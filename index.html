@@ -774,6 +774,12 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* Kalau banner "Pasang Aplikasi" lagi tampil, naikkan posisi toast
+     supaya tidak numpuk/menutupi tombol Pasang & tombol tutup di banner. */
+  .toast.above-banner {
+    bottom: calc(var(--bottom-nav-h) + 92px);
+  }
+
   .toast.success { border-color: var(--accent); }
   .toast.error { border-color: #ef4444; }
 
@@ -1639,8 +1645,11 @@ viewBox="0 0 0.16593 0.10268"
   let toastTimer;
   function showToast(msg, type = '') {
     const toast = document.getElementById('toast');
+    const installBanner = document.getElementById('installBanner');
+    const bannerVisible = installBanner && installBanner.classList.contains('show');
+
     toast.textContent = msg;
-    toast.className = 'toast show' + (type ? ' ' + type : '');
+    toast.className = 'toast show' + (type ? ' ' + type : '') + (bannerVisible ? ' above-banner' : '');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toast.classList.remove('show');
