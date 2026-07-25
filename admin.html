@@ -30,6 +30,7 @@
     --radius-pill: 999px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  .hidden { display: none !important; }
   body {
     background: var(--bg);
     color: var(--text);
@@ -273,7 +274,10 @@
     <div class="panel active" id="panel-images">
       <div class="panel-head">
         <h2>Semua Gambar</h2>
-        <button class="btn btn-primary" style="width:auto;" onclick="openImageModal()">+ Tambah Gambar</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-ghost" style="width:auto;" id="migrateAllBtn" onclick="migrateAllImages()">Pindahkan Semua ke Storage</button>
+          <button class="btn btn-primary" style="width:auto;" onclick="openImageModal()">+ Tambah Gambar</button>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
@@ -333,7 +337,14 @@
       <select id="imgCategory"></select>
     </div>
     <div class="field">
-      <label for="imgUrl">URL Gambar</label>
+      <label for="imgFile">Upload dari perangkat (disimpan permanen ke Supabase Storage)</label>
+      <input type="file" id="imgFile" accept="image/*" onchange="onImgFileChange(event)">
+      <div id="imgFilePreviewWrap" class="hidden" style="margin-top:8px;">
+        <img id="imgFilePreview" alt="" style="max-width:120px; max-height:120px; border-radius:8px; display:block;">
+      </div>
+    </div>
+    <div class="field">
+      <label for="imgUrl">URL Gambar <span style="color:var(--text-dimmer); font-weight:400;">(otomatis terisi kalau upload file, atau isi manual)</span></label>
       <input type="text" id="imgUrl" placeholder="https://...">
     </div>
     <div class="row2">
@@ -523,6 +534,7 @@
           </button>
         </td>
         <td class="actions">
+          ${isStorageUrl(img.url) ? '' : `<button class="btn btn-ghost btn-sm" onclick="migrateImageToStorage(${img.id})" title="Pindahkan ke Storage permanen">Storage</button>`}
           <button class="btn btn-ghost btn-sm" onclick="openImageModal(${img.id})">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteImage(${img.id})">Hapus</button>
         </td>
@@ -548,6 +560,69 @@
     showToast('Gambar dihapus', 'success');
   }
 
+  // ===== MIGRASI KE STORAGE =====
+  // Ambil gambar dari URL luar (mis. image.qwenlm.ai) lalu upload ulang ke
+  // Supabase Storage supaya permanen. Fetch dijalankan di browser admin,
+  // bukan di server, jadi tetap butuh koneksi ke domain asalnya saat migrasi.
+  async function doMigrateOne(id) {
+    const img = IMAGES.find(i => i.id === id);
+    if (!img) throw new Error('Gambar tidak ditemukan');
+    if (isStorageUrl(img.url)) return img.url; // sudah di storage, skip
+
+    const res = await fetch(img.url);
+    if (!res.ok) throw new Error('Gagal mengunduh dari sumber asli');
+    const blob = await res.blob();
+    const newUrl = await uploadFileToStorage(blob, img.url);
+
+    const { error } = await supabaseClient.from('images').update({ url: newUrl }).eq('id', id);
+    if (error) throw error;
+
+    img.url = newUrl;
+    return newUrl;
+  }
+
+  async function migrateImageToStorage(id) {
+    const img = IMAGES.find(i => i.id === id);
+    if (!img) return;
+    if (!confirm(`Pindahkan "${img.title}" ke Supabase Storage? URL lama akan diganti otomatis.`)) return;
+
+    showToast('Memindahkan gambar...');
+    try {
+      await doMigrateOne(id);
+      renderImagesTable();
+      showToast('Gambar berhasil dipindahkan ke Storage', 'success');
+    } catch (err) {
+      showToast('Gagal memindahkan: ' + err.message, 'error');
+    }
+  }
+
+  async function migrateAllImages() {
+    const targets = IMAGES.filter(i => !isStorageUrl(i.url));
+    if (targets.length === 0) {
+      showToast('Semua gambar sudah tersimpan permanen di Storage', 'success');
+      return;
+    }
+    if (!confirm(`Pindahkan ${targets.length} gambar ke Supabase Storage sekarang? Ini bisa memakan waktu beberapa menit, jangan tutup halaman ini.`)) return;
+
+    const btn = document.getElementById('migrateAllBtn');
+    btn.disabled = true;
+    let ok = 0, fail = 0;
+    for (const img of targets) {
+      btn.textContent = `Memindahkan... (${ok + fail + 1}/${targets.length})`;
+      try {
+        await doMigrateOne(img.id);
+        ok++;
+      } catch (err) {
+        fail++;
+        console.error(`Gagal migrasi gambar "${img.title}":`, err);
+      }
+      renderImagesTable();
+    }
+    btn.disabled = false;
+    btn.textContent = 'Pindahkan Semua ke Storage';
+    showToast(`Migrasi selesai: ${ok} berhasil${fail ? `, ${fail} gagal (lihat console)` : ''}`, fail ? 'error' : 'success');
+  }
+
   // ===== MODAL: IMAGE =====
   function populateCategorySelect() {
     const sel = document.getElementById('imgCategory');
@@ -556,6 +631,8 @@
 
   function openImageModal(id) {
     populateCategorySelect();
+    document.getElementById('imgFile').value = '';
+    document.getElementById('imgFilePreviewWrap').classList.add('hidden');
     if (id) {
       const img = IMAGES.find(i => i.id === id);
       document.getElementById('imageModalTitle').textContent = 'Edit Gambar';
@@ -582,23 +659,85 @@
     document.getElementById('imageModalOverlay').classList.remove('show');
   }
 
+  // Saat user pilih file: tampilkan preview + auto-isi lebar/tinggi dari file asli
+  function onImgFileChange(e) {
+    const file = e.target.files[0];
+    const wrap = document.getElementById('imgFilePreviewWrap');
+    const preview = document.getElementById('imgFilePreview');
+    if (!file) { wrap.classList.add('hidden'); return; }
+
+    const objectUrl = URL.createObjectURL(file);
+    preview.src = objectUrl;
+    wrap.classList.remove('hidden');
+
+    const probe = new Image();
+    probe.onload = () => {
+      document.getElementById('imgWidth').value = probe.naturalWidth;
+      document.getElementById('imgHeight').value = probe.naturalHeight;
+      URL.revokeObjectURL(objectUrl);
+    };
+    probe.src = objectUrl;
+  }
+
+  // Prefix publik bucket storage 'images', dipakai untuk deteksi "sudah dimigrasi atau belum"
+  function storagePublicPrefix() {
+    return `${SUPABASE_URL}/storage/v1/object/public/images/`;
+  }
+
+  function isStorageUrl(url) {
+    return typeof url === 'string' && url.startsWith(storagePublicPrefix());
+  }
+
+  // Upload File object ke bucket storage 'images', kembalikan URL publiknya
+  async function uploadFileToStorage(fileOrBlob, hintName) {
+    const rawExt = (hintName || fileOrBlob.name || '').split('.').pop() || '';
+    const typeExt = (fileOrBlob.type || '').split('/')[1] || '';
+    let ext = (/^[a-z0-9]{2,5}$/i.test(rawExt) ? rawExt : typeExt || 'png').toLowerCase().split('+')[0];
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    const { error: upErr } = await supabaseClient.storage
+      .from('images')
+      .upload(path, fileOrBlob, {
+        cacheControl: '31536000',
+        upsert: false,
+        contentType: fileOrBlob.type || 'image/png'
+      });
+    if (upErr) throw upErr;
+
+    const { data } = supabaseClient.storage.from('images').getPublicUrl(path);
+    return data.publicUrl;
+  }
+
   async function saveImage() {
     const id = document.getElementById('imgId').value;
     const title = document.getElementById('imgTitle').value.trim();
     const category_id = document.getElementById('imgCategory').value;
-    const url = document.getElementById('imgUrl').value.trim();
+    let url = document.getElementById('imgUrl').value.trim();
     const width = parseInt(document.getElementById('imgWidth').value) || null;
     const height = parseInt(document.getElementById('imgHeight').value) || null;
     const is_active = document.getElementById('imgActive').checked;
+    const file = document.getElementById('imgFile').files[0];
 
-    if (!title || !url || !category_id) {
-      showToast('Judul, kategori, dan URL wajib diisi', 'error');
+    if (!title || (!url && !file) || !category_id) {
+      showToast('Judul, kategori, dan URL/file gambar wajib diisi', 'error');
       return;
     }
 
     const btn = document.getElementById('imgSaveBtn');
     btn.disabled = true;
-    btn.textContent = 'Menyimpan...';
+    btn.textContent = file ? 'Mengupload gambar...' : 'Menyimpan...';
+
+    if (file) {
+      try {
+        url = await uploadFileToStorage(file);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Simpan';
+        showToast('Gagal upload gambar: ' + err.message, 'error');
+        return;
+      }
+      btn.textContent = 'Menyimpan...';
+    }
 
     let error;
     if (id) {
