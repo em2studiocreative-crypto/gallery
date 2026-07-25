@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://wsrv.nl" crossorigin>
 <link rel="dns-prefetch" href="https://image.qwenlm.ai">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
 <!-- ===== GOOGLE ANALYTICS (GA4) — Measurement ID: G-4SGWMRTPXL ===== -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-4SGWMRTPXL"></script>
 <script>
@@ -3223,6 +3223,75 @@ viewBox="0 0 0.16593 0.10268"
     if (typeof gtag === 'function') gtag('event', 'share_app', { method: 'wa_link_fallback' });
   }
 
+  // ===== WATERMARK SAAT DOWNLOAD (logo em2studio, 1 warna) =====
+  // Menempelkan wordmark "em2studio" (2 baris: "em2" bold + "studio" script,
+  // putih polos semi-transparan) di pojok kanan-bawah gambar HANYA pada file
+  // yang diunduh user. Gambar asli di Storage/tabel tidak diubah sama sekali.
+  async function addDownloadWatermark(blob) {
+    // Pastikan font custom sudah siap dipakai canvas sebelum menggambar teks,
+    // supaya tidak fallback ke font default di percobaan pertama.
+    try {
+      await Promise.all([
+        document.fonts.load('800 40px Inter'),
+        document.fonts.load('40px Pacifico')
+      ]);
+    } catch (e) { /* lanjut walau preload font gagal, browser akan pakai fallback */ }
+
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      const img = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = objectUrl;
+      });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      // Ukuran & posisi proporsional terhadap dimensi gambar supaya konsisten
+      // di gambar kecil maupun besar.
+      const emSize = Math.max(20, canvas.width * 0.045);
+      const studioSize = emSize * 1.05;
+      const pad = canvas.width * 0.035;
+
+      ctx.save();
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'alphabetic';
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur = emSize * 0.15;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = emSize * 0.03;
+
+      // Baris "studio" (paling bawah, font script)
+      ctx.font = `${studioSize}px Pacifico, cursive`;
+      const studioY = canvas.height - pad;
+      ctx.fillText('studio', canvas.width - pad, studioY);
+
+      // Baris "em2" (di atas "studio", bold)
+      ctx.font = `800 ${emSize}px Inter, sans-serif`;
+      const em2Y = studioY - studioSize * 0.85;
+      ctx.fillText('em2', canvas.width - pad, em2Y);
+
+      ctx.restore();
+
+      const outType = blob.type === 'image/png' ? 'image/png' : 'image/jpeg';
+      const quality = outType === 'image/jpeg' ? 0.92 : undefined;
+      const wmBlob = await new Promise(resolve => canvas.toBlob(resolve, outType, quality));
+      return wmBlob || blob;
+    } catch (e) {
+      console.warn('Gagal menambahkan watermark saat download, pakai gambar asli:', e);
+      return blob;
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
   // Catatan: <a download> tidak berfungsi untuk gambar cross-origin di kebanyakan
   // browser (atribut download diabaikan, gambar malah dibuka di tab baru).
   // Solusinya: ambil gambar sebagai blob dulu, baru buat object URL lokal untuk didownload.
@@ -3232,7 +3301,8 @@ viewBox="0 0 0.16593 0.10268"
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error('Gagal mengambil gambar');
-      const blob = await response.blob();
+      let blob = await response.blob();
+      blob = await addDownloadWatermark(blob);
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = objectUrl;
