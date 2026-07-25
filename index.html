@@ -2744,6 +2744,7 @@ viewBox="0 0 0.16593 0.10268"
     simulateLoad();
     setupSearch();
     initAuth();
+    setupRealtimeImages();
   });
 
   function renderCategories() {
@@ -2975,6 +2976,61 @@ viewBox="0 0 0.16593 0.10268"
 
   function simulateLoad() {
     loadData();
+  }
+
+  // Mengubah 1 baris tabel `images` dari Supabase jadi bentuk objek yang
+  // dipakai UI (sama persis seperti mapping di loadData()).
+  function mapImageRow(r) {
+    return {
+      id: r.id,
+      title: r.title,
+      category: r.category_id,
+      url: r.url,
+      size: (r.width && r.height) ? `${r.width}×${r.height}` : '',
+      downloads: r.downloads,
+      created_at: r.created_at
+    };
+  }
+
+  // ===== REALTIME: gambar baru dari Admin langsung tampil tanpa refresh =====
+  // Dengar perubahan tabel `images` lewat Supabase Realtime, lalu update
+  // state IMAGES di browser dan render ulang gallery secara otomatis.
+  //
+  // PENTING - supaya event ini benar-benar terkirim, Realtime harus
+  // diaktifkan dulu utk tabel `images` (sekali saja, di sisi Supabase):
+  // Dashboard -> Database -> Replication -> aktifkan tabel `images`,
+  // ATAU jalankan SQL ini sekali di SQL Editor:
+  //   alter publication supabase_realtime add table images;
+  function setupRealtimeImages() {
+    supabaseClient
+      .channel('public:images')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'images' }, (payload) => {
+        const row = payload.new;
+        if (!row.is_active) return; // belum aktif -> jangan tampilkan dulu
+        if (IMAGES.some(i => i.id === row.id)) return; // jaga-jaga duplikat
+        IMAGES.unshift(mapImageRow(row));
+        filterAndRender();
+        showToast(`Gambar baru ditambahkan: ${row.title}`, 'success');
+        checkForNewNotifications();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'images' }, (payload) => {
+        const row = payload.new;
+        const idx = IMAGES.findIndex(i => i.id === row.id);
+        if (!row.is_active) {
+          // Admin menyembunyikan gambar ini -> hapus dari tampilan publik
+          if (idx !== -1) { IMAGES.splice(idx, 1); filterAndRender(); }
+          return;
+        }
+        const mapped = mapImageRow(row);
+        if (idx !== -1) IMAGES[idx] = mapped; else IMAGES.unshift(mapped);
+        filterAndRender();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'images' }, (payload) => {
+        const oldId = payload.old.id;
+        const idx = IMAGES.findIndex(i => i.id === oldId);
+        if (idx !== -1) { IMAGES.splice(idx, 1); filterAndRender(); }
+      })
+      .subscribe();
   }
 
   async function loadData() {
