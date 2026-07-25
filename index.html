@@ -1646,6 +1646,15 @@ viewBox="0 0 0.16593 0.10268"
       toast.classList.remove('show');
     }, 2500);
   }
+
+  // Kalau halaman dibuka lagi dari cache browser (mis. balik dari tab lain
+  // atau buka ulang browser), pastikan toast lama yang "nyangkut" langsung
+  // disembunyikan, bukan ditampilkan seolah baru saja terjadi.
+  window.addEventListener('pageshow', () => {
+    clearTimeout(toastTimer);
+    const toast = document.getElementById('toast');
+    if (toast) toast.classList.remove('show');
+  });
 </script>
 </body>
 </html>
