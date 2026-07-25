@@ -1864,6 +1864,16 @@ viewBox="0 0 0.16593 0.10268"
     <div class="settings-section">
       <div class="settings-section-label">Dukungan</div>
       <div class="settings-group">
+        <button class="settings-row" id="settingsShareAppRow" onclick="shareApp()">
+          <div class="settings-row-icon" style="background:var(--accent-dim);color:var(--accent);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Bagikan Aplikasi</div>
+            <div class="settings-row-desc">Ajak teman pakai Status Gallery juga</div>
+          </div>
+          <svg class="settings-row-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
         <a class="settings-row" href="mailto:andrichupu@gmail.com?subject=Kontak%20Status%20Gallery" id="settingsContactRow">
           <div class="settings-row-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
@@ -2909,6 +2919,31 @@ viewBox="0 0 0.16593 0.10268"
 
   function logShareEvent(imgId, method) {
     if (typeof gtag === 'function') gtag('event', 'share_image', { image_id: imgId, method });
+  }
+
+  // Share aplikasi secara umum (bukan 1 gambar spesifik) — dipakai dari
+  // tombol "Bagikan Aplikasi" di Pengaturan. Alurnya sama seperti share
+  // gambar: coba Web Share API dulu (share sheet asli HP), fallback ke
+  // WhatsApp kalau device/browser tidak support.
+  async function shareApp() {
+    const appUrl = window.location.origin + window.location.pathname;
+    const shareText = 'Status Gallery — download status WhatsApp HD gratis: motivasi, islami, aesthetic, quotes, dan lainnya!';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Status Gallery by EM2STUDIO', text: shareText, url: appUrl });
+        if (typeof gtag === 'function') gtag('event', 'share_app', { method: 'native' });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return; // user batal dari share sheet
+      }
+    }
+
+    // Fallback: browser tanpa Web Share API (kebanyakan desktop) —
+    // langsung buka WhatsApp dengan teks + link siap kirim
+    const waText = encodeURIComponent(`${shareText}\n${appUrl}`);
+    window.open(`https://wa.me/?text=${waText}`, '_blank', 'noopener');
+    if (typeof gtag === 'function') gtag('event', 'share_app', { method: 'wa_link_fallback' });
   }
 
   // Catatan: <a download> tidak berfungsi untuk gambar cross-origin di kebanyakan
