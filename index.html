@@ -3333,14 +3333,14 @@ viewBox="0 0 7.14519 2.77802"
       // Ukuran & posisi proporsional terhadap dimensi gambar supaya konsisten
       // di gambar kecil maupun besar (maks ~24% lebar gambar).
       const aspect = 7.14519 / 2.77802;
-      const wmW = Math.max(60, Math.min(canvas.width * 0.24, 340));
+      const wmW = Math.max(40, Math.min(canvas.width * 0.13, 180));
       const wmH = wmW / aspect;
       const pad = canvas.width * 0.035;
       const x = canvas.width - wmW - pad;
       const y = canvas.height - wmH - pad;
 
       ctx.save();
-      ctx.globalAlpha = 0.9;
+      ctx.globalAlpha = 0.5;
       ctx.drawImage(logoImg, x, y, wmW, wmH);
       ctx.restore();
 
