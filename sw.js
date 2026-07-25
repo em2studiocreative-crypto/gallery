@@ -9,8 +9,8 @@ const APP_SHELL = [
   './index.html',
   './config.js',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // ===== INSTALL: simpan app shell ke cache =====
