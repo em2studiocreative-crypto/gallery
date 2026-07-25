@@ -317,6 +317,7 @@
       <div class="panel-head">
         <h2>Semua Gambar</h2>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" style="width:auto;" id="rewatermarkBtn" onclick="rewatermarkAllImages()">Watermark Ulang Gambar Lama</button>
           <button class="btn btn-ghost" style="width:auto;" id="cleanupBtn" onclick="cleanupOrphanFiles()">Bersihkan File Tak Terpakai</button>
           <button class="btn btn-ghost" style="width:auto;" id="migrateAllBtn" onclick="migrateAllImages()">Pindahkan Semua ke Storage</button>
           <button class="btn btn-primary" style="width:auto;" onclick="openImageModal()">+ Tambah Gambar</button>
@@ -595,7 +596,7 @@
   async function loadImages() {
     const { data, error } = await supabaseClient
       .from('images')
-      .select('id, title, category_id, url, width, height, downloads, is_active')
+      .select('id, title, category_id, url, width, height, downloads, is_active, watermarked')
       .order('created_at', { ascending: false });
 
     if (error) { showToast('Gagal memuat gambar', 'error'); return; }
@@ -676,12 +677,13 @@
     const res = await fetch(img.url);
     if (!res.ok) throw new Error('Gagal mengunduh dari sumber asli');
     const blob = await res.blob();
-    const newUrl = await uploadFileToStorage(blob, img.url);
+    const { url: newUrl, watermarked } = await uploadFileToStorage(blob, img.url);
 
-    const { error } = await supabaseClient.from('images').update({ url: newUrl }).eq('id', id);
+    const { error } = await supabaseClient.from('images').update({ url: newUrl, watermarked }).eq('id', id);
     if (error) throw error;
 
     img.url = newUrl;
+    img.watermarked = watermarked;
     return newUrl;
   }
 
@@ -725,6 +727,44 @@
     btn.disabled = false;
     btn.textContent = 'Pindahkan Semua ke Storage';
     showToast(`Migrasi selesai: ${ok} berhasil${fail ? `, ${fail} gagal (lihat console)` : ''}`, fail ? 'error' : 'success');
+  }
+
+  // ===== WATERMARK ULANG GAMBAR LAMA =====
+  // "Pindahkan Semua ke Storage" cuma memproses gambar yang MASIH di host
+  // luar (belum di Storage kita) -> gambar yang sudah lama ada di Storage
+  // sebelum fitur watermark ini dibuat jadi ikut ke-skip & tetap tanpa
+  // watermark. Fungsi ini beda: menyasar SEMUA gambar yang belum ditandai
+  // watermarked=true, baik itu masih di host luar maupun sudah di Storage,
+  // supaya akhirnya semua gambar konsisten ada watermark-nya.
+  async function rewatermarkAllImages() {
+    const targets = IMAGES.filter(i => !i.watermarked);
+    if (targets.length === 0) {
+      showToast('Semua gambar sudah punya watermark', 'success');
+      return;
+    }
+    if (!confirm(`Proses ulang ${targets.length} gambar untuk ditambahkan watermark? Ini bisa memakan waktu beberapa menit, jangan tutup halaman ini.`)) return;
+
+    const btn = document.getElementById('rewatermarkBtn');
+    btn.disabled = true;
+    let ok = 0, fail = 0;
+    for (const img of targets) {
+      btn.textContent = `Memproses... (${ok + fail + 1}/${targets.length})`;
+      try {
+        const { url: newUrl, watermarked } = await fetchUrlAndUploadWatermarked(img.url);
+        const { error } = await supabaseClient.from('images').update({ url: newUrl, watermarked }).eq('id', img.id);
+        if (error) throw error;
+        img.url = newUrl;
+        img.watermarked = watermarked;
+        if (watermarked) ok++; else fail++;
+      } catch (err) {
+        fail++;
+        console.error(`Gagal watermark ulang gambar "${img.title}":`, err);
+      }
+      renderImagesTable();
+    }
+    btn.disabled = false;
+    btn.textContent = 'Watermark Ulang Gambar Lama';
+    showToast(`Selesai: ${ok} berhasil diberi watermark${fail ? `, ${fail} gagal (lihat console — biasanya CORS dari host asal)` : ''}`, fail ? 'error' : 'success');
   }
 
   // ===== BERSIHKAN FILE TAK TERPAKAI =====
@@ -867,11 +907,12 @@ viewBox="0 0 1.49117 0.57976"
   }
 
   // Tambahkan watermark logo EM2STUDIO ke pojok kanan-bawah gambar.
-  // Mengembalikan Blob baru (fallback: file asli kalau proses gagal / tipe tidak didukung).
+  // Mengembalikan { blob, applied }: blob baru (atau file asli kalau gagal/
+  // tipe tidak didukung), dan applied = true kalau watermark berhasil dipasang.
   async function addWatermark(fileOrBlob) {
     const type = (fileOrBlob.type || '').toLowerCase();
     // Lewati tipe yang tidak cocok diproses via canvas (svg statis / gif animasi)
-    if (type.includes('svg') || type.includes('gif')) return fileOrBlob;
+    if (type.includes('svg') || type.includes('gif')) return { blob: fileOrBlob, applied: false };
 
     const objectUrl = URL.createObjectURL(fileOrBlob);
     try {
@@ -924,25 +965,25 @@ viewBox="0 0 1.49117 0.57976"
       const quality = outType === 'image/jpeg' ? 0.92 : undefined;
 
       const blob = await new Promise(resolve => canvas.toBlob(resolve, outType, quality));
-      return blob || fileOrBlob;
+      return blob ? { blob, applied: true } : { blob: fileOrBlob, applied: false };
     } catch (e) {
       console.warn('Watermark gagal, upload tanpa watermark:', e);
-      return fileOrBlob;
+      return { blob: fileOrBlob, applied: false };
     } finally {
       URL.revokeObjectURL(objectUrl);
     }
   }
 
-  // Upload File object ke bucket storage 'images', kembalikan URL publiknya
+  // Upload File object ke bucket storage 'images', kembalikan { url, watermarked }
   async function uploadFileToStorage(fileOrBlob, hintName) {
     const rawExt = (hintName || fileOrBlob.name || '').split('.').pop() || '';
     const typeExt = (fileOrBlob.type || '').split('/')[1] || '';
     let ext = (/^[a-z0-9]{2,5}$/i.test(rawExt) ? rawExt : typeExt || 'png').toLowerCase().split('+')[0];
 
     // Tambahkan watermark kecil logo EM2STUDIO sebelum diupload (otomatis)
-    const watermarked = await addWatermark(fileOrBlob);
-    if (watermarked !== fileOrBlob && watermarked.type) {
-      const newTypeExt = watermarked.type.split('/')[1];
+    const { blob: watermarkedBlob, applied: watermarked } = await addWatermark(fileOrBlob);
+    if (watermarkedBlob !== fileOrBlob && watermarkedBlob.type) {
+      const newTypeExt = watermarkedBlob.type.split('/')[1];
       if (newTypeExt) ext = newTypeExt.split('+')[0];
     }
 
@@ -950,15 +991,26 @@ viewBox="0 0 1.49117 0.57976"
 
     const { error: upErr } = await supabaseClient.storage
       .from('images')
-      .upload(path, watermarked, {
+      .upload(path, watermarkedBlob, {
         cacheControl: '31536000',
         upsert: false,
-        contentType: watermarked.type || fileOrBlob.type || 'image/png'
+        contentType: watermarkedBlob.type || fileOrBlob.type || 'image/png'
       });
     if (upErr) throw upErr;
 
     const { data } = supabaseClient.storage.from('images').getPublicUrl(path);
-    return data.publicUrl;
+    return { url: data.publicUrl, watermarked };
+  }
+
+  // Ambil gambar dari URL eksternal (mis. di-paste manual, bukan upload file),
+  // lalu proses lewat pipeline watermark yang sama supaya konsisten dengan
+  // gambar yang diupload lewat file. Melempar error kalau fetch gagal (mis.
+  // CORS diblok host sumber) supaya pemanggil bisa kasih tahu adminnya.
+  async function fetchUrlAndUploadWatermarked(sourceUrl) {
+    const res = await fetch(sourceUrl);
+    if (!res.ok) throw new Error('Gagal mengambil gambar dari URL');
+    const blob = await res.blob();
+    return uploadFileToStorage(blob, sourceUrl);
   }
 
   async function saveImage() {
@@ -980,9 +1032,16 @@ viewBox="0 0 1.49117 0.57976"
     btn.disabled = true;
     btn.textContent = file ? 'Mengupload gambar...' : 'Menyimpan...';
 
+    // Cek apakah field URL ini baru/berubah dibanding data tersimpan -> supaya
+    // gambar yang ditambahkan lewat paste URL juga konsisten kena watermark
+    // yang sama seperti upload file, bukan cuma dipakai apa adanya.
+    const original = id ? IMAGES.find(i => i.id === id) : null;
+    const urlChanged = !original || original.url !== url;
+    let watermarked = original ? !!original.watermarked : false;
+
     if (file) {
       try {
-        url = await uploadFileToStorage(file);
+        ({ url, watermarked } = await uploadFileToStorage(file));
       } catch (err) {
         btn.disabled = false;
         btn.textContent = 'Simpan';
@@ -990,16 +1049,26 @@ viewBox="0 0 1.49117 0.57976"
         return;
       }
       btn.textContent = 'Menyimpan...';
+    } else if (url && urlChanged) {
+      btn.textContent = 'Memproses watermark...';
+      try {
+        ({ url, watermarked } = await fetchUrlAndUploadWatermarked(url));
+      } catch (err) {
+        console.warn('Gagal proses watermark dari URL, disimpan apa adanya:', err);
+        showToast('Watermark otomatis gagal untuk URL ini (kemungkinan CORS) — disimpan tanpa watermark', 'error');
+        watermarked = false;
+      }
+      btn.textContent = 'Menyimpan...';
     }
 
     let error;
     if (id) {
       ({ error } = await supabaseClient.from('images')
-        .update({ title, category_id, url, width, height, is_active })
+        .update({ title, category_id, url, width, height, is_active, watermarked })
         .eq('id', id));
     } else {
       ({ error } = await supabaseClient.from('images')
-        .insert({ title, category_id, url, width, height, is_active }));
+        .insert({ title, category_id, url, width, height, is_active, watermarked }));
     }
 
     btn.disabled = false;
