@@ -1645,9 +1645,10 @@
     z-index: 150;
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     opacity: 0;
+    pointer-events: none;
     transition: transform 0.3s ease, opacity 0.3s ease;
   }
-  .install-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .install-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
   .install-banner-icon {
     width: 40px; height: 40px; border-radius: var(--radius-sm);
     background: var(--accent-dim); flex-shrink: 0;
