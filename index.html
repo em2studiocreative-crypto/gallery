@@ -1122,14 +1122,10 @@ viewBox="0 0 0.16593 0.10268"
       favorites.add(imgId);
       showToast('Ditambahkan ke favorit', 'success');
     }
-    saveFavorites();
-    filterAndRender();
-    if (currentModalImage && currentModalImage.id === imgId) {
-      updateModalFavoriteBtn();
-    }
 
-    // Kalau sudah login, sinkron ke Supabase juga (tidak menghalangi UI kalau gagal)
     if (currentUser) {
+      // Sudah login: Supabase jadi satu-satunya sumber data, JANGAN sentuh
+      // localStorage supaya tidak "kebawa" lagi kalau nanti logout.
       if (wasFavorite) {
         supabaseClient.from('favorites').delete().eq('user_id', currentUser.id).eq('image_id', imgId)
           .then(({ error }) => { if (error) console.error('Gagal hapus favorit di server:', error); });
@@ -1137,6 +1133,14 @@ viewBox="0 0 0.16593 0.10268"
         supabaseClient.from('favorites').insert({ user_id: currentUser.id, image_id: imgId })
           .then(({ error }) => { if (error) console.error('Gagal simpan favorit di server:', error); });
       }
+    } else {
+      // Belum login (guest): simpan ke localStorage seperti biasa
+      saveFavorites();
+    }
+
+    filterAndRender();
+    if (currentModalImage && currentModalImage.id === imgId) {
+      updateModalFavoriteBtn();
     }
   }
 
