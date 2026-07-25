@@ -222,6 +222,29 @@
 
   .loading-box { text-align: center; padding: var(--gap-4); color: var(--text-dim); font-size: 13px; }
 
+  /* ===== DASHBOARD ===== */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--gap-2); margin-bottom: var(--gap-4);
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: var(--gap-3);
+  }
+  .stat-value { font-size: 26px; font-weight: 700; line-height: 1.2; }
+  .stat-label { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .stat-value.muted { color: var(--text-dimmer); font-size: 15px; }
+  .dash-section-title { font-size: 14px; font-weight: 600; margin: var(--gap-3) 0 var(--gap-2); }
+  .top-list { display: flex; flex-direction: column; gap: 8px; }
+  .top-row {
+    display: flex; align-items: center; gap: 10px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px;
+  }
+  .top-rank { width: 20px; color: var(--text-dimmer); font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .top-thumb { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--bg-elevated); }
+  .top-title { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top-count { font-size: 13px; font-weight: 600; color: var(--accent); flex-shrink: 0; }
+
   @media (max-width: 560px) {
     .row2 { grid-template-columns: 1fr; }
     th:nth-child(4), td:nth-child(4) { display: none; } /* sembunyikan kolom downloads di mobile */
@@ -266,12 +289,31 @@
 
   <main>
     <div class="tabs">
-      <button class="tab-btn active" data-tab="images" onclick="switchTab('images')">Gambar</button>
+      <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="tab-btn" data-tab="images" onclick="switchTab('images')">Gambar</button>
       <button class="tab-btn" data-tab="categories" onclick="switchTab('categories')">Kategori</button>
     </div>
 
+    <!-- PANEL: DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="panel-head">
+        <h2>Ringkasan</h2>
+      </div>
+      <div class="stats-grid" id="dashStatsGrid">
+        <div class="stat-card"><div class="stat-value" id="statTotalImages">—</div><div class="stat-label">Total Gambar</div></div>
+        <div class="stat-card"><div class="stat-value" id="statActiveImages">—</div><div class="stat-label">Gambar Aktif (tampil publik)</div></div>
+        <div class="stat-card"><div class="stat-value" id="statTotalCategories">—</div><div class="stat-label">Total Kategori</div></div>
+        <div class="stat-card"><div class="stat-value" id="statTotalDownloads">—</div><div class="stat-label">Total Download</div></div>
+        <div class="stat-card"><div class="stat-value" id="statTotalUsers">—</div><div class="stat-label">User Terdaftar</div></div>
+      </div>
+      <div class="dash-section-title">🔥 Gambar Terpopuler</div>
+      <div class="top-list" id="dashTopList">
+        <div class="loading-box">Memuat...</div>
+      </div>
+    </div>
+
     <!-- PANEL: IMAGES -->
-    <div class="panel active" id="panel-images">
+    <div class="panel" id="panel-images">
       <div class="panel-head">
         <h2>Semua Gambar</h2>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -479,6 +521,7 @@
   // ===== TABS =====
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('panel-dashboard').classList.toggle('active', tab === 'dashboard');
     document.getElementById('panel-images').classList.toggle('active', tab === 'images');
     document.getElementById('panel-categories').classList.toggle('active', tab === 'categories');
   }
@@ -486,6 +529,55 @@
   // ===== LOAD DATA =====
   async function loadAll() {
     await Promise.all([loadCategories(), loadImages()]);
+    renderDashboard();
+    loadUserCount();
+  }
+
+  // ===== DASHBOARD =====
+  // Statistik gambar/kategori/download dihitung langsung dari data yang
+  // sudah ada di memori (CATEGORIES & IMAGES), tidak perlu query terpisah.
+  function renderDashboard() {
+    const totalDownloads = IMAGES.reduce((sum, img) => sum + (img.downloads || 0), 0);
+    const activeCount = IMAGES.filter(img => img.is_active).length;
+
+    document.getElementById('statTotalImages').textContent = IMAGES.length.toLocaleString('id-ID');
+    document.getElementById('statActiveImages').textContent = activeCount.toLocaleString('id-ID');
+    document.getElementById('statTotalCategories').textContent = CATEGORIES.length.toLocaleString('id-ID');
+    document.getElementById('statTotalDownloads').textContent = totalDownloads.toLocaleString('id-ID');
+
+    const top = [...IMAGES].sort((a, b) => (b.downloads || 0) - (a.downloads || 0)).slice(0, 5);
+    const list = document.getElementById('dashTopList');
+    if (top.length === 0) {
+      list.innerHTML = '<div class="loading-box">Belum ada gambar.</div>';
+      return;
+    }
+    list.innerHTML = top.map((img, i) => `
+      <div class="top-row">
+        <span class="top-rank">#${i + 1}</span>
+        <img class="top-thumb" src="${escapeAttr(img.url)}" alt="" loading="lazy" onerror="this.style.opacity=0.2">
+        <span class="top-title">${escapeHtml(img.title)}</span>
+        <span class="top-count">${(img.downloads || 0).toLocaleString('id-ID')}</span>
+      </div>
+    `).join('');
+  }
+
+  // Jumlah user terdaftar butuh akses tabel auth.users, yang tidak bisa
+  // diquery langsung lewat anon key. Makanya lewat RPC get_user_count()
+  // (function di database, admin-only, lihat SQL yang menyertai ini).
+  // Kalau function-nya belum dibuat di Supabase, ini akan gagal dengan
+  // sopan dan cuma menampilkan tanda "—" tanpa mengganggu bagian lain.
+  async function loadUserCount() {
+    const el = document.getElementById('statTotalUsers');
+    const { data, error } = await supabaseClient.rpc('get_user_count');
+    if (error) {
+      console.error('Gagal ambil jumlah user (pastikan function get_user_count sudah dibuat):', error);
+      el.textContent = '—';
+      el.classList.add('muted');
+      el.title = 'Function get_user_count belum tersedia di database';
+      return;
+    }
+    el.classList.remove('muted');
+    el.textContent = Number(data).toLocaleString('id-ID');
   }
 
   async function loadCategories() {
