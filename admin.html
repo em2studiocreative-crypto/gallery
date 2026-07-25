@@ -274,7 +274,8 @@
     <div class="panel active" id="panel-images">
       <div class="panel-head">
         <h2>Semua Gambar</h2>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" style="width:auto;" id="cleanupBtn" onclick="cleanupOrphanFiles()">Bersihkan File Tak Terpakai</button>
           <button class="btn btn-ghost" style="width:auto;" id="migrateAllBtn" onclick="migrateAllImages()">Pindahkan Semua ke Storage</button>
           <button class="btn btn-primary" style="width:auto;" onclick="openImageModal()">+ Tambah Gambar</button>
         </div>
@@ -552,9 +553,20 @@
   }
 
   async function deleteImage(id) {
+    const img = IMAGES.find(i => i.id === id);
     if (!confirm('Hapus gambar ini? Tindakan tidak bisa dibatalkan.')) return;
+
     const { error } = await supabaseClient.from('images').delete().eq('id', id);
     if (error) { showToast('Gagal menghapus gambar', 'error'); return; }
+
+    // Kalau file-nya ada di Storage kita sendiri, hapus juga file fisiknya
+    // supaya tidak numpuk dan makan kuota percuma.
+    if (img && isStorageUrl(img.url)) {
+      const path = img.url.slice(storagePublicPrefix().length);
+      supabaseClient.storage.from('images').remove([path])
+        .then(({ error: rmErr }) => { if (rmErr) console.error('Gagal menghapus file storage:', rmErr); });
+    }
+
     IMAGES = IMAGES.filter(i => i.id !== id);
     renderImagesTable();
     showToast('Gambar dihapus', 'success');
@@ -621,6 +633,42 @@
     btn.disabled = false;
     btn.textContent = 'Pindahkan Semua ke Storage';
     showToast(`Migrasi selesai: ${ok} berhasil${fail ? `, ${fail} gagal (lihat console)` : ''}`, fail ? 'error' : 'success');
+  }
+
+  // ===== BERSIHKAN FILE TAK TERPAKAI =====
+  // Mencari file di bucket Storage 'images' yang tidak dirujuk oleh baris
+  // manapun di tabel images (misal sisa dari penghapusan sebelum fitur ini
+  // ada, atau upload yang gagal disimpan ke DB), lalu hapus.
+  async function cleanupOrphanFiles() {
+    const btn = document.getElementById('cleanupBtn');
+    btn.disabled = true;
+    btn.textContent = 'Mengecek...';
+    try {
+      const { data: files, error: listErr } = await supabaseClient
+        .storage.from('images')
+        .list('', { limit: 1000, sortBy: { column: 'name', order: 'asc' } });
+      if (listErr) throw listErr;
+
+      const usedPaths = new Set(
+        IMAGES.filter(i => isStorageUrl(i.url)).map(i => i.url.slice(storagePublicPrefix().length))
+      );
+      const orphans = (files || []).filter(f => f.name && !usedPaths.has(f.name));
+
+      if (orphans.length === 0) {
+        showToast('Tidak ada file tak terpakai di Storage', 'success');
+        return;
+      }
+      if (!confirm(`Ditemukan ${orphans.length} file tak terpakai di Storage (tidak dirujuk gambar manapun). Hapus semua sekarang?`)) return;
+
+      const { error: rmErr } = await supabaseClient.storage.from('images').remove(orphans.map(f => f.name));
+      if (rmErr) throw rmErr;
+      showToast(`${orphans.length} file tak terpakai berhasil dihapus`, 'success');
+    } catch (err) {
+      showToast('Gagal membersihkan: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Bersihkan File Tak Terpakai';
+    }
   }
 
   // ===== MODAL: IMAGE =====
