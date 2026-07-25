@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Status Gallery</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-elevated: #141414;
+    --card: #1a1a1a;
+    --card-hover: #222222;
+    --accent: #C1892F;
+    --accent-hover: #A47428;
+    --accent-dim: rgba(193, 137, 47, 0.15);
+    --text: #F0F0F0;
+    --text-dim: #9a9a9a;
+    --text-dimmer: #6e6e6e;
+    --border: #2a2a2a;
+    --danger: #D9534F;
+    --danger-dim: rgba(217, 83, 79, 0.15);
+    --success: #4CAF50;
+    --gap-1: 8px;
+    --gap-2: 16px;
+    --gap-3: 24px;
+    --gap-4: 32px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-pill: 999px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  a { color: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+  input, select { font-family: inherit; }
+
+  /* ===== LOGIN ===== */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gap-2);
+  }
+  .login-box {
+    width: 100%;
+    max-width: 360px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--gap-4);
+  }
+  .login-box h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .login-box p.sub {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: var(--gap-3);
+  }
+  .field { margin-bottom: var(--gap-2); }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.15s ease;
+  }
+  .btn-primary { background: var(--accent); color: #0a0a0a; width: 100%; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text-dimmer); }
+  .btn-danger { background: var(--danger-dim); color: var(--danger); }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 6px 10px; font-size: 12px; }
+  .error-msg {
+    background: var(--danger-dim);
+    color: var(--danger);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: var(--gap-2);
+    display: none;
+  }
+  .error-msg.show { display: block; }
+
+  /* ===== APP SHELL ===== */
+  #app { display: none; min-height: 100vh; }
+  #app.show { display: block; }
+  header.topbar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px var(--gap-3);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .brand-title { font-weight: 700; font-size: 16px; }
+  .brand-sub { font-size: 11px; color: var(--text-dimmer); }
+  .who { font-size: 13px; color: var(--text-dim); margin-right: var(--gap-2); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: var(--gap-3); }
+
+  .tabs { display: flex; gap: var(--gap-1); margin-bottom: var(--gap-3); border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    background: none; border: none; color: var(--text-dim);
+    padding: 10px 4px; font-size: 14px; font-weight: 600;
+    border-bottom: 2px solid transparent; margin-right: var(--gap-3);
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: var(--gap-2);
+  }
+  .panel-head h2 { font-size: 16px; }
+
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
+    text-align: left; padding: 10px 12px; font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--text-dim); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--card-hover); }
+  td.thumb-cell { width: 56px; }
+  td.thumb-cell img {
+    width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-sm);
+    display: block; background: var(--bg-elevated);
+  }
+  td.actions { white-space: nowrap; text-align: right; }
+  td.actions .btn { margin-left: 6px; }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: var(--radius-pill);
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-on { background: rgba(76,175,80,0.15); color: var(--success); }
+  .badge-off { background: var(--danger-dim); color: var(--danger); }
+  .empty-row td { text-align: center; color: var(--text-dimmer); padding: var(--gap-4) 12px; }
+
+  .toggle {
+    width: 36px; height: 20px; border-radius: var(--radius-pill);
+    background: var(--border); position: relative; border: none; padding: 0;
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle .knob {
+    position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+    border-radius: 50%; background: #fff; transition: transform 0.15s ease;
+  }
+  .toggle.on .knob { transform: translateX(16px); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    align-items: center; justify-content: center; z-index: 100; padding: var(--gap-2);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    width: 100%; max-width: 420px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: var(--gap-3); max-height: 90vh; overflow-y: auto;
+  }
+  .modal h3 { font-size: 16px; margin-bottom: var(--gap-2); }
+  .modal-foot { display: flex; justify-content: flex-end; gap: var(--gap-1); margin-top: var(--gap-2); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-2); }
+  .checkbox-field { display: flex; align-items: center; gap: 8px; margin-bottom: var(--gap-2); }
+  .checkbox-field input { width: auto; }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 18px; border-radius: var(--radius-pill); font-size: 13px;
+    opacity: 0; transition: all 0.2s ease; z-index: 200; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--success); color: var(--success); }
+  .toast.error { border-color: var(--danger); color: var(--danger); }
+
+  .loading-box { text-align: center; padding: var(--gap-4); color: var(--text-dim); font-size: 13px; }
+
+  @media (max-width: 560px) {
+    .row2 { grid-template-columns: 1fr; }
+    th:nth-child(4), td:nth-child(4) { display: none; } /* sembunyikan kolom downloads di mobile */
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Admin Status Gallery</h1>
+    <p class="sub">Masuk untuk kelola gambar dan kategori.</p>
+    <div id="loginError" class="error-msg"></div>
+    <div class="field">
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" placeholder="admin@statusgallery.com" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Masuk</button>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="dot"></div>
+      <div>
+        <div class="brand-title">Status Gallery</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center;">
+      <span class="who" id="whoami"></span>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Keluar</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="images" onclick="switchTab('images')">Gambar</button>
+      <button class="tab-btn" data-tab="categories" onclick="switchTab('categories')">Kategori</button>
+    </div>
+
+    <!-- PANEL: IMAGES -->
+    <div class="panel active" id="panel-images">
+      <div class="panel-head">
+        <h2>Semua Gambar</h2>
+        <button class="btn btn-primary" style="width:auto;" onclick="openImageModal()">+ Tambah Gambar</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Judul</th>
+              <th>Kategori</th>
+              <th>Download</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="imagesTbody">
+            <tr class="empty-row"><td colspan="6">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL: CATEGORIES -->
+    <div class="panel" id="panel-categories">
+      <div class="panel-head">
+        <h2>Semua Kategori</h2>
+        <button class="btn btn-primary" style="width:auto;" onclick="openCategoryModal()">+ Tambah Kategori</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Label</th>
+              <th>Urutan</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="categoriesTbody">
+            <tr class="empty-row"><td colspan="4">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== MODAL: IMAGE FORM ===== -->
+<div class="modal-overlay" id="imageModalOverlay">
+  <div class="modal">
+    <h3 id="imageModalTitle">Tambah Gambar</h3>
+    <input type="hidden" id="imgId">
+    <div class="field">
+      <label for="imgTitle">Judul</label>
+      <input type="text" id="imgTitle" placeholder="Contoh: Never Give Up">
+    </div>
+    <div class="field">
+      <label for="imgCategory">Kategori</label>
+      <select id="imgCategory"></select>
+    </div>
+    <div class="field">
+      <label for="imgUrl">URL Gambar</label>
+      <input type="text" id="imgUrl" placeholder="https://...">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="imgWidth">Lebar (px)</label>
+        <input type="number" id="imgWidth" placeholder="1080">
+      </div>
+      <div class="field">
+        <label for="imgHeight">Tinggi (px)</label>
+        <input type="number" id="imgHeight" placeholder="1920">
+      </div>
+    </div>
+    <div class="checkbox-field">
+      <input type="checkbox" id="imgActive" checked>
+      <label for="imgActive" style="margin:0;">Tampilkan di galeri</label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeImageModal()">Batal</button>
+      <button class="btn btn-primary" style="width:auto;" id="imgSaveBtn" onclick="saveImage()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: CATEGORY FORM ===== -->
+<div class="modal-overlay" id="categoryModalOverlay">
+  <div class="modal">
+    <h3 id="categoryModalTitle">Tambah Kategori</h3>
+    <div class="field">
+      <label for="catId">ID (slug, tidak bisa diubah nanti)</label>
+      <input type="text" id="catId" placeholder="contoh: motivasi">
+    </div>
+    <div class="field">
+      <label for="catLabel">Label</label>
+      <input type="text" id="catLabel" placeholder="contoh: Motivasi">
+    </div>
+    <div class="field">
+      <label for="catSort">Urutan tampil</label>
+      <input type="number" id="catSort" placeholder="0">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeCategoryModal()">Batal</button>
+      <button class="btn btn-primary" style="width:auto;" id="catSaveBtn" onclick="saveCategory()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let CATEGORIES = [];
+  let IMAGES = [];
+  let editingCategoryId = null; // null = mode tambah, isi = mode edit
+
+  // ===== TOAST =====
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' ' + type : '');
+    setTimeout(() => { t.className = 'toast'; }, 2500);
+  }
+
+  // ===== AUTH =====
+  async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errBox = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    errBox.classList.remove('show');
+
+    if (!email || !password) {
+      errBox.textContent = 'Isi email dan password dulu.';
+      errBox.classList.add('show');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      errBox.textContent = 'Login gagal: ' + error.message;
+      errBox.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+      return;
+    }
+
+    const { data: isAdminData, error: adminErr } = await supabaseClient.rpc('is_admin');
+    if (adminErr || !isAdminData) {
+      errBox.textContent = 'Akun ini tidak terdaftar sebagai admin.';
+      errBox.classList.add('show');
+      await supabaseClient.auth.signOut();
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+      return;
+    }
+
+    document.getElementById('whoami').textContent = email;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').classList.add('show');
+    loadAll();
+  }
+
+  async function doLogout() {
+    await supabaseClient.auth.signOut();
+    document.getElementById('app').classList.remove('show');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginBtn').textContent = 'Masuk';
+  }
+
+  // Cek kalau sudah ada sesi login aktif (misal reload halaman)
+  async function checkExistingSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) return;
+    const { data: isAdminData } = await supabaseClient.rpc('is_admin');
+    if (!isAdminData) { await supabaseClient.auth.signOut(); return; }
+    document.getElementById('whoami').textContent = session.user.email;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').classList.add('show');
+    loadAll();
+  }
+
+  // ===== TABS =====
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('panel-images').classList.toggle('active', tab === 'images');
+    document.getElementById('panel-categories').classList.toggle('active', tab === 'categories');
+  }
+
+  // ===== LOAD DATA =====
+  async function loadAll() {
+    await Promise.all([loadCategories(), loadImages()]);
+  }
+
+  async function loadCategories() {
+    const { data, error } = await supabaseClient
+      .from('categories')
+      .select('id, label, sort_order')
+      .order('sort_order', { ascending: true });
+
+    if (error) { showToast('Gagal memuat kategori', 'error'); return; }
+    CATEGORIES = data;
+    renderCategoriesTable();
+    populateCategorySelect();
+  }
+
+  async function loadImages() {
+    const { data, error } = await supabaseClient
+      .from('images')
+      .select('id, title, category_id, url, width, height, downloads, is_active')
+      .order('created_at', { ascending: false });
+
+    if (error) { showToast('Gagal memuat gambar', 'error'); return; }
+    IMAGES = data;
+    renderImagesTable();
+  }
+
+  function categoryLabel(id) {
+    const c = CATEGORIES.find(c => c.id === id);
+    return c ? c.label : id;
+  }
+
+  // ===== RENDER: IMAGES =====
+  function renderImagesTable() {
+    const tbody = document.getElementById('imagesTbody');
+    if (IMAGES.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Belum ada gambar. Klik "Tambah Gambar" untuk mulai.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = IMAGES.map(img => `
+      <tr>
+        <td class="thumb-cell"><img src="${escapeAttr(img.url)}" alt="" loading="lazy" onerror="this.style.opacity=0.2"></td>
+        <td>${escapeHtml(img.title)}</td>
+        <td>${escapeHtml(categoryLabel(img.category_id))}</td>
+        <td>${img.downloads.toLocaleString('id-ID')}</td>
+        <td>
+          <button class="toggle ${img.is_active ? 'on' : ''}" onclick="toggleImageActive(${img.id}, ${!img.is_active})" title="Klik untuk ${img.is_active ? 'sembunyikan' : 'tampilkan'}">
+            <span class="knob"></span>
+          </button>
+        </td>
+        <td class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="openImageModal(${img.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteImage(${img.id})">Hapus</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function toggleImageActive(id, newVal) {
+    const { error } = await supabaseClient.from('images').update({ is_active: newVal }).eq('id', id);
+    if (error) { showToast('Gagal mengubah status', 'error'); return; }
+    const img = IMAGES.find(i => i.id === id);
+    if (img) img.is_active = newVal;
+    renderImagesTable();
+    showToast(newVal ? 'Gambar ditampilkan' : 'Gambar disembunyikan', 'success');
+  }
+
+  async function deleteImage(id) {
+    if (!confirm('Hapus gambar ini? Tindakan tidak bisa dibatalkan.')) return;
+    const { error } = await supabaseClient.from('images').delete().eq('id', id);
+    if (error) { showToast('Gagal menghapus gambar', 'error'); return; }
+    IMAGES = IMAGES.filter(i => i.id !== id);
+    renderImagesTable();
+    showToast('Gambar dihapus', 'success');
+  }
+
+  // ===== MODAL: IMAGE =====
+  function populateCategorySelect() {
+    const sel = document.getElementById('imgCategory');
+    sel.innerHTML = CATEGORIES.map(c => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.label)}</option>`).join('');
+  }
+
+  function openImageModal(id) {
+    populateCategorySelect();
+    if (id) {
+      const img = IMAGES.find(i => i.id === id);
+      document.getElementById('imageModalTitle').textContent = 'Edit Gambar';
+      document.getElementById('imgId').value = img.id;
+      document.getElementById('imgTitle').value = img.title;
+      document.getElementById('imgCategory').value = img.category_id;
+      document.getElementById('imgUrl').value = img.url;
+      document.getElementById('imgWidth').value = img.width || '';
+      document.getElementById('imgHeight').value = img.height || '';
+      document.getElementById('imgActive').checked = img.is_active;
+    } else {
+      document.getElementById('imageModalTitle').textContent = 'Tambah Gambar';
+      document.getElementById('imgId').value = '';
+      document.getElementById('imgTitle').value = '';
+      document.getElementById('imgUrl').value = '';
+      document.getElementById('imgWidth').value = '';
+      document.getElementById('imgHeight').value = '';
+      document.getElementById('imgActive').checked = true;
+    }
+    document.getElementById('imageModalOverlay').classList.add('show');
+  }
+
+  function closeImageModal() {
+    document.getElementById('imageModalOverlay').classList.remove('show');
+  }
+
+  async function saveImage() {
+    const id = document.getElementById('imgId').value;
+    const title = document.getElementById('imgTitle').value.trim();
+    const category_id = document.getElementById('imgCategory').value;
+    const url = document.getElementById('imgUrl').value.trim();
+    const width = parseInt(document.getElementById('imgWidth').value) || null;
+    const height = parseInt(document.getElementById('imgHeight').value) || null;
+    const is_active = document.getElementById('imgActive').checked;
+
+    if (!title || !url || !category_id) {
+      showToast('Judul, kategori, dan URL wajib diisi', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('imgSaveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    let error;
+    if (id) {
+      ({ error } = await supabaseClient.from('images')
+        .update({ title, category_id, url, width, height, is_active })
+        .eq('id', id));
+    } else {
+      ({ error } = await supabaseClient.from('images')
+        .insert({ title, category_id, url, width, height, is_active }));
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Simpan';
+
+    if (error) {
+      showToast('Gagal menyimpan: ' + (error.message.includes('duplicate') ? 'URL sudah dipakai gambar lain' : error.message), 'error');
+      return;
+    }
+
+    closeImageModal();
+    showToast('Gambar disimpan', 'success');
+    loadImages();
+  }
+
+  // ===== RENDER: CATEGORIES =====
+  function renderCategoriesTable() {
+    const tbody = document.getElementById('categoriesTbody');
+    const list = CATEGORIES.filter(c => c.id !== 'all');
+    if (list.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Belum ada kategori.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(c => `
+      <tr>
+        <td>${escapeHtml(c.id)}</td>
+        <td>${escapeHtml(c.label)}</td>
+        <td>${c.sort_order}</td>
+        <td class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="openCategoryModal('${escapeAttr(c.id)}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCategory('${escapeAttr(c.id)}')">Hapus</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function openCategoryModal(id) {
+    if (id) {
+      const c = CATEGORIES.find(c => c.id === id);
+      editingCategoryId = id;
+      document.getElementById('categoryModalTitle').textContent = 'Edit Kategori';
+      document.getElementById('catId').value = c.id;
+      document.getElementById('catId').disabled = true;
+      document.getElementById('catLabel').value = c.label;
+      document.getElementById('catSort').value = c.sort_order;
+    } else {
+      editingCategoryId = null;
+      document.getElementById('categoryModalTitle').textContent = 'Tambah Kategori';
+      document.getElementById('catId').value = '';
+      document.getElementById('catId').disabled = false;
+      document.getElementById('catLabel').value = '';
+      document.getElementById('catSort').value = CATEGORIES.length;
+    }
+    document.getElementById('categoryModalOverlay').classList.add('show');
+  }
+
+  function closeCategoryModal() {
+    document.getElementById('categoryModalOverlay').classList.remove('show');
+  }
+
+  async function saveCategory() {
+    const id = document.getElementById('catId').value.trim().toLowerCase().replace(/\s+/g, '-');
+    const label = document.getElementById('catLabel').value.trim();
+    const sort_order = parseInt(document.getElementById('catSort').value) || 0;
+
+    if (!id || !label) {
+      showToast('ID dan label wajib diisi', 'error');
+      return;
+    }
+    if (id === 'all') {
+      showToast('"all" adalah ID khusus, pakai nama lain', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('catSaveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    let error;
+    if (editingCategoryId) {
+      ({ error } = await supabaseClient.from('categories').update({ label, sort_order }).eq('id', editingCategoryId));
+    } else {
+      ({ error } = await supabaseClient.from('categories').insert({ id, label, sort_order }));
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Simpan';
+
+    if (error) {
+      showToast('Gagal menyimpan: ' + (error.message.includes('duplicate') ? 'ID kategori sudah dipakai' : error.message), 'error');
+      return;
+    }
+
+    closeCategoryModal();
+    showToast('Kategori disimpan', 'success');
+    loadCategories();
+  }
+
+  async function deleteCategory(id) {
+    if (!confirm('Hapus kategori ini? Gambar yang masih pakai kategori ini akan gagal terhapus sampai dipindah dulu.')) return;
+    const { error } = await supabaseClient.from('categories').delete().eq('id', id);
+    if (error) {
+      showToast('Gagal hapus: masih ada gambar pakai kategori ini', 'error');
+      return;
+    }
+    CATEGORIES = CATEGORIES.filter(c => c.id !== id);
+    renderCategoriesTable();
+    populateCategorySelect();
+    showToast('Kategori dihapus', 'success');
+  }
+
+  // ===== UTIL =====
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
+  }
+  function escapeAttr(str) { return escapeHtml(str); }
+
+  // Login pakai tombol Enter
+  document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  checkExistingSession();
+</script>
+</body>
+</html>
