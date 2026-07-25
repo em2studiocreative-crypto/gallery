@@ -8,7 +8,14 @@
 <meta property="og:title" content="Status Gallery — by Radja Production">
 <meta property="og:description" content="Koleksi gambar status motivasi, islami, aesthetic, quotes, dan lainnya. Download gratis dalam kualitas HD.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C1892F'/><text x='16' y='23' font-size='18' font-weight='800' text-anchor='middle' fill='%23000'>S</text></svg>">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Status Gallery">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://wsrv.nl" crossorigin>
@@ -845,6 +852,53 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text-dimmer); }
+
+  /* ===== INSTALL PWA BANNER ===== */
+  .install-banner {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--bottom-nav-h) + 12px);
+    transform: translateX(-50%) translateY(120%);
+    width: calc(100% - 32px);
+    max-width: 420px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 150;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .install-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .install-banner-icon {
+    width: 40px; height: 40px; border-radius: var(--radius-sm);
+    background: var(--accent-dim); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .install-banner-icon img { width: 26px; height: 26px; }
+  .install-banner-text { flex: 1; min-width: 0; }
+  .install-banner-text strong { display: block; font-size: 13px; color: var(--text); }
+  .install-banner-text span { display: block; font-size: 12px; color: var(--text-dim); }
+  .install-banner-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .install-btn {
+    background: var(--accent); color: #0a0a0a; border: none;
+    border-radius: var(--radius-pill); padding: 8px 14px;
+    font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+  .install-btn:hover { background: var(--accent-hover); }
+  .install-dismiss-btn {
+    background: transparent; border: none; color: var(--text-dimmer);
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .install-dismiss-btn:hover { background: var(--card-hover); color: var(--text); }
+  @media (min-width: 769px) {
+    .install-banner { bottom: 20px; }
+  }
 </style>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
@@ -1053,6 +1107,21 @@ viewBox="0 0 0.16593 0.10268"
   </div>
 </div>
 
+<!-- INSTALL PWA BANNER -->
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-icon"><img src="icons/icon-192.png" alt=""></div>
+  <div class="install-banner-text">
+    <strong>Pasang Status Gallery</strong>
+    <span>Akses lebih cepat langsung dari layar utama</span>
+  </div>
+  <div class="install-banner-actions">
+    <button class="install-btn" onclick="installPWA()">Pasang</button>
+    <button class="install-dismiss-btn" onclick="dismissInstallBanner()" aria-label="Tutup">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1142,6 +1211,46 @@ viewBox="0 0 0.16593 0.10268"
     if (currentModalImage && currentModalImage.id === imgId) {
       updateModalFavoriteBtn();
     }
+  }
+
+  // ===== PWA: INSTALL PROMPT =====
+  let deferredInstallPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    const dismissed = localStorage.getItem('sg_install_dismissed') === '1';
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (!dismissed && !isStandalone) {
+      document.getElementById('installBanner').classList.add('show');
+    }
+  });
+
+  async function installPWA() {
+    if (!deferredInstallPrompt) return;
+    document.getElementById('installBanner').classList.remove('show');
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      showToast('Aplikasi berhasil dipasang', 'success');
+    }
+    deferredInstallPrompt = null;
+  }
+
+  function dismissInstallBanner() {
+    document.getElementById('installBanner').classList.remove('show');
+    try { localStorage.setItem('sg_install_dismissed', '1'); } catch (e) {}
+  }
+
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('installBanner').classList.remove('show');
+  });
+
+  // ===== PWA: SERVICE WORKER =====
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => console.error('SW gagal daftar:', err));
+    });
   }
 
   // ===== AUTH (Google login via Supabase) =====
