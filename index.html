@@ -995,7 +995,7 @@ viewBox="0 0 0.16593 0.10268"
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="side-nav-badge"></span>
     </button>
-    <button class="side-nav-item nav-item" data-tooltip="Profil" onclick="setNav(this); showToast('Fitur profil segera hadir!')">
+    <button class="side-nav-item nav-item" id="profileNavBtnSide" data-tooltip="Profil" onclick="setNav(this); openProfileModal();">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     </button>
   </div>
@@ -1019,11 +1019,39 @@ viewBox="0 0 0.16593 0.10268"
     <svg id="favNavIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     Favorit
   </button>
-  <button class="nav-item" onclick="setNav(this); showToast('Fitur profil segera hadir!')">
+  <button class="nav-item" id="profileNavBtnBottom" onclick="setNav(this); openProfileModal();">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     Profil
   </button>
 </nav>
+
+<!-- PROFILE MODAL -->
+<div class="modal-backdrop" id="profileModal" onclick="closeProfileModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:360px; padding:28px 24px; text-align:center; display:block;">
+    <button class="modal-close" onclick="closeProfileModal()" aria-label="Tutup">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div id="profileLoggedOut">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <h2 class="modal-title" style="font-size:18px;margin-bottom:6px;">Masuk ke Akun</h2>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Masuk supaya favorit kamu tersimpan dan sinkron di semua perangkat.</p>
+      <button class="state-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="loginWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 16.1 3 9.3 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.9 27 37 24 37c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.2 40.5 16 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.6C39.9 37 45 30.9 45 24c0-1.4-.1-2.7-.4-4z"/></svg>
+        Masuk dengan Google
+      </button>
+    </div>
+
+    <div id="profileLoggedIn" style="display:none;">
+      <div id="profileAvatar" style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#0a0a0a;font-weight:700;font-size:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"></div>
+      <h2 class="modal-title" style="font-size:16px;margin-bottom:2px;" id="profileEmail"></h2>
+      <p style="color:var(--text-dim);font-size:12px;margin-bottom:20px;">Favorit kamu tersimpan otomatis</p>
+      <button class="state-btn secondary" style="width:100%;" onclick="logoutUser()">Keluar</button>
+    </div>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1070,6 +1098,7 @@ viewBox="0 0 0.16593 0.10268"
   let currentModalImage = null;
   let showFavoritesOnly = false;
   let favorites = new Set();
+  let currentUser = null; // null = guest (pakai localStorage), diisi setelah login Google
   try {
     favorites = new Set(JSON.parse(localStorage.getItem('sg_favorites') || '[]'));
   } catch (e) {
@@ -1085,7 +1114,8 @@ viewBox="0 0 0.16593 0.10268"
   }
 
   function toggleFavorite(imgId) {
-    if (favorites.has(imgId)) {
+    const wasFavorite = favorites.has(imgId);
+    if (wasFavorite) {
       favorites.delete(imgId);
       showToast('Dihapus dari favorit');
     } else {
@@ -1097,6 +1127,106 @@ viewBox="0 0 0.16593 0.10268"
     if (currentModalImage && currentModalImage.id === imgId) {
       updateModalFavoriteBtn();
     }
+
+    // Kalau sudah login, sinkron ke Supabase juga (tidak menghalangi UI kalau gagal)
+    if (currentUser) {
+      if (wasFavorite) {
+        supabaseClient.from('favorites').delete().eq('user_id', currentUser.id).eq('image_id', imgId)
+          .then(({ error }) => { if (error) console.error('Gagal hapus favorit di server:', error); });
+      } else {
+        supabaseClient.from('favorites').insert({ user_id: currentUser.id, image_id: imgId })
+          .then(({ error }) => { if (error) console.error('Gagal simpan favorit di server:', error); });
+      }
+    }
+  }
+
+  // ===== AUTH (Google login via Supabase) =====
+  function openProfileModal() {
+    document.getElementById('profileModal').classList.add('open');
+  }
+  function closeProfileModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('profileModal').classList.remove('open');
+  }
+
+  async function loginWithGoogle() {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+    if (error) showToast('Gagal memulai login', 'error');
+  }
+
+  async function logoutUser() {
+    await supabaseClient.auth.signOut();
+    currentUser = null;
+    updateProfileUI();
+    closeProfileModal();
+    showToast('Berhasil keluar');
+    // Kembali ke favorit lokal (localStorage) setelah logout
+    try {
+      favorites = new Set(JSON.parse(localStorage.getItem('sg_favorites') || '[]'));
+    } catch (e) {
+      favorites = new Set();
+    }
+    filterAndRender();
+  }
+
+  function updateProfileUI() {
+    const loggedOutBox = document.getElementById('profileLoggedOut');
+    const loggedInBox = document.getElementById('profileLoggedIn');
+    if (currentUser) {
+      loggedOutBox.style.display = 'none';
+      loggedInBox.style.display = 'block';
+      const email = currentUser.email || '';
+      document.getElementById('profileEmail').textContent = email;
+      document.getElementById('profileAvatar').textContent = email.charAt(0).toUpperCase();
+    } else {
+      loggedOutBox.style.display = 'block';
+      loggedInBox.style.display = 'none';
+    }
+  }
+
+  // Ambil favorit dari Supabase lalu gabung dengan favorit lokal (kalau ada
+  // favorit yang ditambah sebelum login, ikut disimpan ke akun juga)
+  async function syncFavoritesAfterLogin() {
+    const { data, error } = await supabaseClient.from('favorites').select('image_id').eq('user_id', currentUser.id);
+    if (error) { console.error('Gagal ambil favorit:', error); return; }
+
+    const serverFavIds = new Set(data.map(r => r.image_id));
+    const localOnlyIds = [...favorites].filter(id => !serverFavIds.has(id));
+
+    // Upload favorit lokal yang belum ada di server
+    if (localOnlyIds.length > 0) {
+      const rows = localOnlyIds.map(image_id => ({ user_id: currentUser.id, image_id }));
+      const { error: insertErr } = await supabaseClient.from('favorites').insert(rows);
+      if (insertErr) console.error('Gagal upload favorit lokal:', insertErr);
+    }
+
+    favorites = new Set([...serverFavIds, ...localOnlyIds]);
+    filterAndRender();
+  }
+
+  async function initAuth() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      updateProfileUI();
+      syncFavoritesAfterLogin();
+    }
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        currentUser = session.user;
+        updateProfileUI();
+        syncFavoritesAfterLogin();
+        closeProfileModal();
+        showToast('Berhasil masuk', 'success');
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        updateProfileUI();
+      }
+    });
   }
 
   function toggleFavoritesView() {
@@ -1115,6 +1245,7 @@ viewBox="0 0 0.16593 0.10268"
     renderCategories();
     simulateLoad();
     setupSearch();
+    initAuth();
   });
 
   function renderCategories() {
