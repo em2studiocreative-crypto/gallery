@@ -1388,6 +1388,22 @@ viewBox="0 0 0.16593 0.10268"
     });
   }
 
+  // Kalau thumbnail via wsrv.nl gagal dimuat, coba dulu pakai URL asli
+  // sebelum benar-benar dianggap gagal (bukan langsung sembunyikan gambar).
+  function handleGridImgError(imgEl, imgId) {
+    if (imgEl.dataset.fallback === '1') {
+      // Sudah pernah coba URL asli dan tetap gagal -> baru dianggap gagal beneran
+      imgEl.dataset.loaded = '1';
+      const card = imgEl.closest('.gallery-card');
+      if (card) card.classList.add('img-error');
+      return;
+    }
+    const img = IMAGES.find(i => i.id === imgId);
+    if (!img) return;
+    imgEl.dataset.fallback = '1';
+    imgEl.src = img.url;
+  }
+
   function filterAndRender() {
     let filtered = IMAGES;
     if (showFavoritesOnly) {
@@ -1450,8 +1466,8 @@ viewBox="0 0 0.16593 0.10268"
           fetchpriority="${eager ? 'high' : 'low'}"
           decoding="async"
           data-loaded="0"
-          onload="this.dataset.loaded='1'"
-          onerror="this.dataset.loaded='1'; this.src='${img.url}'; this.closest('.gallery-card').classList.add('img-error')">
+          onload="this.dataset.loaded='1'; this.closest('.gallery-card').classList.remove('img-error')"
+          onerror="handleGridImgError(this, ${img.id})">
         <button class="card-fav-btn ${favorites.has(img.id) ? 'active' : ''}" aria-label="${favorites.has(img.id) ? 'Hapus dari favorit' : 'Tambah ke favorit'}" onclick="event.stopPropagation(); toggleFavorite(${img.id})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${favorites.has(img.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>
