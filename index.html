@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Status Gallery — by Radja Production</title>
+<title>Status Gallery — by EM2STUDIO</title>
 <meta name="description" content="Status Gallery — koleksi gambar status motivasi, islami, aesthetic, quotes, dan lainnya. Download gratis dalam kualitas HD.">
-<meta property="og:title" content="Status Gallery — by Radja Production">
+<meta property="og:title" content="Status Gallery — by EM2STUDIO">
 <meta property="og:description" content="Koleksi gambar status motivasi, islami, aesthetic, quotes, dan lainnya. Download gratis dalam kualitas HD.">
 <meta property="og:type" content="website">
 <link rel="icon" type="image/png" href="./favicon-32.png">
@@ -21,6 +21,14 @@
 <link rel="preconnect" href="https://wsrv.nl" crossorigin>
 <link rel="dns-prefetch" href="https://image.qwenlm.ai">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- ===== GOOGLE ANALYTICS (GA4) — Measurement ID: G-4SGWMRTPXL ===== -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4SGWMRTPXL"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-4SGWMRTPXL');
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -50,6 +58,42 @@
     --bottom-nav-h: 64px;
     --side-nav-w: 76px;
     --max-w: 1400px;
+  }
+
+  html[data-theme="light"] {
+    --bg: #f7f6f3;
+    --bg-elevated: #ffffff;
+    --card: #ffffff;
+    --card-hover: #efeeea;
+    --accent: #B87A22;
+    --accent-hover: #9c6819;
+    --accent-dim: rgba(184, 122, 34, 0.12);
+    --text: #1c1a17;
+    --text-dim: #6b6560;
+    --text-dimmer: #948f89;
+    --border: #e4e1da;
+    --skeleton: #ececE7;
+    --skeleton-shine: #dedad2;
+  }
+
+  html[data-theme="light"] body { background: var(--bg); }
+
+  html[data-theme="light"] .modal-close,
+  html[data-theme="light"] .card-fav-btn {
+    background: rgba(255,255,255,0.75);
+    color: #1c1a17;
+  }
+
+  html[data-theme="light"] .modal-close:hover,
+  html[data-theme="light"] .card-fav-btn:hover {
+    background: rgba(255,255,255,0.95);
+  }
+
+  /* Logo: white strokes become dark in light mode, gold stays gold */
+  html[data-theme="light"] .m2fil0,
+  html[data-theme="light"] .m2fil1,
+  html[data-theme="light"] .m3fil0 {
+    fill: #1c1a17;
   }
 
   html { scroll-behavior: smooth; }
@@ -461,6 +505,267 @@
 
   .hidden { display: none !important; }
 
+  /* ===== PROFILE MODAL ===== */
+  .profile-quota {
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .profile-quota strong { color: var(--accent); font-weight: 700; }
+
+  .auth-provider-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .auth-btn {
+    width: 100%;
+    padding: 11px 20px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background 0.2s, filter 0.2s;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+  }
+
+  .auth-btn:hover { background: var(--card-hover); }
+
+  .auth-btn.google { background: #fff; color: #1f1f1f; border: 1px solid #dadce0; }
+  .auth-btn.google:hover { background: #f7f7f7; }
+
+  .profile-guest-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 12px 0 4px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .profile-guest-link:hover { color: var(--text); }
+
+  .profile-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0;
+    color: var(--text-dimmer);
+    font-size: 11px;
+  }
+
+  .profile-divider::before,
+  .profile-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .profile-terms {
+    font-size: 11px;
+    color: var(--text-dimmer);
+    line-height: 1.5;
+    margin-top: 16px;
+  }
+
+  .profile-terms a {
+    color: var(--text-dim);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
+  .profile-terms a:hover { color: var(--accent); }
+
+  .state-btn.danger {
+    background: rgba(239,68,68,0.12);
+    color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+
+  .state-btn.danger:hover { background: rgba(239,68,68,0.2); }
+
+  /* ===== SETTINGS ===== */
+  .settings-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .settings-header-mark {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-dim), rgba(193,137,47,0.05));
+    border: 1px solid rgba(193,137,47,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .settings-header-mark-svg { width: 20px; height: auto; }
+
+  .settings-header-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+  }
+
+  .settings-header-sub {
+    font-size: 12px;
+    color: var(--text-dimmer);
+    margin-top: 1px;
+    letter-spacing: 0.02em;
+  }
+
+  .settings-section {
+    margin-bottom: var(--gap-3);
+  }
+
+  .settings-section:last-child { margin-bottom: 0; }
+
+  .settings-section-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 4px 10px;
+  }
+
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .settings-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  }
+
+  .settings-row:hover { background: var(--card-hover); border-color: rgba(193,137,47,0.3); }
+  .settings-row:active { transform: scale(0.99); }
+
+  .settings-row-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .settings-row-icon svg { width: 17px; height: 17px; }
+
+  .settings-row-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .settings-row-title {
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .settings-row-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .settings-row-chevron {
+    flex-shrink: 0;
+    color: var(--text-dimmer);
+    transition: transform 0.15s;
+  }
+
+  .settings-row:hover .settings-row-chevron { transform: translateX(2px); color: var(--accent); }
+
+  .settings-toggle {
+    flex-shrink: 0;
+    width: 40px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .settings-toggle.on { background: var(--accent); }
+
+  .settings-toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+  }
+
+  .settings-toggle.on::after { transform: translateX(16px); }
+
+  .settings-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 4px 4px 0;
+    margin-bottom: 4px;
+  }
+
+  .settings-back-btn:hover { color: var(--text); }
+
   /* ===== MODAL ===== */
   .modal-backdrop {
     position: fixed;
@@ -594,6 +899,331 @@
   }
 
   .modal-close:hover { background: rgba(0,0,0,0.85); }
+
+  /* ===== NOTIFICATIONS ===== */
+  .notif-bell-btn { position: relative; }
+
+  .notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f0553f, #dc2626);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    border: 2px solid var(--bg);
+    box-shadow: 0 1px 5px rgba(220,38,38,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .side-nav-item .notif-badge {
+    top: 0px;
+    right: 0px;
+    border-color: var(--bg-elevated);
+  }
+
+  .notif-modal-content {
+    max-width: 440px;
+    width: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 82vh;
+    overflow: hidden;
+  }
+
+  .notif-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 18px 56px 18px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .notif-panel-title {
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .notif-panel-title-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .notif-panel-title-icon svg { width: 18px; height: 18px; }
+
+  .notif-mark-all-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .notif-mark-all-btn:hover { background: var(--accent-dim); }
+
+  .notif-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px;
+  }
+
+  .notif-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s;
+    text-align: left;
+  }
+
+  .notif-item:hover { background: var(--card-hover); }
+  .notif-item.unread { background: var(--accent-dim); }
+  .notif-item.unread:hover { background: rgba(193,137,47,0.22); }
+
+  .notif-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--skeleton);
+  }
+
+  .notif-content { flex: 1; min-width: 0; }
+
+  .notif-text {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text);
+  }
+
+  .notif-text b { color: var(--accent); font-weight: 700; }
+
+  .notif-time {
+    font-size: 11.5px;
+    color: var(--text-dimmer);
+    margin-top: 3px;
+  }
+
+  .notif-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .notif-empty, .notif-guest {
+    padding: 48px 24px;
+    text-align: center;
+  }
+
+  .notif-empty-icon, .notif-guest-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .notif-empty-title, .notif-guest-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .notif-empty-desc, .notif-guest-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+
+  .notif-guest .auth-provider-list { margin-bottom: 0; }
+
+  /* ===== DONATION MODAL ===== */
+  .donate-intro {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .donate-bank-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+
+  .donate-bank-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .donate-bank-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-dim);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .donate-bank-logo svg { width: 18px; height: 18px; }
+
+  .donate-bank-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .donate-bank-sub {
+    font-size: 11.5px;
+    color: var(--text-dimmer);
+  }
+
+  .donate-field {
+    margin-bottom: 12px;
+  }
+
+  .donate-field:last-child { margin-bottom: 0; }
+
+  .donate-field-label {
+    font-size: 11px;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .donate-field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .donate-field-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    word-break: break-all;
+  }
+
+  .donate-copy-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+
+  .donate-copy-btn svg { width: 14px; height: 14px; }
+
+  .donate-copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .donate-copy-btn.copied {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .donate-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .donate-wa-btn {
+    padding: 13px 20px;
+    background: #25D366;
+    color: #04250f;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-size: 14.5px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: filter 0.2s;
+  }
+
+  .donate-wa-btn:hover { filter: brightness(0.92); }
+
+  .donate-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .donate-note svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; color: var(--accent); }
 
   /* ===== BOTTOM NAV ===== */
   .bottom-nav {
@@ -908,6 +1538,14 @@
 </style>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script>
+  (function() {
+    try {
+      var saved = localStorage.getItem('sg_theme_pref');
+      if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
 
@@ -1006,16 +1644,41 @@ viewBox="0 0 1.49117 0.57976"
         <span id="modalDownloads"></span>
       </div>
       <div class="modal-actions">
-        <button class="state-btn secondary" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-          <svg id="modalFavIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          <span id="modalFavLabel">Tambah ke Favorit</span>
-        </button>
+        <div style="display:flex; gap:10px;">
+          <button class="state-btn secondary" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg id="modalFavIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span id="modalFavLabel">Tambah ke Favorit</span>
+          </button>
+          <button class="state-btn secondary" id="modalShareBtn" onclick="shareCurrent()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Bagikan
+          </button>
+        </div>
         <button class="modal-download-btn" id="modalDownloadBtn" onclick="downloadCurrent()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download HD
         </button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS MODAL -->
+<div class="modal-backdrop" id="notifModal" onclick="closeNotifModal(event)">
+  <div class="modal-content notif-modal-content" onclick="event.stopPropagation()">
+    <div class="notif-panel-header">
+      <div class="notif-panel-title">
+        <span class="notif-panel-title-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </span>
+        Notifikasi
+      </div>
+      <button class="notif-mark-all-btn" id="notifMarkAllBtn" onclick="markAllNotifRead()">Tandai semua dibaca</button>
+    </div>
+    <div id="notifBody"></div>
+    <button class="modal-close" onclick="closeNotifModal()" aria-label="Tutup">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
   </div>
 </div>
 
@@ -1042,42 +1705,47 @@ viewBox="0 0 0.16593 0.10268"
 </svg>
   </a>
   <div class="side-nav-items">
-    <button class="side-nav-item nav-item active" aria-current="page" data-tooltip="Beranda" onclick="setNav(this); resetAll();">
+    <button class="side-nav-item nav-item active" aria-current="page" id="navBerandaSide" data-tooltip="Beranda" onclick="setNav(this); resetAll();">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     </button>
-    <button class="side-nav-item nav-item" data-tooltip="Cari" onclick="setNav(this); document.getElementById('searchInput').focus();">
+    <button class="side-nav-item nav-item" data-tooltip="Cari" onclick="setNav(this); focusSearch();">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     </button>
-    <button class="side-nav-item nav-item" data-tooltip="Favorit" onclick="setNav(this); toggleFavoritesView();">
+    <button class="side-nav-item nav-item" id="navFavoritSide" data-tooltip="Favorit" onclick="setNav(this); toggleFavoritesView();">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </button>
-    <button class="side-nav-item" data-tooltip="Notifikasi" onclick="showToast('Fitur segera hadir!')">
+    <button class="side-nav-item" data-tooltip="Notifikasi" onclick="openNotifModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span class="side-nav-badge"></span>
+      <span class="notif-badge" id="notifBadgeSide"></span>
     </button>
     <button class="side-nav-item nav-item" id="profileNavBtnSide" data-tooltip="Profil" onclick="setNav(this); openProfileModal();">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     </button>
   </div>
   <div class="side-nav-spacer"></div>
-  <button class="side-nav-item" data-tooltip="Pengaturan" onclick="showToast('Fitur pengaturan segera hadir!')">
+  <button class="side-nav-item" data-tooltip="Pengaturan" onclick="openSettingsModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
 </nav>
 
 <!-- BOTTOM NAV (Mobile) -->
 <nav class="bottom-nav" aria-label="Navigasi utama">
-  <button class="nav-item active" aria-current="page" onclick="setNav(this); resetAll();">
+  <button class="nav-item active" aria-current="page" id="navBerandaBottom" onclick="setNav(this); resetAll();">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     Beranda
   </button>
-  <button class="nav-item" onclick="setNav(this); document.getElementById('searchInput').focus();">
+  <button class="nav-item" onclick="setNav(this); focusSearch();">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     Cari
   </button>
-  <button class="nav-item" onclick="setNav(this); toggleFavoritesView();">
+  <button class="nav-item" id="navFavoritBottom" onclick="setNav(this); toggleFavoritesView();">
     <svg id="favNavIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     Favorit
+  </button>
+  <button class="nav-item notif-bell-btn" onclick="setNav(this); openNotifModal();">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    Notifikasi
+    <span class="notif-badge" id="notifBadgeBottom"></span>
   </button>
   <button class="nav-item" id="profileNavBtnBottom" onclick="setNav(this); openProfileModal();">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1097,18 +1765,193 @@ viewBox="0 0 0.16593 0.10268"
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
       <h2 class="modal-title" style="font-size:18px;margin-bottom:6px;">Masuk ke Akun</h2>
-      <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Masuk supaya favorit kamu tersimpan dan sinkron di semua perangkat.</p>
-      <button class="state-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="loginWithGoogle()">
-        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 16.1 3 9.3 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.9 27 37 24 37c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.2 40.5 16 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.6C39.9 37 45 30.9 45 24c0-1.4-.1-2.7-.4-4z"/></svg>
-        Masuk dengan Google
+      <p class="profile-quota" id="profileQuotaDesc">Masuk supaya favorit kamu tersimpan dan sinkron di semua perangkat.</p>
+
+      <div class="auth-provider-list">
+        <button class="auth-btn google" onclick="loginWithProvider('google')">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 16.1 3 9.3 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.9 27 37 24 37c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.2 40.5 16 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.6C39.9 37 45 30.9 45 24c0-1.4-.1-2.7-.4-4z"/></svg>
+          Masuk dengan Google
+        </button>
+      </div>
+
+      <button class="profile-guest-link" onclick="closeProfileModal()">Lanjutkan sebagai Tamu</button>
+
+      <div class="profile-divider">ATAU</div>
+
+      <button class="state-btn secondary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="closeProfileModal(); openSettingsModal();">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Pengaturan
       </button>
+
+      <p class="profile-terms">Dengan masuk, kamu menyetujui <a onclick="showToast('Fitur segera hadir!')">Syarat & Ketentuan</a> dan <a onclick="showToast('Fitur segera hadir!')">Kebijakan Privasi</a> kami.</p>
     </div>
 
     <div id="profileLoggedIn" style="display:none;">
       <div id="profileAvatar" style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#0a0a0a;font-weight:700;font-size:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"></div>
       <h2 class="modal-title" style="font-size:16px;margin-bottom:2px;" id="profileEmail"></h2>
       <p style="color:var(--text-dim);font-size:12px;margin-bottom:20px;">Favorit kamu tersimpan otomatis</p>
-      <button class="state-btn secondary" style="width:100%;" onclick="logoutUser()">Keluar</button>
+      <button class="state-btn secondary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="closeProfileModal(); openSettingsModal();">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Pengaturan
+      </button>
+      <button class="state-btn danger" style="width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="logoutUser()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Keluar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-backdrop" id="settingsModal" onclick="closeSettingsModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:400px; padding:24px; display:block; max-height:85vh; overflow-y:auto;">
+    <button class="modal-close" onclick="closeSettingsModal()" aria-label="Tutup">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="settings-header">
+      <div class="settings-header-mark">
+        <svg class="settings-header-mark-svg" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 0.16593 0.10268"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .sfil1 {fill:#C1892F}
+    .sfil0 {fill:var(--text)}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1_settings">
+  <path class="sfil0" d="M0.06948 0.0057l-0.06371 0.06339c-0.00766,0.00762 -0.00769,0.02012 -0.00007,0.02778 0.00762,0.00766 0.02012,0.00769 0.02778,0.00007 0.01046,-0.0104 0.02211,-0.02156 0.0319,-0.03139 0.00382,-0.00383 0.00872,-0.00628 0.014,-0.00704 0.00118,-0.00017 0.00238,-0.00026 0.00359,-0.00026 0.00819,0 0.01546,0.00397 0.01998,0.0101 0.00304,0.00412 0.00484,0.00922 0.00484,0.01473 0,0.00092 -0.00005,0.00184 -0.00015,0.00274l0.01895 -0.01885 0 0.01593c0,0.0108 0.00884,0.01964 0.01964,0.01964 0.0108,0 0.01964,-0.00884 0.01964,-0.01964l0 -0.06188c0.00038,-0.00547 -0.0015,-0.01107 -0.00565,-0.01524 -0.00762,-0.00766 -0.02012,-0.00769 -0.02778,-0.00007l-0.0295 0.02935 0 -0.0154c0,-0.00004 -0,-0.00008 -0,-0.00012 -0,-0.00013 -0,-0.00025 -0,-0.00038l-0 -0.00002c-0.00012,-0.00485 -0.00202,-0.00967 -0.00569,-0.01336 -0.00382,-0.00384 -0.00887,-0.00576 -0.01392,-0.00576l-0.00003 -0c-0.00007,0 -0.00014,0 -0.00021,0 -0.00007,0 -0.00015,0 -0.00022,0 -0.00012,0 -0.00024,0.00001 -0.00035,0.00001l-0.00011 0c-0.00013,0.00001 -0.00027,0.00001 -0.0004,0.00002l-0.00006 0c-0.00014,0.00001 -0.00028,0.00002 -0.00041,0.00003l-0.00006 0.00001c-0.00013,0.00001 -0.00027,0.00003 -0.0004,0.00004l-0.00008 0.00001c-0.00012,0.00001 -0.00024,0.00003 -0.00037,0.00005l-0.00014 0.00002c-0.0001,0.00001 -0.0002,0.00003 -0.0003,0.00005 -0.00007,0.00001 -0.00015,0.00002 -0.00022,0.00004 -0.00007,0.00001 -0.00014,0.00002 -0.00021,0.00004 -0.00011,0.00002 -0.00023,0.00004 -0.00034,0.00007l-0.00008 0.00002c-0.00362,0.00074 -0.00706,0.0025 -0.00986,0.00529z"/>
+  <path class="sfil1" d="M0.02034 0.03922c0.00543,0 0.01034,-0.0022 0.01389,-0.00577l0 0 0.03333 -0.03345 -0.04722 0c-0.01083,0 -0.01961,0.00878 -0.01961,0.01961 0,0.01083 0.00878,0.01961 0.01961,0.01961zm0.06263 0.02425c-0.00543,0 -0.01034,0.00221 -0.01389,0.00577l-0 0 -0.03333 0.03345 0.04722 0c0.01083,0 0.01961,-0.00878 0.01961,-0.01961 0,-0.01083 -0.00878,-0.01961 -0.01961,-0.01961z"/>
+ </g>
+</svg>
+      </div>
+      <div>
+        <h2 class="settings-header-title">Pengaturan</h2>
+        <p class="settings-header-sub">EM2STUDIO · Status Gallery</p>
+      </div>
+    </div>
+
+    <!-- PREFERENSI -->
+    <div class="settings-section">
+      <div class="settings-section-label">Preferensi</div>
+      <div class="settings-group">
+        <div class="settings-row" id="settingsThemeRow" role="button" tabindex="0" onclick="toggleThemePref()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleThemePref();}">
+          <div class="settings-row-icon">
+            <svg id="settingsThemeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Mode Gelap</div>
+            <div class="settings-row-desc" id="settingsThemeDesc">Aktif</div>
+          </div>
+          <button class="settings-toggle" id="settingsThemeToggle" onclick="event.stopPropagation(); toggleThemePref();" aria-label="Aktifkan mode gelap"></button>
+        </div>
+        <div class="settings-row" id="settingsNotifRow" role="button" tabindex="0" onclick="toggleNotifPref()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleNotifPref();}">
+          <div class="settings-row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Notifikasi Gambar Baru</div>
+            <div class="settings-row-desc">Info koleksi status terbaru</div>
+          </div>
+          <button class="settings-toggle" id="settingsNotifToggle" onclick="event.stopPropagation(); toggleNotifPref();" aria-label="Aktifkan notifikasi"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DUKUNGAN -->
+    <div class="settings-section">
+      <div class="settings-section-label">Dukungan</div>
+      <div class="settings-group">
+        <a class="settings-row" href="mailto:andrichupu@gmail.com?subject=Kontak%20Status%20Gallery" id="settingsContactRow">
+          <div class="settings-row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+          </div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Hubungi Pengembang</div>
+            <div class="settings-row-desc" id="settingsContactDesc">andrichupu@gmail.com</div>
+          </div>
+          <svg class="settings-row-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <button class="settings-row" id="settingsDonateRow" onclick="closeSettingsModal(); openDonateModal();">
+          <div class="settings-row-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Dukung Pengembang</div>
+            <div class="settings-row-desc">Donasi supaya aplikasi terus berkembang</div>
+          </div>
+          <svg class="settings-row-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- TENTANG -->
+    <div class="settings-section">
+      <div class="settings-section-label">Tentang</div>
+      <div class="settings-group">
+        <div class="settings-row" style="cursor:default;">
+          <div class="settings-row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Status Gallery</div>
+            <div class="settings-row-desc">by EM2STUDIO · v1.0.0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DONATE MODAL -->
+<div class="modal-backdrop" id="donateModal" onclick="closeDonateModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:400px; padding:24px; display:block; max-height:85vh; overflow-y:auto;">
+    <button class="modal-close" onclick="closeDonateModal()" aria-label="Tutup">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h2 class="modal-title" style="font-size:18px;margin-bottom:6px;">Dukung Pengembang</h2>
+    <p class="donate-intro">Suka pakai aplikasi ini? Donasi kamu bantu Status Gallery terus berkembang dan tetap gratis untuk semua orang.</p>
+
+    <div class="donate-bank-card">
+      <div class="donate-bank-header">
+        <div class="donate-bank-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
+        </div>
+        <div>
+          <div class="donate-bank-name">Bank BCA</div>
+          <div class="donate-bank-sub">Transfer Bank</div>
+        </div>
+      </div>
+
+      <div class="donate-field">
+        <div class="donate-field-label">Nomor Rekening</div>
+        <div class="donate-field-row">
+          <span class="donate-field-value" id="donateRekNumber">5140250521</span>
+          <button class="donate-copy-btn" id="donateCopyBtn" onclick="copyDonateRekening()">
+            <svg id="donateCopyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="donateCopyLabel">Salin</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="donate-field">
+        <div class="donate-field-label">Atas Nama</div>
+        <div class="donate-field-value">ANDRI YANTO</div>
+      </div>
+    </div>
+
+    <div class="donate-actions">
+      <a class="donate-wa-btn" href="https://wa.me/62859106501881?text=Halo%2C%20saya%20sudah%20donasi%20untuk%20Status%20Gallery" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4a7.94 7.94 0 0 0-6.9 11.9L4 20l4.2-1.1a7.9 7.9 0 0 0 3.8 1h.02a7.94 7.94 0 0 0 5.58-13.58zm-5.55 12.2h-.02a6.6 6.6 0 0 1-3.36-.92l-.24-.14-2.5.65.67-2.44-.16-.25a6.6 6.6 0 0 1 10.24-8.2 6.55 6.55 0 0 1 1.94 4.67 6.62 6.62 0 0 1-6.57 6.63zm3.6-4.95c-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.19-.5.64-.62.77-.11.13-.23.15-.42.05a5.4 5.4 0 0 1-1.6-.99 6 6 0 0 1-1.1-1.37c-.12-.19 0-.3.09-.4.09-.09.19-.23.29-.34.1-.11.13-.19.2-.32.06-.13.03-.24-.02-.34-.05-.1-.44-1.06-.6-1.45-.16-.38-.32-.33-.44-.34h-.38c-.13 0-.34.05-.52.24-.18.19-.68.66-.68 1.62s.7 1.88.79 2.01c.1.13 1.37 2.09 3.32 2.93.46.2.83.32 1.11.41.47.15.89.13 1.23.08.37-.06 1.17-.48 1.34-.94.16-.46.16-.85.11-.94-.04-.09-.17-.14-.36-.24z"/></svg>
+        Konfirmasi via WhatsApp
+      </a>
+    </div>
+
+    <div class="donate-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>Sudah transfer? Kirim bukti transfer via WhatsApp atau email ke <span id="donateEmail">andrichupu@gmail.com</span> supaya kami bisa ucapkan terima kasih 🙏</span>
     </div>
   </div>
 </div>
@@ -1219,6 +2062,203 @@ viewBox="0 0 0.16593 0.10268"
     }
   }
 
+  // ===== NOTIFIKASI (khusus user yang sudah login, bukan tamu) =====
+  // Aturan: user yang login akan mendapat notifikasi kalau ada gambar BARU
+  // yang kategorinya sama dengan kategori gambar yang sudah dia favoritkan.
+  let notifications = []; // [{id, imageId, title, category, categoryLabel, url, created_at, read}]
+
+  function notifStorageKey(suffix) {
+    return currentUser ? `sg_notif_${suffix}_${currentUser.id}` : null;
+  }
+
+  function isNotifPrefOn() {
+    // Toggle di Pengaturan > "Notifikasi Gambar Baru". Default AKTIF
+    // kecuali user pernah mematikannya secara eksplisit.
+    return localStorage.getItem('sg_notif_pref') !== '0';
+  }
+
+  function loadNotificationsForUser() {
+    if (!currentUser) { notifications = []; renderNotifBadge(); return; }
+    try {
+      notifications = JSON.parse(localStorage.getItem(notifStorageKey('list')) || '[]');
+    } catch (e) {
+      notifications = [];
+    }
+    renderNotifBadge();
+  }
+
+  function saveNotifications() {
+    if (!currentUser) return;
+    try {
+      localStorage.setItem(notifStorageKey('list'), JSON.stringify(notifications.slice(0, 50)));
+    } catch (e) {}
+  }
+
+  // Bandingkan gambar dari server dengan waktu cek terakhir milik user ini,
+  // lalu buat notifikasi utk gambar baru yang kategorinya cocok dgn favorit.
+  function checkForNewNotifications() {
+    if (!currentUser || !isNotifPrefOn() || IMAGES.length === 0) return;
+
+    const favCategoryIds = new Set(
+      IMAGES.filter(img => favorites.has(img.id)).map(img => img.category)
+    );
+
+    const lastCheckKey = notifStorageKey('lastcheck');
+    const lastCheck = localStorage.getItem(lastCheckKey);
+    const now = new Date().toISOString();
+
+    // Pertama kali fitur ini jalan utk user ini: catat baseline waktu saja,
+    // supaya tidak tiba-tiba menumpahkan seluruh histori gambar lama.
+    if (!lastCheck || favCategoryIds.size === 0) {
+      try { localStorage.setItem(lastCheckKey, now); } catch (e) {}
+      return;
+    }
+
+    const existingIds = new Set(notifications.map(n => n.imageId));
+    const newOnes = IMAGES.filter(img =>
+      img.created_at &&
+      favCategoryIds.has(img.category) &&
+      new Date(img.created_at) > new Date(lastCheck) &&
+      !existingIds.has(img.id)
+    );
+
+    if (newOnes.length > 0) {
+      const catLabel = id => (CATEGORIES.find(c => c.id === id) || {}).label || id;
+      const added = newOnes.map(img => ({
+        id: `${img.id}_${Date.now()}`,
+        imageId: img.id,
+        title: img.title,
+        category: img.category,
+        categoryLabel: catLabel(img.category),
+        url: img.url,
+        created_at: img.created_at,
+        read: false
+      }));
+      notifications = [...added, ...notifications].slice(0, 50);
+      saveNotifications();
+      renderNotifBadge();
+
+      if (document.getElementById('notifModal').classList.contains('open')) {
+        renderNotifList();
+      } else if (added.length === 1) {
+        showToast(`🔔 Gambar baru di kategori ${added[0].categoryLabel}`, 'success');
+      } else {
+        showToast(`🔔 ${added.length} gambar baru sesuai favoritmu`, 'success');
+      }
+    }
+
+    try { localStorage.setItem(lastCheckKey, now); } catch (e) {}
+  }
+
+  function unreadNotifCount() {
+    return currentUser ? notifications.filter(n => !n.read).length : 0;
+  }
+
+  function renderNotifBadge() {
+    const count = unreadNotifCount();
+    ['notifBadgeSide', 'notifBadgeBottom'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (count > 0) {
+        el.textContent = count > 9 ? '9+' : String(count);
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+        el.textContent = '';
+      }
+    });
+  }
+
+  function timeAgo(dateStr) {
+    const diff = Math.max(0, (Date.now() - new Date(dateStr).getTime()) / 1000);
+    if (diff < 60) return 'Baru saja';
+    if (diff < 3600) return `${Math.floor(diff / 60)} menit lalu`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} hari lalu`;
+    return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function openNotifModal() {
+    renderNotifList();
+    document.getElementById('notifModal').classList.add('open');
+  }
+
+  function closeNotifModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('notifModal').classList.remove('open');
+    if (currentUser && unreadNotifCount() > 0) {
+      notifications.forEach(n => n.read = true);
+      saveNotifications();
+      renderNotifBadge();
+    }
+  }
+
+  function markAllNotifRead() {
+    if (!currentUser || notifications.length === 0) return;
+    notifications.forEach(n => n.read = true);
+    saveNotifications();
+    renderNotifBadge();
+    renderNotifList();
+  }
+
+  function openNotifItem(notifId) {
+    const notif = notifications.find(n => n.id === notifId);
+    if (!notif) return;
+    notif.read = true;
+    saveNotifications();
+    renderNotifBadge();
+    document.getElementById('notifModal').classList.remove('open');
+    openModal(notif.imageId);
+  }
+
+  function renderNotifList() {
+    const body = document.getElementById('notifBody');
+    const markAllBtn = document.getElementById('notifMarkAllBtn');
+    const bellIconSvg = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
+
+    if (!currentUser) {
+      markAllBtn.style.display = 'none';
+      body.innerHTML = `
+        <div class="notif-guest">
+          <div class="notif-guest-icon">${bellIconSvg}</div>
+          <div class="notif-guest-title">Masuk buat dapat notifikasi</div>
+          <div class="notif-guest-desc">Tandai gambar favorit kamu, nanti kami kabari di sini kalau ada gambar baru di kategori yang sama. Fitur ini khusus buat kamu yang sudah masuk akun.</div>
+          <div class="auth-provider-list">
+            <button class="auth-btn google" onclick="closeNotifModal(); loginWithProvider('google');">
+              <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 16.1 3 9.3 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.9 27 37 24 37c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.2 40.5 16 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.6C39.9 37 45 30.9 45 24c0-1.4-.1-2.7-.4-4z"/></svg>
+              Masuk dengan Google
+            </button>
+          </div>
+        </div>`;
+      return;
+    }
+
+    if (notifications.length === 0) {
+      markAllBtn.style.display = 'none';
+      body.innerHTML = `
+        <div class="notif-empty">
+          <div class="notif-empty-icon">${bellIconSvg}</div>
+          <div class="notif-empty-title">Belum ada notifikasi</div>
+          <div class="notif-empty-desc">Tambahkan gambar ke favorit ❤️ — nanti kami kabari di sini kalau ada gambar baru yang senada.</div>
+          <button class="state-btn secondary" onclick="closeNotifModal(); toggleFavoritesView();">Lihat Favorit</button>
+        </div>`;
+      return;
+    }
+
+    markAllBtn.style.display = unreadNotifCount() > 0 ? 'inline-flex' : 'none';
+
+    body.innerHTML = `<div class="notif-list">` + notifications.map(n => `
+      <div class="notif-item ${n.read ? '' : 'unread'}" onclick="openNotifItem('${n.id}')">
+        <img class="notif-thumb" src="${gridThumb(n.url)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${n.url}'">
+        <div class="notif-content">
+          <div class="notif-text"><b>Gambar baru</b> di kategori <b>${n.categoryLabel}</b> — ${n.title || ''}</div>
+          <div class="notif-time">${timeAgo(n.created_at)}</div>
+        </div>
+        ${n.read ? '' : '<span class="notif-dot"></span>'}
+      </div>
+    `).join('') + `</div>`;
+  }
+
   // ===== PWA: INSTALL PROMPT =====
   let deferredInstallPrompt = null;
 
@@ -1259,8 +2299,96 @@ viewBox="0 0 0.16593 0.10268"
     });
   }
 
-  // ===== AUTH (Google login via Supabase) =====
+  // ===== SETTINGS =====
+  function openSettingsModal() {
+    updateSettingsUI();
+    document.getElementById('settingsModal').classList.add('open');
+  }
+
+  function closeSettingsModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('settingsModal').classList.remove('open');
+  }
+
+  function updateSettingsUI() {
+    document.getElementById('settingsNotifToggle').classList.toggle('on', isNotifPrefOn());
+
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    document.getElementById('settingsThemeToggle').classList.toggle('on', !isLight);
+    document.getElementById('settingsThemeDesc').textContent = isLight ? 'Nonaktif' : 'Aktif';
+  }
+
+  function toggleNotifPref() {
+    const isOn = isNotifPrefOn();
+    try { localStorage.setItem('sg_notif_pref', isOn ? '0' : '1'); } catch (e) {}
+    document.getElementById('settingsNotifToggle').classList.toggle('on', !isOn);
+    showToast(isOn ? 'Notifikasi dimatikan' : 'Notifikasi diaktifkan', 'success');
+    if (!isOn) checkForNewNotifications();
+  }
+
+  function toggleThemePref() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+      document.documentElement.removeAttribute('data-theme');
+      try { localStorage.setItem('sg_theme_pref', 'dark'); } catch (e) {}
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      try { localStorage.setItem('sg_theme_pref', 'light'); } catch (e) {}
+    }
+    updateSettingsUI();
+    showToast(isLight ? 'Mode gelap diaktifkan' : 'Mode terang diaktifkan', 'success');
+  }
+
+  // ===== DONATE MODAL =====
+  function openDonateModal() {
+    document.getElementById('donateModal').classList.add('open');
+  }
+
+  function closeDonateModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('donateModal').classList.remove('open');
+  }
+
+  function copyDonateRekening() {
+    const number = document.getElementById('donateRekNumber').textContent.trim();
+    const btn = document.getElementById('donateCopyBtn');
+    const label = document.getElementById('donateCopyLabel');
+
+    const markCopied = () => {
+      btn.classList.add('copied');
+      label.textContent = 'Tersalin!';
+      showToast('Nomor rekening disalin', 'success');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        label.textContent = 'Salin';
+      }, 2000);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(number).then(markCopied).catch(() => {
+        fallbackCopyText(number);
+        markCopied();
+      });
+    } else {
+      fallbackCopyText(number);
+      markCopied();
+    }
+  }
+
+  function fallbackCopyText(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
   function openProfileModal() {
+    updateProfileQuotaText();
     document.getElementById('profileModal').classList.add('open');
   }
   function closeProfileModal(e) {
@@ -1268,9 +2396,9 @@ viewBox="0 0 0.16593 0.10268"
     document.getElementById('profileModal').classList.remove('open');
   }
 
-  async function loginWithGoogle() {
+  async function loginWithProvider(provider) {
     const { error } = await supabaseClient.auth.signInWithOAuth({
-      provider: 'google',
+      provider,
       options: { redirectTo: window.location.origin + window.location.pathname }
     });
     if (error) showToast('Gagal memulai login', 'error');
@@ -1279,6 +2407,8 @@ viewBox="0 0 0.16593 0.10268"
   async function logoutUser() {
     await supabaseClient.auth.signOut();
     currentUser = null;
+    notifications = [];
+    renderNotifBadge();
     updateProfileUI();
     closeProfileModal();
     showToast('Berhasil keluar');
@@ -1289,6 +2419,19 @@ viewBox="0 0 0.16593 0.10268"
       favorites = new Set();
     }
     filterAndRender();
+  }
+
+  // Tampilkan sisa kuota download gratis untuk guest supaya ajakan masuk
+  // terasa lebih konkret (bukan cuma "biar sinkron").
+  function updateProfileQuotaText() {
+    const el = document.getElementById('profileQuotaDesc');
+    if (!el || currentUser) return;
+    const remaining = Math.max(0, GUEST_DOWNLOAD_LIMIT - getGuestDownloadCount());
+    if (remaining > 0) {
+      el.innerHTML = `Sisa <strong>${remaining}x</strong> download gratis hari ini. Masuk untuk unlimited & sinkron di semua perangkat.`;
+    } else {
+      el.innerHTML = `Batas download gratis tercapai. Masuk untuk lanjut download tanpa batas & sinkron di semua perangkat.`;
+    }
   }
 
   function updateProfileUI() {
@@ -1303,6 +2446,7 @@ viewBox="0 0 0.16593 0.10268"
     } else {
       loggedOutBox.style.display = 'block';
       loggedInBox.style.display = 'none';
+      updateProfileQuotaText();
     }
   }
 
@@ -1324,6 +2468,7 @@ viewBox="0 0 0.16593 0.10268"
 
     favorites = new Set([...serverFavIds, ...localOnlyIds]);
     filterAndRender();
+    checkForNewNotifications();
   }
 
   async function initAuth() {
@@ -1331,6 +2476,7 @@ viewBox="0 0 0.16593 0.10268"
     if (session) {
       currentUser = session.user;
       updateProfileUI();
+      loadNotificationsForUser();
       syncFavoritesAfterLogin();
     }
 
@@ -1338,11 +2484,15 @@ viewBox="0 0 0.16593 0.10268"
       if (event === 'SIGNED_IN' && session) {
         currentUser = session.user;
         updateProfileUI();
+        loadNotificationsForUser();
         syncFavoritesAfterLogin();
         closeProfileModal();
         showToast('Berhasil masuk', 'success');
+        if (typeof gtag === 'function') gtag('event', 'login', { method: 'google' });
       } else if (event === 'SIGNED_OUT') {
         currentUser = null;
+        notifications = [];
+        renderNotifBadge();
         updateProfileUI();
       }
     });
@@ -1356,6 +2506,7 @@ viewBox="0 0 0.16593 0.10268"
       document.getElementById('searchInput').value = '';
       renderCategories();
     }
+    highlightNav(showFavoritesOnly ? 'Favorit' : 'Beranda');
     filterAndRender();
   }
 
@@ -1377,17 +2528,37 @@ viewBox="0 0 0.16593 0.10268"
   function selectCategory(catId) {
     activeCategory = catId;
     showFavoritesOnly = false;
+    highlightNav('Beranda');
     renderCategories();
     filterAndRender();
+  }
+
+  // Klik ikon "Cari" berarti user mau menjelajah/mencari semua gambar —
+  // kalau lagi di mode Favorit-only, filter itu harus dimatikan dulu,
+  // supaya galeri tidak tetap kosong sebelum user sempat mengetik apa pun.
+  function focusSearch() {
+    if (showFavoritesOnly) {
+      showFavoritesOnly = false;
+      filterAndRender();
+    }
+    document.getElementById('searchInput').focus();
   }
 
   function setupSearch() {
     const input = document.getElementById('searchInput');
     let debounce;
+    input.addEventListener('focus', () => {
+      if (showFavoritesOnly) {
+        showFavoritesOnly = false;
+        highlightNav('Beranda');
+        filterAndRender();
+      }
+    });
     input.addEventListener('input', (e) => {
       clearTimeout(debounce);
       debounce = setTimeout(() => {
         searchQuery = e.target.value.toLowerCase().trim();
+        if (showFavoritesOnly) highlightNav('Beranda');
         showFavoritesOnly = false;
         filterAndRender();
       }, 250);
@@ -1427,6 +2598,73 @@ viewBox="0 0 0.16593 0.10268"
     renderGallery(filtered);
   }
 
+  // ===== RENDER BERTAHAP (biar gambar pertama cepat muncul) =====
+  // Daripada dump semua kartu sekaligus (bikin puluhan gambar diminta
+  // bersamaan ke server), render 1 batch dulu, sisanya nyusul otomatis
+  // pas user scroll ke bawah.
+  const GALLERY_BATCH_SIZE = 20;
+  let currentFilteredItems = [];
+  let renderedCount = 0;
+
+  function cardHtml(img, idx) {
+    const [w, h] = img.size.split('×').map(Number);
+    const ratio = (w && h) ? `${w}/${h}` : '1/1';
+    // 6 kartu pertama (kira-kira yang tampak tanpa scroll) dimuat lebih prioritas
+    const eager = idx < 6;
+    return `
+      <div class="gallery-card" role="button" tabindex="0" onclick="openModal(${img.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id});}">
+        <img
+          src="${gridThumb(img.url)}"
+          alt="Gambar status: ${img.title}"
+          style="aspect-ratio:${ratio}"
+          loading="${eager ? 'eager' : 'lazy'}"
+          fetchpriority="${eager ? 'high' : 'low'}"
+          decoding="async"
+          data-loaded="0"
+          onload="this.dataset.loaded='1'; this.closest('.gallery-card').classList.remove('img-error')"
+          onerror="handleGridImgError(this, ${img.id})">
+        <button class="card-fav-btn ${favorites.has(img.id) ? 'active' : ''}" aria-label="${favorites.has(img.id) ? 'Hapus dari favorit' : 'Tambah ke favorit'}" onclick="event.stopPropagation(); toggleFavorite(${img.id})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="${favorites.has(img.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <div class="card-overlay">
+          <div class="card-title">${img.title}</div>
+          <button class="card-download-btn" aria-label="Download ${img.title}" onclick="event.stopPropagation(); downloadImage(${img.id})">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function appendNextBatch() {
+    const gallery = document.getElementById('gallery');
+    const nextItems = currentFilteredItems.slice(renderedCount, renderedCount + GALLERY_BATCH_SIZE);
+    if (nextItems.length === 0) return;
+    const html = nextItems.map((img, i) => cardHtml(img, renderedCount + i)).join('');
+    gallery.insertAdjacentHTML('beforeend', html);
+    renderedCount += nextItems.length;
+  }
+
+  // Cek jarak ke bawah halaman; kalau sudah dekat & masih ada sisa item,
+  // render batch berikutnya. Dipanggil saat scroll (throttled lewat rAF).
+  let scrollTicking = false;
+  function maybeLoadMoreGallery() {
+    if (renderedCount >= currentFilteredItems.length) return;
+    const distanceToBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+    if (distanceToBottom < 900) {
+      appendNextBatch();
+    }
+  }
+  window.addEventListener('scroll', () => {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(() => {
+      maybeLoadMoreGallery();
+      scrollTicking = false;
+    });
+  }, { passive: true });
+
   function renderGallery(items) {
     const loading = document.getElementById('loadingState');
     const empty = document.getElementById('emptyState');
@@ -1457,36 +2695,15 @@ viewBox="0 0 0.16593 0.10268"
     empty.classList.add('hidden');
     gallery.classList.remove('hidden');
 
-    gallery.innerHTML = items.map((img, idx) => {
-      const [w, h] = img.size.split('×').map(Number);
-      const ratio = (w && h) ? `${w}/${h}` : '1/1';
-      // 6 kartu pertama (kira-kira yang tampak tanpa scroll) dimuat lebih prioritas
-      const eager = idx < 6;
-      return `
-      <div class="gallery-card" role="button" tabindex="0" onclick="openModal(${img.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id});}">
-        <img
-          src="${gridThumb(img.url)}"
-          alt="Gambar status: ${img.title}"
-          style="aspect-ratio:${ratio}"
-          loading="${eager ? 'eager' : 'lazy'}"
-          fetchpriority="${eager ? 'high' : 'low'}"
-          decoding="async"
-          data-loaded="0"
-          onload="this.dataset.loaded='1'; this.closest('.gallery-card').classList.remove('img-error')"
-          onerror="handleGridImgError(this, ${img.id})">
-        <button class="card-fav-btn ${favorites.has(img.id) ? 'active' : ''}" aria-label="${favorites.has(img.id) ? 'Hapus dari favorit' : 'Tambah ke favorit'}" onclick="event.stopPropagation(); toggleFavorite(${img.id})">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="${favorites.has(img.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-        <div class="card-overlay">
-          <div class="card-title">${img.title}</div>
-          <button class="card-download-btn" aria-label="Download ${img.title}" onclick="event.stopPropagation(); downloadImage(${img.id})">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download
-          </button>
-        </div>
-      </div>
-    `;
-    }).join('');
+    // Reset & render batch pertama saja; sisanya nyusul saat discroll
+    currentFilteredItems = items;
+    renderedCount = 0;
+    gallery.innerHTML = '';
+    appendNextBatch();
+
+    // Jaga-jaga kalau layar besar & batch pertama belum memenuhi
+    // viewport (jadi belum ada scroll), langsung cek & tambah lagi.
+    requestAnimationFrame(maybeLoadMoreGallery);
   }
 
   function simulateLoad() {
@@ -1507,7 +2724,7 @@ viewBox="0 0 0.16593 0.10268"
     try {
       const [{ data: catRows, error: catErr }, { data: imgRows, error: imgErr }] = await Promise.all([
         supabaseClient.from('categories').select('id, label').order('sort_order', { ascending: true }),
-        supabaseClient.from('images').select('id, title, category_id, url, width, height, downloads').order('created_at', { ascending: false })
+        supabaseClient.from('images').select('id, title, category_id, url, width, height, downloads, created_at').eq('is_active', true).order('created_at', { ascending: false })
       ]);
 
       if (catErr) throw catErr;
@@ -1525,11 +2742,13 @@ viewBox="0 0 0.16593 0.10268"
         category: r.category_id,
         url: r.url,
         size: (r.width && r.height) ? `${r.width}×${r.height}` : '',
-        downloads: r.downloads
+        downloads: r.downloads,
+        created_at: r.created_at
       }));
 
       renderCategories();
       filterAndRender();
+      checkForNewNotifications();
     } catch (err) {
       console.error(err);
       loading.classList.add('hidden');
@@ -1543,6 +2762,7 @@ viewBox="0 0 0.16593 0.10268"
     searchQuery = '';
     showFavoritesOnly = false;
     document.getElementById('searchInput').value = '';
+    highlightNav('Beranda');
     renderCategories();
     filterAndRender();
   }
@@ -1585,16 +2805,105 @@ viewBox="0 0 0.16593 0.10268"
   });
 
   // ===== DOWNLOAD =====
+  // Batas download gratis untuk guest (belum login). Setelah tercapai,
+  // guest wajib login (Google) supaya bisa lanjut download tanpa batas.
+  const GUEST_DOWNLOAD_LIMIT = 3;
+
+  function getGuestDownloadCount() {
+    const n = parseInt(localStorage.getItem('sg_guest_dl_count') || '0', 10);
+    return Number.isNaN(n) ? 0 : n;
+  }
+
+  function incrementGuestDownloadCount() {
+    const next = getGuestDownloadCount() + 1;
+    try { localStorage.setItem('sg_guest_dl_count', String(next)); } catch (e) {}
+    return next;
+  }
+
+  // Mengembalikan true kalau boleh lanjut download. Kalau guest sudah
+  // mencapai batas, tampilkan toast + buka modal login, lalu return false.
+  function canDownload() {
+    if (currentUser) return true; // sudah login: tanpa batas
+
+    const count = getGuestDownloadCount();
+    if (count >= GUEST_DOWNLOAD_LIMIT) {
+      showToast(`Batas ${GUEST_DOWNLOAD_LIMIT}x download gratis tercapai. Masuk untuk lanjut download.`, 'error');
+      openProfileModal();
+      return false;
+    }
+    return true;
+  }
+
   function downloadImage(imgId) {
     const img = IMAGES.find(i => i.id === imgId);
     if (!img) return;
+    if (!canDownload()) return;
     triggerDownload(img.url, img.title, img.id);
   }
 
   function downloadCurrent() {
     if (currentModalImage) {
+      if (!canDownload()) return;
       triggerDownload(currentModalImage.url, currentModalImage.title, currentModalImage.id);
     }
+  }
+
+  // ===== SHARE =====
+  function shareCurrent() {
+    if (currentModalImage) shareImage(currentModalImage.id);
+  }
+
+  async function shareImage(imgId) {
+    const img = IMAGES.find(i => i.id === imgId);
+    if (!img) return;
+
+    const pageUrl = window.location.origin + window.location.pathname;
+    const shareText = `${img.title} — Status Gallery by EM2STUDIO`;
+
+    // Cara 1 (terbaik, khususnya di HP): ambil gambarnya sebagai file lalu
+    // pakai Web Share API. Kalau device/browser support "share file"
+    // (kebanyakan Android Chrome & iOS Safari terbaru), gambar langsung
+    // bisa dipilih dikirim ke WhatsApp/Instagram Story/dll dari sheet share
+    // bawaan HP, tanpa harus download manual dulu.
+    try {
+      const response = await fetch(img.url);
+      const blob = await response.blob();
+      const file = new File([blob], `status-${img.title.toLowerCase().replace(/\s+/g, '-')}.png`, {
+        type: blob.type || 'image/png'
+      });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: img.title, text: shareText });
+        logShareEvent(imgId, 'native_file');
+        return;
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return; // user batal dari share sheet, jangan lanjut fallback
+      console.error('Share file gagal, coba fallback:', err);
+    }
+
+    // Cara 2: device tidak support share file (mis. desktop), tapi tetap
+    // punya Web Share API standar (share teks/link saja)
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: img.title, text: shareText, url: pageUrl });
+        logShareEvent(imgId, 'native_link');
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    // Cara 3: fallback terakhir untuk browser desktop tanpa Web Share API
+    // sama sekali — buka WhatsApp Web/app dengan teks siap kirim (link saja,
+    // WhatsApp tidak bisa nerima file lewat URL wa.me).
+    const waText = encodeURIComponent(`${shareText}\n${pageUrl}`);
+    window.open(`https://wa.me/?text=${waText}`, '_blank', 'noopener');
+    logShareEvent(imgId, 'wa_link_fallback');
+  }
+
+  function logShareEvent(imgId, method) {
+    if (typeof gtag === 'function') gtag('event', 'share_image', { image_id: imgId, method });
   }
 
   // Catatan: <a download> tidak berfungsi untuk gambar cross-origin di kebanyakan
@@ -1615,7 +2924,24 @@ viewBox="0 0 0.16593 0.10268"
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(objectUrl);
-      showToast('Download berhasil!', 'success');
+
+      // Catat event ke Google Analytics (kalau gtag ada / GA belum diblok adblock)
+      if (typeof gtag === 'function') {
+        gtag('event', 'download_image', { image_id: imgId, image_title: title });
+      }
+
+      // Guest: tambah hitungan lokal & kasih tahu sisa kuota gratisnya
+      if (!currentUser) {
+        const used = incrementGuestDownloadCount();
+        const remaining = Math.max(0, GUEST_DOWNLOAD_LIMIT - used);
+        if (remaining > 0) {
+          showToast(`Download berhasil! Sisa ${remaining}x download gratis.`, 'success');
+        } else {
+          showToast('Download berhasil! Ini download gratis terakhirmu — masuk untuk lanjut.', 'success');
+        }
+      } else {
+        showToast('Download berhasil!', 'success');
+      }
 
       // Catat +1 download ke Supabase (tidak menghalangi UI kalau gagal)
       if (imgId != null) {
@@ -1639,6 +2965,23 @@ viewBox="0 0 0.16593 0.10268"
     });
     el.classList.add('active');
     el.setAttribute('aria-current', 'page');
+  }
+
+  // Sinkronkan indikator aktif di side-nav & bottom-nav sekaligus (dua-duanya
+  // dirender terpisah di DOM), supaya nav "Favorit" tidak nyangkut aktif
+  // begitu user pindah ke filter kategori lain, atau sebaliknya.
+  function highlightNav(key) {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.remove('active');
+      n.removeAttribute('aria-current');
+    });
+    [`nav${key}Side`, `nav${key}Bottom`].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('active');
+        el.setAttribute('aria-current', 'page');
+      }
+    });
   }
 
   // ===== TOAST =====
