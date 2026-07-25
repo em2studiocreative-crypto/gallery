@@ -3,7 +3,7 @@
 // Data gambar & kategori TIDAK di-cache di sini karena selalu diambil live
 // dari Supabase (biar selalu update).
 
-const CACHE_VERSION = 'sg-v1';
+const CACHE_VERSION = 'sg-v2'; // dinaikkan supaya cache lama otomatis dibersihkan
 const APP_SHELL = [
   './',
   './index.html',
@@ -44,6 +44,33 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Halaman HTML (navigasi / index.html): NETWORK-FIRST.
+  // Supaya begitu kamu update index.html di server, pengguna langsung
+  // dapat versi terbaru tanpa perlu reload dua kali. Cache cuma dipakai
+  // sebagai fallback kalau lagi offline.
+  const isHtmlRequest =
+    event.request.mode === 'navigate' ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('/') ||
+    url.pathname.endsWith('/index.html');
+
+  if (isHtmlRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // File statis lain (ikon, manifest, config.js): CACHE-FIRST seperti semula,
+  // tetap update cache di background supaya lain kali tetap fresh.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const networkFetch = fetch(event.request)
@@ -56,8 +83,6 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => cached); // offline: fallback ke cache kalau ada
 
-      // Cache-first untuk app shell: langsung sajikan dari cache kalau ada,
-      // sambil update cache di background.
       return cached || networkFetch;
     })
   );
