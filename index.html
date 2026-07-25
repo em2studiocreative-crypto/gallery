@@ -2745,6 +2745,7 @@ viewBox="0 0 0.16593 0.10268"
     setupSearch();
     initAuth();
     setupRealtimeImages();
+    setupRealtimeCategories();
   });
 
   function renderCategories() {
@@ -3033,6 +3034,63 @@ viewBox="0 0 0.16593 0.10268"
       .subscribe();
   }
 
+  // Mengubah 1 baris tabel `categories` jadi bentuk objek yang dipakai UI.
+  function mapCategoryRow(r) {
+    return { id: r.id, label: r.label, sort_order: r.sort_order };
+  }
+
+  // Urutkan CATEGORIES sesuai sort_order dari database, dengan 'all' selalu
+  // di posisi pertama (sama seperti urutan awal di loadData()).
+  function sortCategories() {
+    const all = CATEGORIES.find(c => c.id === 'all') || { id: 'all', label: 'Semua' };
+    const rest = CATEGORIES
+      .filter(c => c.id !== 'all')
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    CATEGORIES = [all, ...rest];
+  }
+
+  // ===== REALTIME: kategori baru dari Admin langsung tampil tanpa refresh =====
+  // Sama seperti setupRealtimeImages(), tapi utk tabel `categories`. Supaya
+  // event ini terkirim, Realtime juga harus diaktifkan utk tabel `categories`
+  // (sekali saja, di sisi Supabase):
+  //   alter publication supabase_realtime add table categories;
+  function setupRealtimeCategories() {
+    supabaseClient
+      .channel('public:categories')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'categories' }, (payload) => {
+        const row = payload.new;
+        if (row.id === 'all' || CATEGORIES.some(c => c.id === row.id)) return;
+        CATEGORIES.push(mapCategoryRow(row));
+        sortCategories();
+        renderCategories();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'categories' }, (payload) => {
+        const row = payload.new;
+        const idx = CATEGORIES.findIndex(c => c.id === row.id);
+        if (idx === -1) return;
+        CATEGORIES[idx] = mapCategoryRow(row);
+        sortCategories();
+        renderCategories();
+        // Label kategori bisa berubah -> render ulang gallery supaya nama
+        // kategori di kartu/modal ikut ter-update kalau lagi ditampilkan.
+        filterAndRender();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'categories' }, (payload) => {
+        const oldId = payload.old.id;
+        const idx = CATEGORIES.findIndex(c => c.id === oldId);
+        if (idx === -1) return;
+        CATEGORIES.splice(idx, 1);
+        renderCategories();
+        // Kalau kategori yang lagi difilter dihapus, balik ke "Semua" supaya
+        // gallery tidak nyangkut kosong di kategori yang sudah tidak ada.
+        if (activeCategory === oldId) {
+          activeCategory = 'all';
+        }
+        filterAndRender();
+      })
+      .subscribe();
+  }
+
   async function loadData() {
     const loading = document.getElementById('loadingState');
     const empty = document.getElementById('emptyState');
@@ -3046,7 +3104,7 @@ viewBox="0 0 0.16593 0.10268"
 
     try {
       const [{ data: catRows, error: catErr }, { data: imgRows, error: imgErr }] = await Promise.all([
-        supabaseClient.from('categories').select('id, label').order('sort_order', { ascending: true }),
+        supabaseClient.from('categories').select('id, label, sort_order').order('sort_order', { ascending: true }),
         supabaseClient.from('images').select('id, title, category_id, url, width, height, downloads, created_at').eq('is_active', true).order('created_at', { ascending: false })
       ]);
 
@@ -3056,7 +3114,7 @@ viewBox="0 0 0.16593 0.10268"
       // 'all' selalu jadi opsi pertama, sisanya dari database (skip id 'all' kalau kebawa)
       CATEGORIES = [
         { id: 'all', label: 'Semua' },
-        ...catRows.filter(c => c.id !== 'all').map(c => ({ id: c.id, label: c.label }))
+        ...catRows.filter(c => c.id !== 'all').map(c => ({ id: c.id, label: c.label, sort_order: c.sort_order }))
       ];
 
       IMAGES = imgRows.map(r => ({
