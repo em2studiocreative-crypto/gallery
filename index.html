@@ -956,6 +956,12 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .modal-image-wrap img.loaded {
+    opacity: 1;
   }
 
   .modal-info {
@@ -2803,6 +2809,37 @@ viewBox="0 0 0.16593 0.10268"
     imgEl.src = img.url;
   }
 
+  // ===== ANTI-MACET: watchdog buat thumbnail yang nyangkut loading =====
+  // <img> tidak punya timeout bawaan di browser. Kalau request ke wsrv.nl
+  // nyangkut (mis. cache proxy masih dingin & source-nya lambat diambil),
+  // gambar bisa diam selamanya tanpa pernah trigger onload/onerror -> kartu
+  // keliatan kosong/abu-abu terus. Watchdog ini kasih batas waktu: kalau
+  // belum kelar, coba ulang sekali (request baru), lalu fallback ke URL asli.
+  const IMG_LOAD_TIMEOUT_MS = 6000;
+
+  function watchImageLoad(imgEl, imgId) {
+    const timeoutId = setTimeout(() => {
+      if (imgEl.dataset.loaded === '1') return; // sudah kelar duluan, aman
+      const attempt = parseInt(imgEl.dataset.attempt || '0', 10);
+      if (attempt < 1) {
+        // Percobaan ulang pertama: paksa request baru (cache-buster) siapa
+        // tahu koneksi sebelumnya cuma nyangkut, bukan beneran gagal.
+        imgEl.dataset.attempt = '1';
+        const sep = imgEl.src.includes('?') ? '&' : '?';
+        imgEl.src = imgEl.src + sep + '_retry=' + Date.now();
+        watchImageLoad(imgEl, imgId);
+      } else {
+        // Masih macet juga -> langsung fallback ke gambar asli (alur yang
+        // sama seperti kalau wsrv.nl bener-bener error).
+        handleGridImgError(imgEl, imgId);
+      }
+    }, IMG_LOAD_TIMEOUT_MS);
+
+    const clear = () => clearTimeout(timeoutId);
+    imgEl.addEventListener('load', clear, { once: true });
+    imgEl.addEventListener('error', clear, { once: true });
+  }
+
   function filterAndRender() {
     let filtered = IMAGES;
     if (showFavoritesOnly) {
@@ -2865,6 +2902,14 @@ viewBox="0 0 0.16593 0.10268"
     if (nextItems.length === 0) return;
     const html = nextItems.map((img, i) => cardHtml(img, renderedCount + i)).join('');
     gallery.insertAdjacentHTML('beforeend', html);
+
+    // Pasang watchdog anti-macet ke tiap gambar yang baru saja ditambahkan
+    const newCards = Array.from(gallery.children).slice(-nextItems.length);
+    newCards.forEach((card, i) => {
+      const imgEl = card.querySelector('img');
+      if (imgEl) watchImageLoad(imgEl, nextItems[i].id);
+    });
+
     renderedCount += nextItems.length;
   }
 
@@ -2995,8 +3040,33 @@ viewBox="0 0 0.16593 0.10268"
     if (!img) return;
     currentModalImage = img;
 
-    document.getElementById('modalImg').src = previewThumb(img.url);
-    document.getElementById('modalImg').alt = img.title;
+    const modalImg = document.getElementById('modalImg');
+    modalImg.alt = img.title;
+
+    // Step 1: tampilkan langsung thumbnail grid (480px) yang kemungkinan
+    // besar sudah ter-cache browser (sama persis dengan gambar di kartu
+    // yang baru diklik) -> muncul instan, tidak ada jeda kosong/patah.
+    modalImg.classList.remove('loaded');
+    modalImg.src = gridThumb(img.url);
+    modalImg.classList.add('loaded');
+
+    // Step 2: preload versi resolusi lebih tinggi (1080px) di background.
+    // Baru setelah BENAR-BENAR selesai dimuat, ganti src-nya -> transisi
+    // opacity membuat pergantian ke kualitas HD terasa mulus, bukan patah.
+    const hiRes = new Image();
+    hiRes.onload = () => {
+      // Pastikan modal masih menampilkan gambar yang sama (user belum
+      // klik gambar lain / sudah tutup modal) sebelum menimpa src-nya.
+      if (currentModalImage && currentModalImage.id === img.id) {
+        modalImg.classList.remove('loaded');
+        modalImg.src = hiRes.src;
+        // Force reflow supaya transisi opacity ke-trigger ulang
+        void modalImg.offsetWidth;
+        modalImg.classList.add('loaded');
+      }
+    };
+    hiRes.src = previewThumb(img.url);
+
     document.getElementById('modalTitle').textContent = img.title;
     document.getElementById('modalCategory').textContent = CATEGORIES.find(c => c.id === img.category)?.label || img.category;
     document.getElementById('modalSize').textContent = img.size;
