@@ -2394,6 +2394,11 @@ viewBox="0 0 0.16593 0.10268"
   function closeProfileModal(e) {
     if (e && e.target !== e.currentTarget) return;
     document.getElementById('profileModal').classList.remove('open');
+    // Bug fix: tombol nav "Profil" dulu pakai setNav() yang cuma nyalain
+    // dirinya sendiri tanpa pernah "kembali" ke Beranda/Favorit begitu
+    // modal ditutup — jadi nav kelihatan nyangkut aktif di Profil terus,
+    // padahal user sudah balik lihat galeri. Sinkronkan ulang di sini.
+    highlightNav(showFavoritesOnly ? 'Favorit' : 'Beranda');
   }
 
   async function loginWithProvider(provider) {
