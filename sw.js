@@ -9,7 +9,7 @@
 // yang sudah jalan gak kebentur / harus pilih salah satu.
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE_VERSION = 'sg-v4'; // naikkan angka ini SETIAP kali deploy versi baru,
+const CACHE_VERSION = 'sg-v5'; // naikkan angka ini SETIAP kali deploy versi baru,
 // supaya browser tahu ada update & banner "Perbarui" muncul ke user
 const THUMB_CACHE = 'sg-thumbs-v1'; // cache terpisah khusus thumbnail wsrv.nl,
 // TIDAK ikut terhapus tiap update versi app (lihat activate handler)
@@ -71,15 +71,30 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.open(THUMB_CACHE).then(async (cache) => {
         const cached = await cache.match(event.request);
-        const networkFetch = fetch(event.request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              cache.put(event.request, response.clone());
-            }
-            return response;
-          })
-          .catch(() => cached);
-        return cached || networkFetch;
+        if (cached) {
+          // Ada di cache: langsung balikin, sambil refresh diam-diam di
+          // background (gagal/sukses gak ngaruh ke response yang sudah dikirim).
+          fetch(event.request)
+            .then((response) => {
+              if (response && response.status === 200) {
+                cache.put(event.request, response.clone());
+              }
+            })
+            .catch(() => {}); // diam-diam aja, cached sudah terlanjur dipakai
+          return cached;
+        }
+        // Gak ada di cache: coba network. Kalau ini juga gagal (offline/net error),
+        // WAJIB balikin sebuah Response valid (bukan undefined), atau browser
+        // akan lempar "Failed to convert value to 'Response'".
+        try {
+          const response = await fetch(event.request);
+          if (response && response.status === 200) {
+            cache.put(event.request, response.clone());
+          }
+          return response;
+        } catch (err) {
+          return new Response('', { status: 503, statusText: 'Thumbnail unavailable (offline)' });
+        }
       })
     );
     return;
@@ -119,18 +134,32 @@ self.addEventListener('fetch', (event) => {
   // File statis lain (ikon, manifest, config.js): CACHE-FIRST seperti semula,
   // tetap update cache di background supaya lain kali tetap fresh.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => cached); // offline: fallback ke cache kalau ada
-
-      return cached || networkFetch;
+    caches.match(event.request).then(async (cached) => {
+      if (cached) {
+        // Ada di cache: balikin langsung, refresh diam-diam di background.
+        fetch(event.request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const clone = response.clone();
+              caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, clone));
+            }
+          })
+          .catch(() => {});
+        return cached;
+      }
+      // Gak ada di cache: coba network. Kalau gagal, WAJIB balikin Response
+      // valid (bukan undefined), atau browser lempar "Failed to convert
+      // value to 'Response'".
+      try {
+        const response = await fetch(event.request);
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      } catch (err) {
+        return new Response('', { status: 503, statusText: 'Offline and not cached' });
+      }
     })
   );
 });
