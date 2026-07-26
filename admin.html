@@ -143,6 +143,11 @@
     border-bottom: 2px solid transparent; margin-right: var(--gap-3);
   }
   .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-badge {
+    display: inline-block; min-width: 18px; padding: 1px 6px; margin-left: 4px;
+    background: var(--danger); color: #fff; border-radius: var(--radius-pill);
+    font-size: 11px; font-weight: 700; text-align: center; vertical-align: middle;
+  }
 
   .panel { display: none; }
   .panel.active { display: block; }
@@ -298,6 +303,7 @@
       <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
       <button class="tab-btn" data-tab="images" onclick="switchTab('images')">Gambar</button>
       <button class="tab-btn" data-tab="categories" onclick="switchTab('categories')">Kategori</button>
+      <button class="tab-btn" data-tab="reports" onclick="switchTab('reports')">Laporan <span class="tab-badge hidden" id="reportsBadge">0</span></button>
     </div>
 
     <!-- PANEL: DASHBOARD -->
@@ -365,6 +371,35 @@
           </thead>
           <tbody id="categoriesTbody">
             <tr class="empty-row"><td colspan="4">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL: REPORTS -->
+    <div class="panel" id="panel-reports">
+      <div class="panel-head">
+        <h2>Laporan Gambar</h2>
+        <select id="reportsFilter" onchange="loadReports()" style="background:var(--bg-elevated); border:1px solid var(--border); color:var(--text); border-radius:var(--radius-sm); padding:8px 10px; font-size:13px;">
+          <option value="open">Belum ditangani</option>
+          <option value="resolved">Selesai</option>
+          <option value="dismissed">Diabaikan</option>
+          <option value="all">Semua</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Judul</th>
+              <th>Dilaporkan</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="reportsTbody">
+            <tr class="empty-row"><td colspan="5">Memuat...</td></tr>
           </tbody>
         </table>
       </div>
@@ -530,6 +565,8 @@
     document.getElementById('panel-dashboard').classList.toggle('active', tab === 'dashboard');
     document.getElementById('panel-images').classList.toggle('active', tab === 'images');
     document.getElementById('panel-categories').classList.toggle('active', tab === 'categories');
+    document.getElementById('panel-reports').classList.toggle('active', tab === 'reports');
+    if (tab === 'reports') loadReports();
   }
 
   // ===== LOAD DATA =====
@@ -537,6 +574,7 @@
     await Promise.all([loadCategories(), loadImages()]);
     renderDashboard();
     loadUserCount();
+    refreshReportsBadge();
   }
 
   // ===== DASHBOARD =====
@@ -668,6 +706,107 @@
     IMAGES = IMAGES.filter(i => i.id !== id);
     renderImagesTable();
     showToast('Gambar dihapus', 'success');
+  }
+
+  // ===== REPORTS (LAPORAN) =====
+  // Badge di tab menghitung laporan yang masih 'open' (belum ditangani),
+  // supaya kelihatan tanpa harus buka tabnya dulu.
+  async function refreshReportsBadge() {
+    const { count, error } = await supabaseClient
+      .from('reports')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'open');
+    const badge = document.getElementById('reportsBadge');
+    if (error || !count) {
+      badge.classList.add('hidden');
+      return;
+    }
+    badge.textContent = count;
+    badge.classList.remove('hidden');
+  }
+
+  async function loadReports() {
+    const tbody = document.getElementById('reportsTbody');
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Memuat...</td></tr>';
+
+    const filter = document.getElementById('reportsFilter').value;
+    let query = supabaseClient
+      .from('reports')
+      .select('id, image_id, status, created_at, images(title, url)')
+      .order('created_at', { ascending: false });
+    if (filter !== 'all') query = query.eq('status', filter);
+
+    const { data, error } = await query;
+    if (error) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Gagal memuat laporan.</td></tr>';
+      return;
+    }
+    renderReportsTable(data);
+  }
+
+  function reportStatusLabel(status) {
+    if (status === 'resolved') return 'Selesai';
+    if (status === 'dismissed') return 'Diabaikan';
+    return 'Belum ditangani';
+  }
+
+  function renderReportsTable(reports) {
+    const tbody = document.getElementById('reportsTbody');
+    if (reports.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Tidak ada laporan di kategori ini.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = reports.map(r => {
+      // Gambar bisa saja sudah dihapus duluan (images null) — tetap
+      // tampilkan barisnya supaya histori laporan tidak hilang begitu saja.
+      const img = r.images;
+      const title = img ? escapeHtml(img.title) : '<em>(gambar sudah dihapus)</em>';
+      const thumb = img ? `<img src="${escapeAttr(img.url)}" alt="" loading="lazy" onerror="this.style.opacity=0.2">` : '';
+      const tanggal = new Date(r.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+      const isOpen = r.status === 'open';
+      return `
+      <tr>
+        <td class="thumb-cell">${thumb}</td>
+        <td>${title}</td>
+        <td>${tanggal}</td>
+        <td>${reportStatusLabel(r.status)}</td>
+        <td class="actions">
+          ${isOpen ? `<button class="btn btn-ghost btn-sm" onclick="setReportStatus(${r.id}, 'resolved')">Selesai</button>` : ''}
+          ${isOpen ? `<button class="btn btn-ghost btn-sm" onclick="setReportStatus(${r.id}, 'dismissed')">Abaikan</button>` : ''}
+          ${img ? `<button class="btn btn-danger btn-sm" onclick="deleteImageFromReport(${r.image_id})">Hapus Gambar</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function setReportStatus(reportId, status) {
+    const { error } = await supabaseClient.from('reports').update({ status }).eq('id', reportId);
+    if (error) { showToast('Gagal memperbarui laporan', 'error'); return; }
+    showToast(status === 'resolved' ? 'Laporan ditandai selesai' : 'Laporan diabaikan', 'success');
+    loadReports();
+    refreshReportsBadge();
+  }
+
+  // Hapus gambar langsung dari panel Laporan — pakai fungsi deleteImage yang
+  // sama dengan tab Gambar (termasuk hapus file di Storage kalau ada).
+  // Baris laporan lain untuk gambar ini otomatis ikut terhapus (FK cascade).
+  async function deleteImageFromReport(imageId) {
+    if (!confirm('Hapus gambar ini? Tindakan tidak bisa dibatalkan.')) return;
+    const { data: img } = await supabaseClient.from('images').select('url').eq('id', imageId).single();
+
+    const { error } = await supabaseClient.from('images').delete().eq('id', imageId);
+    if (error) { showToast('Gagal menghapus gambar', 'error'); return; }
+
+    if (img && isStorageUrl(img.url)) {
+      const path = img.url.slice(storagePublicPrefix().length);
+      supabaseClient.storage.from('images').remove([path])
+        .then(({ error: rmErr }) => { if (rmErr) console.error('Gagal menghapus file storage:', rmErr); });
+    }
+
+    IMAGES = IMAGES.filter(i => i.id !== imageId);
+    showToast('Gambar dihapus', 'success');
+    loadReports();
+    refreshReportsBadge();
   }
 
   // ===== MIGRASI KE STORAGE =====
