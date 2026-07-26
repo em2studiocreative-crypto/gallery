@@ -9,7 +9,7 @@
 // yang sudah jalan gak kebentur / harus pilih salah satu.
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE_VERSION = 'sg-v5'; // naikkan angka ini SETIAP kali deploy versi baru,
+const CACHE_VERSION = 'sg-v6'; // naikkan angka ini SETIAP kali deploy versi baru,
 // supaya browser tahu ada update & banner "Perbarui" muncul ke user
 const THUMB_CACHE = 'sg-thumbs-v1'; // cache terpisah khusus thumbnail wsrv.nl,
 // TIDAK ikut terhapus tiap update versi app (lihat activate handler)
@@ -38,6 +38,11 @@ self.addEventListener('install', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  // Dipakai halaman untuk cek "ini beneran versi baru, atau cuma phantom
+  // update-check yang dipicu ulang (misal oleh OneSignal saat subscribe)?"
+  if (event.data && event.data.type === 'GET_VERSION' && event.source) {
+    event.source.postMessage({ type: 'SW_VERSION', version: CACHE_VERSION });
   }
 });
 
