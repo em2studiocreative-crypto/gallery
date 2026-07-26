@@ -362,7 +362,22 @@
        scroll jadi jauh lebih ringan di galeri yang panjang. */
     content-visibility: auto;
     contain-intrinsic-size: 0 260px;
+    /* Kartu ini role="button"/tabindex, jadi browser (terutama di Android)
+       anggap dia elemen yang bisa "ditekan" -> muncul highlight biru
+       transparan bawaan browser setiap kali disentuh, termasuk cuma lewat
+       buat scroll (bukan benar-benar diklik). Matikan di sini. */
+    -webkit-tap-highlight-color: transparent;
   }
+
+  /* Fallback untuk browser/WebView yang gak dukung :focus-visible dengan
+     baik: kalau begitu, seluruh rule ".gallery-card:focus-visible" di bawah
+     akan diabaikan browser itu, lalu dia jatuh balik ke outline default
+     bawaan (biru) tiap kartu ke-fokus (termasuk gara-gara sentuhan pas
+     scroll). Rule terpisah ini mastiin outline biru itu tetap kematiin,
+     style custom oranye tetap jalan lewat :focus-visible di bawah untuk
+     browser yang dukung.
+     Catatan: taruh SEBELUM rule :focus-visible supaya gak menang urutan. */
+  .gallery-card:focus { outline: none; }
 
   .gallery-card:hover {
     transform: translateY(-2px);
