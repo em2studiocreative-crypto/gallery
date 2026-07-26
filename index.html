@@ -3011,13 +3011,68 @@ viewBox="0 0 0.16593 0.10268"
     waitingServiceWorker.postMessage({ type: 'SKIP_WAITING' });
   }
 
+  // Tanya versi ke sebuah worker (installing/waiting), buat mastiin ini
+  // beneran versi baru sebelum ganggu user dengan banner. Perlu ini karena
+  // OneSignal SDK bisa diam-diam register() ulang sw.js pas proses subscribe,
+  // dan itu bikin browser re-check byte sw.js -> kadang "keliru" mikir ada
+  // versi baru padahal isinya sama (cuma beda encoding/whitespace dari CDN).
+  function getWorkerVersion(worker) {
+    return new Promise((resolve) => {
+      let done = false;
+      function onMsg(e) {
+        if (e.data && e.data.type === 'SW_VERSION') {
+          done = true;
+          navigator.serviceWorker.removeEventListener('message', onMsg);
+          resolve(e.data.version);
+        }
+      }
+      navigator.serviceWorker.addEventListener('message', onMsg);
+      try { worker.postMessage({ type: 'GET_VERSION' }); } catch (e) {}
+      // Fallback: kalau gak dibalas dalam 1.5 detik (misal SW versi sangat
+      // lama yang belum punya handler GET_VERSION), anggap aja beneran baru.
+      setTimeout(() => {
+        if (!done) {
+          navigator.serviceWorker.removeEventListener('message', onMsg);
+          resolve(null);
+        }
+      }, 1500);
+    });
+  }
+
+  // Diproses tiap ada calon worker baru (state 'installed'): cek dulu
+  // versinya beneran beda dari yang terakhir kali ditawarin ke user atau
+  // enggak, baru putuskan nampilin banner atau diam-diam skip.
+  function handleCandidateWorker(worker) {
+    getWorkerVersion(worker).then((version) => {
+      const lastNotified = (() => {
+        try { return localStorage.getItem('sg_last_notified_sw_version'); } catch (e) { return null; }
+      })();
+
+      if (version && version === lastNotified) {
+        // Sama persis versi yang sudah pernah kamu terima/setujui sebelumnya.
+        // Ini phantom re-check (misal dipicu OneSignal subscribe), bukan
+        // update beneran -> aktifkan langsung diam-diam, TANPA banner/reload.
+        try { worker.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+        return;
+      }
+
+      // Beneran versi baru (atau gak bisa dipastikan) -> tampilkan banner
+      // seperti biasa, dan catat versinya biar gak nge-prompt ulang untuk
+      // versi yang sama di kemudian hari.
+      if (version) {
+        try { localStorage.setItem('sg_last_notified_sw_version', version); } catch (e) {}
+      }
+      waitingServiceWorker = worker;
+      showUpdateBanner();
+    });
+  }
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').then((reg) => {
         // Kasus 1: sudah ada SW versi baru yang menunggu saat halaman dibuka.
         if (reg.waiting) {
-          waitingServiceWorker = reg.waiting;
-          showUpdateBanner();
+          handleCandidateWorker(reg.waiting);
         }
 
         // Kasus 2: SW baru terdeteksi & mulai diinstall saat user sedang di halaman.
@@ -3027,8 +3082,7 @@ viewBox="0 0 0.16593 0.10268"
           newWorker.addEventListener('statechange', () => {
             // "installed" + sudah ada controller aktif = ini update (bukan install pertama kali)
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              waitingServiceWorker = newWorker;
-              showUpdateBanner();
+              handleCandidateWorker(newWorker);
             }
           });
         });
