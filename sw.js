@@ -3,8 +3,10 @@
 // Data gambar & kategori TIDAK di-cache di sini karena selalu diambil live
 // dari Supabase (biar selalu update).
 
-const CACHE_VERSION = 'sg-v3'; // naikkan angka ini SETIAP kali deploy versi baru,
+const CACHE_VERSION = 'sg-v4'; // naikkan angka ini SETIAP kali deploy versi baru,
 // supaya browser tahu ada update & banner "Perbarui" muncul ke user
+const THUMB_CACHE = 'sg-thumbs-v1'; // cache terpisah khusus thumbnail wsrv.nl,
+// TIDAK ikut terhapus tiap update versi app (lihat activate handler)
 const APP_SHELL = [
   './',
   './index.html',
@@ -38,7 +40,9 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((key) => key !== CACHE_VERSION).map((key) => caches.delete(key))
+        keys
+          .filter((key) => key !== CACHE_VERSION && key !== THUMB_CACHE)
+          .map((key) => caches.delete(key))
       )
     )
   );
@@ -49,10 +53,35 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Hanya tangani request GET dari origin sendiri (app shell).
-  // Request ke Supabase / domain lain (data gambar, auth, dll) dibiarkan
-  // lewat langsung ke jaringan, tidak di-cache, supaya selalu fresh.
-  if (event.request.method !== 'GET' || url.origin !== self.location.origin) {
+  if (event.request.method !== 'GET') return;
+
+  // Thumbnail terkompresi dari wsrv.nl (proxy resize/kompres gambar untuk
+  // grid & preview): CACHE-FIRST, dengan refresh diam-diam di background.
+  // Karena sama-sama thumbnail ringan, aman disimpan lama — bikin galeri
+  // kerasa instan pas dibuka lagi, tanpa download ulang tiap kali.
+  // Gambar ASLI (yang dipakai saat download HD) TIDAK lewat sini karena
+  // itu langsung ke Supabase Storage, bukan ke wsrv.nl.
+  if (url.hostname === 'wsrv.nl') {
+    event.respondWith(
+      caches.open(THUMB_CACHE).then(async (cache) => {
+        const cached = await cache.match(event.request);
+        const networkFetch = fetch(event.request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              cache.put(event.request, response.clone());
+            }
+            return response;
+          })
+          .catch(() => cached);
+        return cached || networkFetch;
+      })
+    );
+    return;
+  }
+
+  // Request ke domain lain (Supabase data/auth, dll) dibiarkan lewat
+  // langsung ke jaringan, tidak di-cache, supaya selalu fresh.
+  if (url.origin !== self.location.origin) {
     return;
   }
 
