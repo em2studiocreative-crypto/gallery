@@ -1170,6 +1170,19 @@
     margin-top: auto;
   }
 
+  .modal-actions-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .modal-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
   .modal-download-btn {
     padding: 14px 24px;
     background: var(--accent);
@@ -1841,19 +1854,28 @@
 
   /* Modal mobile: full screen */
   @media (max-width: 767px) {
-    /* Bottom-sheet: nempel ke bawah layar (bukan di tengah), dan sengaja
-       TIDAK dibuat full height, supaya ada celah gelap di atas yang
-       kelihatan galeri di baliknya masih ada — dan bisa di-tap untuk nutup. */
+    /* Bottom-sheet ala Pinterest: preview gambar jadi kartu kecil yang
+       "mengambang" di atas sheet (bukan gambar besar penuh lebar), sheet-nya
+       sendiri dibikin ramping (cuma daftar aksi), dan backdrop sengaja
+       dibikin gak terlalu gelap supaya galeri di belakang masih kelihatan
+       jelas -> jauh dari kesan "menutupi layar penuh".
+    */
     .modal-backdrop {
       align-items: flex-end;
       padding: 0;
+      background: rgba(0,0,0,0.72);
     }
     .modal-content {
       flex-direction: column;
       width: 100%;
       max-width: 100%;
-      max-height: 82vh;
-      border-radius: 20px 20px 0 0;
+      max-height: 78vh;
+      background: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      overflow: visible; /* biar kartu gambar & tombol X boleh "keluar" dari kotak sheet */
+      padding-top: 60px; /* ruang buat tombol X + separuh atas kartu gambar */
+      position: relative;
       /* Ganti animasi dari "zoom in" (scale) jadi "slide up dari bawah" */
       transform: translateY(100%);
       transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
@@ -1861,30 +1883,93 @@
     .modal-backdrop.open .modal-content {
       transform: translateY(0);
     }
-    /* Gagang kecil di atas sheet, penanda umum "bisa di-swipe/tap" ala
-       bottom sheet — murni visual, tidak mengubah cara menutup modal
-       (masih lewat tombol X / tap area gelap / tombol Tutup seperti biasa). */
-    .modal-content::before {
-      content: '';
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 36px;
-      height: 4px;
-      border-radius: var(--radius-pill);
-      background: rgba(255,255,255,0.55);
-      z-index: 5;
+
+    /* Tombol X: dipindah ke kiri-atas, berdiri sendiri di area gelap
+       (bukan nempel di atas gambar), sama seperti referensi. */
+    .modal-close {
+      top: 6px;
+      left: 12px;
+      right: auto;
     }
+
+    /* Kartu gambar kecil, persegi, melayang & separuh menumpuk ke sheet
+       di bawahnya (margin-bottom negatif) -> efek "floating thumbnail". */
     .modal-image-wrap {
       flex: none;
-      max-height: 50vh;
+      width: 46vw;
+      max-width: 190px;
+      aspect-ratio: 1 / 1;
+      max-height: none;
+      margin: 0 auto -85px auto;
+      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+      position: relative;
+      z-index: 2;
     }
+    .modal-image-wrap img {
+      object-fit: cover; /* dipotong persegi ala thumbnail pin, bukan contain */
+    }
+
+    /* Sheet asli (kartu putih/gelap-nya) sekarang ada di .modal-info,
+       dikasih padding-top ekstra biar teksnya mulai di bawah separuh
+       kartu gambar yang menumpuk ke sini. */
     .modal-info {
       flex: 1;
-      padding: var(--gap-2);
+      min-height: 0;
+      overflow-y: auto;
+      background: var(--bg-elevated);
+      border-radius: 20px 20px 0 0;
+      padding: 105px var(--gap-2) var(--gap-2);
+      position: relative;
+      z-index: 1;
+      text-align: center;
     }
-    .modal-title { font-size: 18px; }
+    .modal-info-top-row {
+      justify-content: center;
+    }
+    .modal-report-icon-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .modal-title { font-size: 17px; text-align: center; }
+    .modal-meta { justify-content: center; }
+
+    /* Daftar aksi dibikin polos ala list (icon + label), bukan tombol pill
+       besar seperti di desktop -> lebih ringkas & mirip referensi. */
+    .modal-actions {
+      margin-top: 12px;
+      text-align: left;
+    }
+    .modal-actions-row {
+      flex-direction: column;
+      gap: 0;
+    }
+    .modal-action-btn,
+    .modal-download-btn {
+      width: 100%;
+      flex: none;
+      justify-content: flex-start;
+      background: transparent;
+      color: var(--text);
+      border: none;
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+      box-shadow: none;
+      padding: 14px 4px;
+      font-size: 15px;
+    }
+    .modal-action-btn:hover,
+    .modal-download-btn:hover {
+      background: var(--card-hover);
+    }
+    /* Tombol "Tutup" jadi berlebihan karena sudah ada X di pojok kiri-atas
+       -> disembunyikan di mobile supaya daftar aksi tetap ringkas. */
+    .modal-close-btn {
+      display: none;
+    }
+
+    .modal-similar { text-align: left; }
   }
 
   /* Focus visibility (keyboard navigation) */
@@ -2138,12 +2223,12 @@ viewBox="0 0 1.49117 0.57976"
         <span id="modalDownloads"></span>
       </div>
       <div class="modal-actions">
-        <div style="display:flex; gap:10px;">
-          <button class="state-btn secondary" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <div class="modal-actions-row">
+          <button class="state-btn secondary modal-action-btn" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)">
             <svg id="modalFavIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             <span id="modalFavLabel">Tambah ke Favorit</span>
           </button>
-          <button class="state-btn secondary" id="modalShareBtn" onclick="shareCurrent()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <button class="state-btn secondary modal-action-btn" id="modalShareBtn" onclick="shareCurrent()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             Bagikan
           </button>
