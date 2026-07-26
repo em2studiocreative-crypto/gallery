@@ -7,7 +7,7 @@
 // Menumpangkan handler push notification OneSignal ke service worker yang
 // sudah ada ini (bukan file worker terpisah), supaya PWA install/update flow
 // yang sudah jalan gak kebentur / harus pilih salah satu.
-importScripts('https://cdn.onesignal.com/sdks/OneSignalSDKWorker.js');
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
 const CACHE_VERSION = 'sg-v4'; // naikkan angka ini SETIAP kali deploy versi baru,
 // supaya browser tahu ada update & banner "Perbarui" muncul ke user
