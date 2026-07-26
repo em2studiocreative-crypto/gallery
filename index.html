@@ -3011,39 +3011,31 @@ viewBox="0 0 0.16593 0.10268"
     waitingServiceWorker.postMessage({ type: 'SKIP_WAITING' });
   }
 
-  // Tanya versi ke sebuah worker (installing/waiting), buat mastiin ini
-  // beneran versi baru sebelum ganggu user dengan banner. Perlu ini karena
-  // OneSignal SDK bisa diam-diam register() ulang sw.js pas proses subscribe,
-  // dan itu bikin browser re-check byte sw.js -> kadang "keliru" mikir ada
-  // versi baru padahal isinya sama (cuma beda encoding/whitespace dari CDN).
-  function getWorkerVersion(worker) {
-    return new Promise((resolve) => {
-      let done = false;
-      function onMsg(e) {
-        if (e.data && e.data.type === 'SW_VERSION') {
-          done = true;
-          navigator.serviceWorker.removeEventListener('message', onMsg);
-          resolve(e.data.version);
-        }
-      }
-      navigator.serviceWorker.addEventListener('message', onMsg);
-      try { worker.postMessage({ type: 'GET_VERSION' }); } catch (e) {}
-      // Fallback: kalau gak dibalas dalam 1.5 detik (misal SW versi sangat
-      // lama yang belum punya handler GET_VERSION), anggap aja beneran baru.
-      setTimeout(() => {
-        if (!done) {
-          navigator.serviceWorker.removeEventListener('message', onMsg);
-          resolve(null);
-        }
-      }, 1500);
-    });
+  // Ambil versi SW langsung dari teks sw.js di server (BUKAN lewat
+  // postMessage ke worker). Pendekatan lama (tanya-jawab postMessage) rentan
+  // soal timing: kalau HP lagi sibuk (misal abis proses subscribe OneSignal
+  // yang berat), balasannya bisa telat lewat dari batas waktu yang dikasih,
+  // jadi dianggap "gak jelas versinya" dan tetap nampilin banner padahal
+  // cuma phantom re-check. Fetch teks sw.js gak nunggu balasan worker sama
+  // sekali, jadi gak ada elemen timing/race yang bisa gagal.
+  function getLiveSwVersion() {
+    // cache: 'no-store' + query cache-buster supaya beneran ambil byte
+    // terbaru dari server, bukan copy lama dari HTTP cache browser.
+    return fetch('sw.js?_=' + Date.now(), { cache: 'no-store' })
+      .then((res) => (res.ok ? res.text() : null))
+      .then((text) => {
+        if (!text) return null;
+        const match = text.match(/CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/);
+        return match ? match[1] : null;
+      })
+      .catch(() => null);
   }
 
   // Diproses tiap ada calon worker baru (state 'installed'): cek dulu
   // versinya beneran beda dari yang terakhir kali ditawarin ke user atau
   // enggak, baru putuskan nampilin banner atau diam-diam skip.
   function handleCandidateWorker(worker) {
-    getWorkerVersion(worker).then((version) => {
+    getLiveSwVersion().then((version) => {
       const lastNotified = (() => {
         try { return localStorage.getItem('sg_last_notified_sw_version'); } catch (e) { return null; }
       })();
