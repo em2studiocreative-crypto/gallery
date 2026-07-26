@@ -3,7 +3,8 @@
 // Data gambar & kategori TIDAK di-cache di sini karena selalu diambil live
 // dari Supabase (biar selalu update).
 
-const CACHE_VERSION = 'sg-v2'; // dinaikkan supaya cache lama otomatis dibersihkan
+const CACHE_VERSION = 'sg-v3'; // naikkan angka ini SETIAP kali deploy versi baru,
+// supaya browser tahu ada update & banner "Perbarui" muncul ke user
 const APP_SHELL = [
   './',
   './index.html',
@@ -14,11 +15,22 @@ const APP_SHELL = [
 ];
 
 // ===== INSTALL: simpan app shell ke cache =====
+// CATATAN: skipWaiting() SENGAJA tidak dipanggil otomatis di sini.
+// Service worker versi baru akan menunggu (state "waiting") sampai
+// user menekan tombol "Perbarui" di banner update (lihat index.html).
+// Ini supaya user nggak tiba-tiba dipindah ke versi baru tanpa sadar.
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then((cache) => cache.addAll(APP_SHELL))
   );
-  self.skipWaiting();
+});
+
+// Terima sinyal dari halaman (tombol "Perbarui") untuk langsung aktifkan
+// service worker versi baru yang sedang menunggu.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // ===== ACTIVATE: bersihkan cache versi lama =====
