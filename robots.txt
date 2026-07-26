@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://em2studiocreative-crypto.github.io/gallery/sitemap.xml
+Sitemap: https://www.em2studio.online/sitemap.xml
