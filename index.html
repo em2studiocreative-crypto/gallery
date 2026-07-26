@@ -1039,6 +1039,61 @@
 
   .modal-download-btn:hover { background: var(--accent-hover); }
 
+  .modal-similar {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .modal-similar-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .modal-similar-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .modal-similar-item {
+    position: relative;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 1/1;
+    background: var(--card);
+    border: none;
+    padding: 0;
+  }
+
+  .modal-similar-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.2s;
+  }
+
+  .modal-similar-item:hover img { transform: scale(1.06); }
+
+  .modal-similar-item .modal-similar-item-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 5px 6px 4px;
+    font-size: 10.5px;
+    line-height: 1.25;
+    color: #fff;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .modal-close {
     position: absolute;
     top: 12px;
@@ -1893,6 +1948,10 @@ viewBox="0 0 1.49117 0.57976"
           Tutup
         </button>
       </div>
+      <div class="modal-similar" id="modalSimilarSection" style="display:none;">
+        <div class="modal-similar-title">Gambar Serupa</div>
+        <div class="modal-similar-grid" id="modalSimilarGrid"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2340,6 +2399,78 @@ viewBox="0 0 0.16593 0.10268"
     }
   }
 
+  // ===== REKOMENDASI: MINAT KATEGORI (category affinity) =====
+  // Skor sederhana per kategori berdasarkan interaksi user: buka detail (+1),
+  // simpan ke favorit (+3), download (+5). Dipakai untuk menyusun ulang urutan
+  // feed "Semua" supaya kategori yang paling disukai user lebih sering muncul,
+  // tanpa menghilangkan variasi kategori lain (lihat weightedInterleave()).
+  const AFFINITY_WEIGHTS = { view: 1, favorite: 3, download: 5 };
+  const AFFINITY_CAP = 200; // batas atas per kategori biar skor tidak meledak seiring waktu
+  let categoryAffinity = {};
+  try {
+    categoryAffinity = JSON.parse(localStorage.getItem('sg_category_affinity') || '{}');
+  } catch (e) {
+    categoryAffinity = {};
+  }
+
+  function trackInteraction(category, type) {
+    if (!category || !AFFINITY_WEIGHTS[type]) return;
+    const current = categoryAffinity[category] || 0;
+    categoryAffinity[category] = Math.min(AFFINITY_CAP, current + AFFINITY_WEIGHTS[type]);
+    try {
+      localStorage.setItem('sg_category_affinity', JSON.stringify(categoryAffinity));
+    } catch (e) {
+      // localStorage tidak tersedia — abaikan secara diam-diam
+    }
+  }
+
+  // Smooth weighted round-robin (algoritma yang sama seperti load balancer
+  // NGINX): setiap kategori "antre" bergiliran, tapi kategori berbobot lebih
+  // tinggi kebagian giliran lebih sering. Dipakai supaya kategori favorit user
+  // lebih dominan di feed TANPA membuat kategori lain hilang sama sekali.
+  function weightedInterleave(groups) {
+    // groups: [{ weight, items }]
+    const active = groups.filter(g => g.items.length > 0).map(g => ({ ...g, cursor: 0, current: 0 }));
+    const totalWeight = active.reduce((sum, g) => sum + g.weight, 0);
+    const totalItems = active.reduce((sum, g) => sum + g.items.length, 0);
+    const result = [];
+    while (result.length < totalItems) {
+      active.forEach(g => { g.current += g.weight; });
+      let best = null;
+      for (const g of active) {
+        if (g.cursor >= g.items.length) continue;
+        if (!best || g.current > best.current) best = g;
+      }
+      if (!best) break;
+      result.push(best.items[best.cursor++]);
+      best.current -= totalWeight;
+    }
+    return result;
+  }
+
+  // Menyusun ulang gambar berdasarkan minat kategori user. Hanya dipakai untuk
+  // feed default "Semua" (bukan saat search / filter favorit / kategori
+  // spesifik dipilih user sendiri) supaya tidak terasa mengganggu kontrol user.
+  function applyCategoryAffinitySort(images) {
+    const hasAffinityData = Object.values(categoryAffinity).some(v => v > 0);
+    if (!hasAffinityData) return images; // belum ada data -> urutan asli (terbaru dulu)
+
+    const byCategory = new Map();
+    images.forEach(img => {
+      if (!byCategory.has(img.category)) byCategory.set(img.category, []);
+      byCategory.get(img.category).push(img);
+    });
+
+    const groups = [...byCategory.entries()].map(([category, items]) => ({
+      // bobot dasar 1 supaya kategori tanpa minat tetap kebagian tampil (tidak
+      // hilang total / filter bubble), ditambah bonus dari skor affinity.
+      weight: 1 + (categoryAffinity[category] || 0) / 10,
+      items
+    }));
+
+    return weightedInterleave(groups);
+  }
+
   function toggleFavorite(imgId) {
     const wasFavorite = favorites.has(imgId);
     if (wasFavorite) {
@@ -2348,6 +2479,8 @@ viewBox="0 0 0.16593 0.10268"
     } else {
       favorites.add(imgId);
       showToast('Ditambahkan ke favorit', 'success');
+      const img = IMAGES.find(i => i.id === imgId);
+      if (img) trackInteraction(img.category, 'favorite');
     }
 
     if (currentUser) {
@@ -2998,6 +3131,12 @@ viewBox="0 0 0.16593 0.10268"
         img.category.toLowerCase().includes(searchQuery)
       );
     }
+    // Urutan berdasar minat kategori hanya untuk feed default "Semua" —
+    // saat user cari, filter favorit, atau pilih kategori sendiri, urutan
+    // asli (terbaru dulu) tetap dipakai supaya hasilnya predictable.
+    if (activeCategory === 'all' && !showFavoritesOnly && !searchQuery) {
+      filtered = applyCategoryAffinitySort(filtered);
+    }
     renderGallery(filtered);
   }
 
@@ -3291,6 +3430,7 @@ viewBox="0 0 0.16593 0.10268"
     const img = IMAGES.find(i => i.id === imgId);
     if (!img) return;
     currentModalImage = img;
+    trackInteraction(img.category, 'view');
 
     const modalImg = document.getElementById('modalImg');
     modalImg.alt = `Gambar status: ${img.title}`;
@@ -3324,9 +3464,75 @@ viewBox="0 0 0.16593 0.10268"
     document.getElementById('modalSize').textContent = img.size;
     document.getElementById('modalDownloads').textContent = img.downloads.toLocaleString('id-ID') + ' downloads';
     updateModalFavoriteBtn();
+    renderModalSimilar(img);
 
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.querySelector('.modal-info').scrollTop = 0;
+  }
+
+  // ===== REKOMENDASI: GAMBAR SERUPA =====
+  // Stopword Indonesia umum, dibuang dari judul supaya perbandingan kemiripan
+  // fokus ke kata yang benar-benar bermakna (bukan kata sambung/hubung).
+  const ID_STOPWORDS = new Set([
+    'yang', 'adalah', 'dan', 'di', 'ke', 'dari', 'untuk', 'dengan', 'atau',
+    'ini', 'itu', 'tidak', 'saja', 'juga', 'karena', 'tapi', 'tak', 'bukan',
+    'jangan', 'kamu', 'kita', 'kami', 'aku', 'saya', 'akan', 'agar', 'supaya',
+    'para', 'sang', 'pada', 'oleh', 'lebih', 'sangat', 'sudah', 'belum',
+    'masih', 'bisa', 'harus', 'boleh', 'ada', 'jadi', 'kalau', 'bila'
+  ]);
+
+  function titleTokens(title) {
+    return new Set(
+      title.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length > 2 && !ID_STOPWORDS.has(w))
+    );
+  }
+
+  function jaccardSimilarity(setA, setB) {
+    if (setA.size === 0 || setB.size === 0) return 0;
+    let intersection = 0;
+    setA.forEach(w => { if (setB.has(w)) intersection++; });
+    const unionSize = setA.size + setB.size - intersection;
+    return unionSize === 0 ? 0 : intersection / unionSize;
+  }
+
+  // Skor kemiripan = bonus kategori sama (2) + kemiripan kata di judul (x3).
+  // Kategori jadi sinyal utama (karena judul biasanya pendek), kemiripan kata
+  // jadi pembeda urutan di dalam kategori yang sama / lintas kategori.
+  function getSimilarImages(img, topN = 6) {
+    const tokens = titleTokens(img.title);
+    return IMAGES
+      .filter(other => other.id !== img.id)
+      .map(other => {
+        const categoryBonus = other.category === img.category ? 2 : 0;
+        const wordScore = jaccardSimilarity(tokens, titleTokens(other.title)) * 3;
+        return { img: other, score: categoryBonus + wordScore };
+      })
+      .filter(entry => entry.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topN)
+      .map(entry => entry.img);
+  }
+
+  function renderModalSimilar(img) {
+    const section = document.getElementById('modalSimilarSection');
+    const grid = document.getElementById('modalSimilarGrid');
+    const similar = getSimilarImages(img);
+    if (similar.length === 0) {
+      section.style.display = 'none';
+      grid.innerHTML = '';
+      return;
+    }
+    grid.innerHTML = similar.map(s => `
+      <button class="modal-similar-item" onclick="openModal(${s.id})" aria-label="Buka ${s.title}">
+        <img src="${gridThumb(s.url)}" alt="Gambar status: ${s.title}" loading="lazy" decoding="async">
+        <span class="modal-similar-item-label">${s.title}</span>
+      </button>
+    `).join('');
+    section.style.display = '';
   }
 
   function updateModalFavoriteBtn() {
@@ -3590,6 +3796,12 @@ viewBox="0 0 7.14519 2.77802"
       // Catat event ke Google Analytics (kalau gtag ada / GA belum diblok adblock)
       if (typeof gtag === 'function') {
         gtag('event', 'download_image', { image_id: imgId, image_title: title });
+      }
+
+      // Rekomendasi: catat minat kategori dari gambar yang barusan didownload
+      if (imgId != null) {
+        const downloadedImg = IMAGES.find(i => i.id === imgId);
+        if (downloadedImg) trackInteraction(downloadedImg.category, 'download');
       }
 
       // Guest: tambah hitungan lokal & kasih tahu sisa kuota gratisnya
