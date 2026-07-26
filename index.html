@@ -1708,6 +1708,48 @@
   @media (min-width: 769px) {
     .install-banner { bottom: 20px; }
   }
+
+  /* ===== UPDATE AVAILABLE BANNER ===== */
+  .update-banner {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--bottom-nav-h) + 12px);
+    transform: translateX(-50%) translateY(120%);
+    width: calc(100% - 32px);
+    max-width: 420px;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 160;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .update-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+  .update-banner-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--accent-dim); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+  .update-banner-text { flex: 1; min-width: 0; }
+  .update-banner-text strong { display: block; font-size: 13px; color: var(--text); }
+  .update-banner-text span { display: block; font-size: 12px; color: var(--text-dim); }
+  .update-btn {
+    background: var(--accent); color: #0a0a0a; border: none;
+    border-radius: var(--radius-pill); padding: 8px 14px;
+    font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+    flex-shrink: 0;
+  }
+  .update-btn:hover { background: var(--accent-hover); }
+  @media (min-width: 769px) {
+    .update-banner { bottom: 20px; }
+  }
 </style>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
@@ -2229,6 +2271,18 @@ viewBox="0 0 0.16593 0.10268"
   </div>
 </div>
 
+<!-- UPDATE AVAILABLE BANNER -->
+<div class="update-banner" id="updateBanner">
+  <div class="update-banner-icon">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+  </div>
+  <div class="update-banner-text">
+    <strong>Versi baru tersedia</strong>
+    <span>Perbarui untuk dapatkan pembaruan terbaru</span>
+  </div>
+  <button class="update-btn" onclick="applyAppUpdate()">Perbarui</button>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -2550,10 +2604,45 @@ viewBox="0 0 0.16593 0.10268"
     document.getElementById('installBanner').classList.remove('show');
   });
 
-  // ===== PWA: SERVICE WORKER =====
+  // ===== PWA: SERVICE WORKER + NOTIFIKASI UPDATE =====
+  let waitingServiceWorker = null;
+
+  function showUpdateBanner() {
+    document.getElementById('updateBanner').classList.add('show');
+  }
+
+  function applyAppUpdate() {
+    if (!waitingServiceWorker) return;
+    // Setelah versi baru aktif (controllerchange), reload halaman otomatis.
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    }, { once: true });
+    // Suruh service worker yang "menunggu" untuk langsung aktif.
+    waitingServiceWorker.postMessage({ type: 'SKIP_WAITING' });
+  }
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(err => console.error('SW gagal daftar:', err));
+      navigator.serviceWorker.register('sw.js').then((reg) => {
+        // Kasus 1: sudah ada SW versi baru yang menunggu saat halaman dibuka.
+        if (reg.waiting) {
+          waitingServiceWorker = reg.waiting;
+          showUpdateBanner();
+        }
+
+        // Kasus 2: SW baru terdeteksi & mulai diinstall saat user sedang di halaman.
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            // "installed" + sudah ada controller aktif = ini update (bukan install pertama kali)
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              waitingServiceWorker = newWorker;
+              showUpdateBanner();
+            }
+          });
+        });
+      }).catch(err => console.error('SW gagal daftar:', err));
     });
   }
 
