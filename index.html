@@ -1841,14 +1841,44 @@
 
   /* Modal mobile: full screen */
   @media (max-width: 767px) {
+    /* Bottom-sheet: nempel ke bawah layar (bukan di tengah), dan sengaja
+       TIDAK dibuat full height, supaya ada celah gelap di atas yang
+       kelihatan galeri di baliknya masih ada — dan bisa di-tap untuk nutup. */
+    .modal-backdrop {
+      align-items: flex-end;
+      padding: 0;
+    }
     .modal-content {
       flex-direction: column;
-      max-height: 95vh;
-      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 100%;
+      max-height: 82vh;
+      border-radius: 20px 20px 0 0;
+      /* Ganti animasi dari "zoom in" (scale) jadi "slide up dari bawah" */
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .modal-backdrop.open .modal-content {
+      transform: translateY(0);
+    }
+    /* Gagang kecil di atas sheet, penanda umum "bisa di-swipe/tap" ala
+       bottom sheet — murni visual, tidak mengubah cara menutup modal
+       (masih lewat tombol X / tap area gelap / tombol Tutup seperti biasa). */
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      border-radius: var(--radius-pill);
+      background: rgba(255,255,255,0.55);
+      z-index: 5;
     }
     .modal-image-wrap {
       flex: none;
-      max-height: 55vh;
+      max-height: 50vh;
     }
     .modal-info {
       flex: 1;
