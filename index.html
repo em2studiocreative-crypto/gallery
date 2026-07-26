@@ -4137,8 +4137,16 @@ viewBox="0 0 0.16593 0.10268"
 
   function reportCurrent() {
     if (!currentModalImage) return;
-    if (typeof gtag === 'function') gtag('event', 'report_image', { image_id: currentModalImage.id });
+    const imageId = currentModalImage.id;
+    if (typeof gtag === 'function') gtag('event', 'report_image', { image_id: imageId });
     showToast('Laporan terkirim, terima kasih sudah membantu kami.');
+
+    // Simpan ke tabel reports supaya bisa direview di panel admin
+    // (sebelumnya cuma tercatat sebagai GA event, gak ada tempat reviewnya).
+    // Gagal simpan tidak mengganggu UI (toast sukses tetap tampil ke user),
+    // cukup dicatat ke console untuk debugging.
+    supabaseClient.from('reports').insert({ image_id: imageId })
+      .then(({ error }) => { if (error) console.error('Gagal mencatat laporan:', error); });
   }
 
   // ===== DOWNLOAD =====
