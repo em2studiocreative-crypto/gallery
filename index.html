@@ -1111,12 +1111,20 @@
 
   .modal-info-top-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 10px;
   }
 
-  .modal-report-icon-btn {
+  .modal-top-left-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .modal-report-icon-btn,
+  .modal-close-icon-btn {
     flex-shrink: 0;
     width: 32px;
     height: 32px;
@@ -1136,6 +1144,24 @@
     background: rgba(239,68,68,0.12);
     color: #ef4444;
     border-color: rgba(239,68,68,0.4);
+  }
+
+  .modal-close-icon-btn:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .modal-category {
@@ -1170,62 +1196,57 @@
     margin-top: auto;
   }
 
-  .modal-actions-row {
-    display: flex;
-    gap: 10px;
-  }
-
-  .modal-action-btn {
-    flex: 1;
+  /* Favorit, Bagikan, Download disejajarkan jadi satu baris tombol bulat
+     icon-only — lebih ringkas & rapi ketimbang tombol pill lebar dengan
+     teks. Download dibuat lebih besar & solid (aksen) sebagai aksi utama. */
+  .modal-quick-actions {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 16px;
+    padding-top: 4px;
   }
 
-  .modal-download-btn {
-    padding: 14px 24px;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: var(--radius-pill);
-    font-size: 15px;
-    font-weight: 700;
+  .modal-quick-btn {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
     font-family: inherit;
-    transition: background 0.2s;
-  }
-
-  .modal-download-btn:hover { background: var(--accent-hover); }
-
-  /* Tombol Tutup dibuat beda dari tombol sekunder biasa (fav/bagikan) —
-     outline aksen yang keisi solid pas di-hover, biar keliatan lebih
-     "sengaja didesain" ketimbang cuma tombol abu-abu polos. */
-  .modal-close-btn {
-    padding: 13px 24px;
-    background: transparent;
-    color: var(--accent);
-    border: 1.5px solid var(--accent);
-    border-radius: var(--radius-pill);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: inherit;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
     -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   }
 
-  .modal-close-btn:hover {
+  .modal-quick-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .modal-quick-btn:active { transform: translateY(0); }
+
+  .modal-quick-btn-primary {
+    width: 64px;
+    height: 64px;
     background: var(--accent);
+    border-color: var(--accent);
     color: #000;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  }
+
+  .modal-quick-btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #000;
+    transform: translateY(-3px);
   }
 
   .modal-similar {
@@ -1924,49 +1945,14 @@
       z-index: 1;
       text-align: center;
     }
-    .modal-info-top-row {
-      justify-content: center;
-    }
-    .modal-report-icon-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
     .modal-title { font-size: 17px; text-align: center; }
     .modal-meta { justify-content: center; }
 
-    /* Daftar aksi dibikin polos ala list (icon + label), bukan tombol pill
-       besar seperti di desktop -> lebih ringkas & mirip referensi. */
     .modal-actions {
-      margin-top: 12px;
-      text-align: left;
+      margin-top: 16px;
     }
-    .modal-actions-row {
-      flex-direction: column;
-      gap: 0;
-    }
-    .modal-action-btn,
-    .modal-download-btn {
-      width: 100%;
-      flex: none;
-      justify-content: flex-start;
-      background: transparent;
-      color: var(--text);
-      border: none;
-      border-bottom: 1px solid var(--border);
-      border-radius: 0;
-      box-shadow: none;
-      padding: 14px 4px;
-      font-size: 15px;
-    }
-    .modal-action-btn:hover,
-    .modal-download-btn:hover {
-      background: var(--card-hover);
-    }
-    /* Tombol "Tutup" jadi berlebihan karena sudah ada X di pojok kiri-atas
-       -> disembunyikan di mobile supaya daftar aksi tetap ringkas. */
-    .modal-close-btn {
-      display: none;
+    .modal-quick-actions {
+      gap: 20px;
     }
 
     .modal-similar { text-align: left; }
@@ -1979,8 +1965,8 @@
   .side-nav-item:focus-visible,
   .state-btn:focus-visible,
   .card-fav-btn:focus-visible,
-  .modal-download-btn:focus-visible,
-  .modal-close-btn:focus-visible,
+  .modal-quick-btn:focus-visible,
+  .modal-close-icon-btn:focus-visible,
   .modal-report-icon-btn:focus-visible,
   .modal-close:focus-visible,
   .gallery-card:focus-visible {
@@ -2200,47 +2186,39 @@ viewBox="0 0 1.49117 0.57976"
 <!-- MODAL -->
 <div class="modal-backdrop" id="modal" onclick="closeModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal()" aria-label="Tutup">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
     <div class="modal-image-wrap">
       <img id="modalImg" alt="" onerror="if(typeof currentModalImage!=='undefined' && currentModalImage && this.src!==currentModalImage.url){this.src=currentModalImage.url;}else{showToast('Gambar gagal dimuat', 'error');}">
     </div>
     <div class="modal-info">
       <div class="modal-info-top-row">
-        <span class="modal-category" id="modalCategory"></span>
-        <button class="modal-report-icon-btn" id="modalReportBtn" onclick="reportCurrent()" aria-label="Laporkan gambar ini" title="Laporkan">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>
+        <div class="modal-top-left-group">
+          <button class="modal-report-icon-btn" id="modalReportBtn" onclick="reportCurrent()" aria-label="Laporkan gambar ini" title="Laporkan">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>
+          </button>
+          <span class="modal-category" id="modalCategory"></span>
+        </div>
+        <button class="modal-close-icon-btn" onclick="closeModal()" aria-label="Tutup">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <h2 class="modal-title" id="modalTitle"></h2>
-      <div class="modal-meta">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span id="modalSize"></span>
-      </div>
       <div class="modal-meta">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <span id="modalDownloads"></span>
       </div>
       <div class="modal-actions">
-        <div class="modal-actions-row">
-          <button class="state-btn secondary modal-action-btn" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)">
-            <svg id="modalFavIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            <span id="modalFavLabel">Tambah ke Favorit</span>
+        <div class="modal-quick-actions">
+          <button class="modal-quick-btn" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)" aria-label="Tambah ke Favorit" title="Tambah ke Favorit">
+            <svg id="modalFavIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="sr-only" id="modalFavLabel">Tambah ke Favorit</span>
           </button>
-          <button class="state-btn secondary modal-action-btn" id="modalShareBtn" onclick="shareCurrent()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Bagikan
+          <button class="modal-quick-btn" id="modalShareBtn" onclick="shareCurrent()" aria-label="Bagikan" title="Bagikan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
+          <button class="modal-quick-btn modal-quick-btn-primary" id="modalDownloadBtn" onclick="downloadCurrent()" aria-label="Download HD" title="Download HD">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </button>
         </div>
-        <button class="modal-download-btn" id="modalDownloadBtn" onclick="downloadCurrent()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download HD
-        </button>
-        <button class="modal-close-btn" onclick="closeModal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Tutup
-        </button>
       </div>
       <div class="modal-similar" id="modalSimilarSection" style="display:none;">
         <div class="modal-similar-title">Gambar Serupa</div>
@@ -4140,7 +4118,6 @@ viewBox="0 0 0.16593 0.10268"
 
     document.getElementById('modalTitle').textContent = img.title;
     document.getElementById('modalCategory').textContent = CATEGORIES.find(c => c.id === img.category)?.label || img.category;
-    document.getElementById('modalSize').textContent = img.size;
     document.getElementById('modalDownloads').textContent = img.downloads.toLocaleString('id-ID') + ' downloads';
     updateModalFavoriteBtn();
     renderModalSimilar(img);
@@ -4222,9 +4199,13 @@ viewBox="0 0 0.16593 0.10268"
   function updateModalFavoriteBtn() {
     if (!currentModalImage) return;
     const isFav = favorites.has(currentModalImage.id);
+    const label = isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit';
     document.getElementById('modalFavIcon').setAttribute('fill', isFav ? 'currentColor' : 'none');
-    document.getElementById('modalFavLabel').textContent = isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit';
-    document.getElementById('modalFavBtn').style.color = isFav ? '#ef4444' : '';
+    document.getElementById('modalFavLabel').textContent = label;
+    const favBtn = document.getElementById('modalFavBtn');
+    favBtn.style.color = isFav ? '#ef4444' : '';
+    favBtn.setAttribute('aria-label', label);
+    favBtn.setAttribute('title', label);
   }
 
   function closeModal(e, options = {}) {
