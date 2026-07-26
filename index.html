@@ -422,6 +422,25 @@
     color: #ef4444;
   }
 
+  .card-trending-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 9px 4px 7px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(135deg, #ff5f2e, #ff2e63);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    box-shadow: 0 2px 6px rgba(255, 46, 99, 0.35);
+    z-index: 2;
+    pointer-events: none;
+  }
+
   .gallery-card.img-error img { display: none; }
 
   .gallery-card.img-error::before {
@@ -519,6 +538,73 @@
   }
 
   .hidden { display: none !important; }
+
+  .state-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .state-btn:disabled:hover { background: var(--accent); }
+
+  /* ===== ONBOARDING MODAL ===== */
+  .onboarding-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+  }
+
+  .onboarding-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 20px 0 22px;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+
+  .onboarding-chip {
+    padding: 9px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--card);
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .onboarding-chip:hover { background: var(--card-hover); color: var(--text); }
+
+  .onboarding-chip.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+    border-color: var(--accent);
+  }
+
+  .onboarding-skip-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 10px;
+    padding: 6px;
+  }
+
+  .onboarding-skip-link:hover { color: var(--text); }
 
   /* ===== PROFILE MODAL ===== */
   .profile-quota {
@@ -1038,6 +1124,25 @@
   }
 
   .modal-download-btn:hover { background: var(--accent-hover); }
+
+  .modal-status-btn {
+    padding: 13px 24px;
+    background: #25D366;
+    color: #04240e;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: background 0.2s;
+  }
+
+  .modal-status-btn:hover { background: #1fb958; }
 
   .modal-similar {
     margin-top: 20px;
@@ -1935,6 +2040,10 @@ viewBox="0 0 1.49117 0.57976"
             Bagikan
           </button>
         </div>
+        <button class="modal-status-btn" id="modalStatusBtn" onclick="setStatusCurrent()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4a7.94 7.94 0 0 0-6.9 11.9L4 20l4.2-1.1a7.9 7.9 0 0 0 3.8 1h.02a7.94 7.94 0 0 0 5.58-13.58zm-5.55 12.2h-.02a6.6 6.6 0 0 1-3.36-.92l-.24-.14-2.5.65.67-2.44-.16-.25a6.6 6.6 0 0 1 10.24-8.2 6.55 6.55 0 0 1 1.94 4.67 6.62 6.62 0 0 1-6.57 6.63zm3.6-4.95c-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.19-.5.64-.62.77-.11.13-.23.15-.42.05a5.4 5.4 0 0 1-1.6-.99 6 6 0 0 1-1.1-1.37c-.12-.19 0-.3.09-.4.09-.09.19-.23.29-.34.1-.11.13-.19.2-.32.06-.13.03-.24-.02-.34-.05-.1-.44-1.06-.6-1.45-.16-.38-.32-.33-.44-.34h-.38c-.13 0-.34.05-.52.24-.18.19-.68.66-.68 1.62s.7 1.88.79 2.01c.1.13 1.37 2.09 3.32 2.93.46.2.83.32 1.11.41.47.15.89.13 1.23.08.37-.06 1.17-.48 1.34-.94.16-.46.16-.85.11-.94-.04-.09-.17-.14-.36-.24z"/></svg>
+          Set sebagai Status WA
+        </button>
         <button class="modal-download-btn" id="modalDownloadBtn" onclick="downloadCurrent()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download HD
@@ -2336,6 +2445,22 @@ viewBox="0 0 0.16593 0.10268"
   <button class="update-btn" onclick="applyAppUpdate()">Perbarui</button>
 </div>
 
+<!-- ONBOARDING: PILIH MINAT DI AWAL -->
+<div class="modal-backdrop" id="onboardingModal" onclick="finishOnboarding(true)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:420px; padding:28px 24px; text-align:center; display:block;">
+    <div class="onboarding-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </div>
+    <h2 class="modal-title" style="font-size:18px;margin-bottom:6px;">Suka yang mana?</h2>
+    <p class="profile-quota">Pilih beberapa kategori favoritmu, feed langsung kami sesuaikan buat kamu.</p>
+
+    <div class="onboarding-chip-grid" id="onboardingChipGrid"></div>
+
+    <button class="state-btn" id="onboardingConfirmBtn" style="width:100%;" onclick="finishOnboarding(false)" disabled>Pilih minimal 1</button>
+    <button class="onboarding-skip-link" onclick="finishOnboarding(true)">Lewati</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -2406,6 +2531,10 @@ viewBox="0 0 0.16593 0.10268"
   // tanpa menghilangkan variasi kategori lain (lihat weightedInterleave()).
   const AFFINITY_WEIGHTS = { view: 1, favorite: 3, download: 5 };
   const AFFINITY_CAP = 200; // batas atas per kategori biar skor tidak meledak seiring waktu
+  // Boost awal per kategori yang dipilih user saat onboarding — sengaja jauh
+  // lebih besar dari 1 interaksi organik (view=1) supaya feed langsung terasa
+  // personal sejak menit pertama, tanpa perlu nunggu beberapa kali klik dulu.
+  const ONBOARDING_AFFINITY_BOOST = 20;
   let categoryAffinity = {};
   try {
     categoryAffinity = JSON.parse(localStorage.getItem('sg_category_affinity') || '{}');
@@ -2469,6 +2598,117 @@ viewBox="0 0 0.16593 0.10268"
     }));
 
     return weightedInterleave(groups);
+  }
+
+  // ===== ONBOARDING: PILIH MINAT DI AWAL =====
+  // Ditampilkan sekali untuk pengunjung baru (belum punya data affinity
+  // organik) supaya feed langsung terasa personal sejak menit pertama,
+  // bukan nunggu user klik-klik dulu. Dipicu setelah CATEGORIES asli
+  // berhasil dimuat dari Supabase (lihat akhir loadData()).
+  let onboardingSelectedCats = new Set();
+
+  function maybeShowOnboarding() {
+    let seen = false;
+    try {
+      seen = localStorage.getItem('sg_onboarding_seen') === '1';
+    } catch (e) {
+      seen = false;
+    }
+    if (seen) return;
+
+    // Sudah ada minat organik (mis. dari sesi sebelumnya) -> tidak perlu tanya lagi
+    const hasAffinityData = Object.values(categoryAffinity).some(v => v > 0);
+    if (hasAffinityData) return;
+
+    // Kurang dari 3 kategori nyata: onboarding kurang berguna, skip saja
+    const realCats = CATEGORIES.filter(c => c.id !== 'all');
+    if (realCats.length < 3) return;
+
+    openOnboardingModal(realCats);
+  }
+
+  function openOnboardingModal(realCats) {
+    onboardingSelectedCats = new Set();
+    const grid = document.getElementById('onboardingChipGrid');
+    grid.innerHTML = realCats.map(c =>
+      `<button type="button" class="onboarding-chip" data-cat="${c.id}" onclick="event.stopPropagation(); toggleOnboardingChip('${c.id}', this)">${c.label}</button>`
+    ).join('');
+    updateOnboardingConfirmBtn();
+    document.getElementById('onboardingModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function toggleOnboardingChip(catId, el) {
+    if (onboardingSelectedCats.has(catId)) {
+      onboardingSelectedCats.delete(catId);
+      el.classList.remove('active');
+    } else {
+      onboardingSelectedCats.add(catId);
+      el.classList.add('active');
+    }
+    updateOnboardingConfirmBtn();
+  }
+
+  function updateOnboardingConfirmBtn() {
+    const btn = document.getElementById('onboardingConfirmBtn');
+    if (!btn) return;
+    const n = onboardingSelectedCats.size;
+    btn.disabled = n === 0;
+    btn.textContent = n > 0 ? `Lanjutkan (${n} dipilih)` : 'Pilih minimal 1';
+  }
+
+  function finishOnboarding(skip) {
+    if (!skip && onboardingSelectedCats.size > 0) {
+      onboardingSelectedCats.forEach(catId => {
+        const current = categoryAffinity[catId] || 0;
+        categoryAffinity[catId] = Math.min(AFFINITY_CAP, current + ONBOARDING_AFFINITY_BOOST);
+      });
+      try {
+        localStorage.setItem('sg_category_affinity', JSON.stringify(categoryAffinity));
+      } catch (e) {
+        // localStorage tidak tersedia — abaikan secara diam-diam
+      }
+      showToast('Feed kamu udah disesuaikan!', 'success');
+    }
+
+    try {
+      localStorage.setItem('sg_onboarding_seen', '1');
+    } catch (e) {
+      // localStorage tidak tersedia — abaikan secara diam-diam
+    }
+
+    document.getElementById('onboardingModal').classList.remove('open');
+    document.body.style.overflow = '';
+
+    // Kalau lagi di feed "Semua" tanpa filter/search aktif, susun ulang feed
+    // supaya kategori yang barusan dipilih langsung kelihatan lebih dominan.
+    if (activeCategory === 'all' && !showFavoritesOnly && !searchQuery) {
+      filterAndRender();
+    }
+  }
+
+  // ===== BADGE TRENDING =====
+  // Data yang ada cuma total downloads sepanjang masa + tanggal upload, jadi
+  // "trending minggu ini" didekati dengan skor downloads per hari sejak
+  // diupload (bukan total downloads mentah) — biar gambar LAMA dengan
+  // download menumpuk selama bertahun-tahun nggak otomatis menang terus
+  // ngalahin gambar baru yang lagi rame diunduh belakangan ini.
+  const TRENDING_BADGE_COUNT = 6; // maks berapa gambar yang dikasih badge sekaligus
+  const TRENDING_MIN_DOWNLOADS = 5; // gambar baru dgn 1-2 download nggak usah ikut dinilai
+  let trendingIds = new Set();
+
+  function recomputeTrendingIds() {
+    const now = Date.now();
+    const scored = IMAGES
+      .filter(img => (img.downloads || 0) >= TRENDING_MIN_DOWNLOADS)
+      .map(img => {
+        const createdAt = img.created_at ? new Date(img.created_at).getTime() : now;
+        const daysSinceUpload = Math.max(1, (now - createdAt) / 86400000);
+        return { id: img.id, score: img.downloads / daysSinceUpload };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, TRENDING_BADGE_COUNT);
+    trendingIds = new Set(scored.map(s => s.id));
   }
 
   function toggleFavorite(imgId) {
@@ -3118,6 +3358,7 @@ viewBox="0 0 0.16593 0.10268"
   }
 
   function filterAndRender() {
+    recomputeTrendingIds();
     let filtered = IMAGES;
     if (showFavoritesOnly) {
       filtered = filtered.filter(img => favorites.has(img.id));
@@ -3168,6 +3409,7 @@ viewBox="0 0 0.16593 0.10268"
         <button class="card-fav-btn ${favorites.has(img.id) ? 'active' : ''}" aria-label="${favorites.has(img.id) ? 'Hapus dari favorit' : 'Tambah ke favorit'}" onclick="event.stopPropagation(); toggleFavorite(${img.id})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${favorites.has(img.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>
+        ${trendingIds.has(img.id) ? '<span class="card-trending-badge">🔥 Trending</span>' : ''}
         <div class="card-overlay">
           <div class="card-title">${img.title}</div>
         </div>
@@ -3407,6 +3649,8 @@ viewBox="0 0 0.16593 0.10268"
       renderCategories();
       filterAndRender();
       checkForNewNotifications();
+      const openedFromUrl = openInitialImageFromUrl();
+      if (!openedFromUrl) maybeShowOnboarding();
     } catch (err) {
       console.error(err);
       loading.classList.add('hidden');
@@ -3426,7 +3670,168 @@ viewBox="0 0 0.16593 0.10268"
   }
 
   // ===== MODAL =====
-  function openModal(imgId) {
+  // ===== SEO: URL & META TAG UNIK PER GAMBAR =====
+  // App ini single-page (semua konten dirender lewat JS dari Supabase),
+  // jadi TANPA ini Google cuma bisa index 1 URL: halaman utama. Sekarang tiap
+  // kali modal gambar dibuka: (1) URL browser diganti ke ?img=<id>-<slug>
+  // pakai History API (tanpa reload halaman, tetap SPA), dan (2) tag <title>,
+  // meta description, Open Graph, Twitter Card, canonical, & JSON-LD
+  // ImageObject di <head> diperbarui biar cocok sama gambar yang lagi dibuka.
+  //
+  // BATASAN YANG PERLU DISADARI (biar realistis, bukan janji berlebihan):
+  // - Googlebot MODERN pada umumnya me-render JavaScript sebelum mengindeks,
+  //   jadi update tag di atas tetap kebaca & membantu indexing per-gambar di
+  //   Google Search/Images.
+  // - TAPI bot preview link yang TIDAK menjalankan JavaScript (WhatsApp,
+  //   Facebook, Twitter/X, Telegram) akan tetap nampilin OG default (gambar
+  //   & teks generik halaman utama) waktu link "?img=123" di-share ke chat,
+  //   BUKAN gambar spesifik itu. Preview per-gambar yang akurat di semua
+  //   platform butuh server-side rendering / prerender per URL — itu langkah
+  //   lanjutan di luar cakupan perubahan ini (murni frontend, tanpa server).
+  // - sitemap.xml otomatis (biar Google nemuin semua URL gambar tanpa nunggu
+  //   di-crawl manual) juga butuh proses generate terpisah (server/cron),
+  //   nggak bisa dari file HTML statis ini saja.
+  const DEFAULT_SEO = {
+    title: document.title,
+    description: document.querySelector('meta[name="description"]')?.content || '',
+    ogTitle: document.querySelector('meta[property="og:title"]')?.content || '',
+    ogDescription: document.querySelector('meta[property="og:description"]')?.content || '',
+    ogImage: document.querySelector('meta[property="og:image"]')?.content || '',
+    ogImageWidth: document.querySelector('meta[property="og:image:width"]')?.content || '',
+    ogImageHeight: document.querySelector('meta[property="og:image:height"]')?.content || '',
+    ogUrl: document.querySelector('meta[property="og:url"]')?.content || '',
+    twitterTitle: document.querySelector('meta[name="twitter:title"]')?.content || '',
+    twitterDescription: document.querySelector('meta[name="twitter:description"]')?.content || '',
+    twitterImage: document.querySelector('meta[name="twitter:image"]')?.content || '',
+    canonical: document.querySelector('link[rel="canonical"]')?.href || (window.location.origin + '/')
+  };
+
+  function slugify(text) {
+    return (text || '')
+      .toLowerCase()
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 60);
+  }
+
+  // ?img=<id>-<slug-judul> — angka di depan dipakai buat lookup (robust
+  // walau judul kemudian diubah admin), slug di belakang cuma buat
+  // keterbacaan URL & sinyal kata kunci tambahan buat Google.
+  function imageUrlPath(img) {
+    const slug = slugify(img.title);
+    const basePath = window.location.pathname;
+    return basePath + (slug ? `?img=${img.id}-${slug}` : `?img=${img.id}`);
+  }
+
+  function setMetaContent(selector, value) {
+    const el = document.querySelector(selector);
+    if (el) el.setAttribute('content', value);
+  }
+
+  function updateImageSEO(img) {
+    const catLabel = (CATEGORIES.find(c => c.id === img.category) || {}).label || img.category;
+    const title = `${img.title} — Status Gallery by EM2STUDIO`;
+    const description = `Download gambar status WhatsApp "${img.title}" kategori ${catLabel} gratis dalam kualitas HD di Status Gallery.`;
+    const pageUrl = window.location.origin + imageUrlPath(img);
+    const [w, h] = (img.size || '').split('×').map(Number);
+
+    document.title = title;
+    setMetaContent('meta[name="description"]', description);
+    setMetaContent('meta[property="og:title"]', title);
+    setMetaContent('meta[property="og:description"]', description);
+    setMetaContent('meta[property="og:image"]', img.url);
+    if (w) setMetaContent('meta[property="og:image:width"]', String(w));
+    if (h) setMetaContent('meta[property="og:image:height"]', String(h));
+    setMetaContent('meta[property="og:url"]', pageUrl);
+    setMetaContent('meta[name="twitter:title"]', title);
+    setMetaContent('meta[name="twitter:description"]', description);
+    setMetaContent('meta[name="twitter:image"]', img.url);
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) canonicalEl.href = pageUrl;
+
+    updateImageStructuredData(img, pageUrl, description);
+  }
+
+  function restoreDefaultSEO() {
+    document.title = DEFAULT_SEO.title;
+    setMetaContent('meta[name="description"]', DEFAULT_SEO.description);
+    setMetaContent('meta[property="og:title"]', DEFAULT_SEO.ogTitle);
+    setMetaContent('meta[property="og:description"]', DEFAULT_SEO.ogDescription);
+    setMetaContent('meta[property="og:image"]', DEFAULT_SEO.ogImage);
+    if (DEFAULT_SEO.ogImageWidth) setMetaContent('meta[property="og:image:width"]', DEFAULT_SEO.ogImageWidth);
+    if (DEFAULT_SEO.ogImageHeight) setMetaContent('meta[property="og:image:height"]', DEFAULT_SEO.ogImageHeight);
+    setMetaContent('meta[property="og:url"]', DEFAULT_SEO.ogUrl);
+    setMetaContent('meta[name="twitter:title"]', DEFAULT_SEO.twitterTitle);
+    setMetaContent('meta[name="twitter:description"]', DEFAULT_SEO.twitterDescription);
+    setMetaContent('meta[name="twitter:image"]', DEFAULT_SEO.twitterImage);
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) canonicalEl.href = DEFAULT_SEO.canonical;
+    removeImageStructuredData();
+  }
+
+  // JSON-LD ImageObject: sinyal terstruktur tambahan (di luar meta tag) yang
+  // dipakai Google buat memahami & menampilkan gambar di hasil pencarian
+  // maupun Google Images (mis. muncul badge/info tambahan di hasil).
+  function updateImageStructuredData(img, pageUrl, description) {
+    let script = document.getElementById('imageStructuredData');
+    if (!script) {
+      script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.id = 'imageStructuredData';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'ImageObject',
+      contentUrl: img.url,
+      url: pageUrl,
+      name: img.title,
+      description: description,
+      uploadDate: img.created_at || undefined,
+      isFamilyFriendly: true
+    });
+  }
+
+  function removeImageStructuredData() {
+    const script = document.getElementById('imageStructuredData');
+    if (script) script.remove();
+  }
+
+  // Dipanggil sekali di akhir loadData() (setelah IMAGES siap): kalau URL
+  // yang dibuka user sudah membawa ?img=<id> (mis. dari hasil Google/share
+  // link), langsung buka modal gambar itu tanpa perlu klik apa pun. History
+  // disusun 2 lapis (galeri di bawah, gambar di atas) supaya tombol Back
+  // browser menutup modal dulu, baru keluar situs — bukan langsung keluar.
+  function openInitialImageFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const imgParam = params.get('img');
+    if (!imgParam) return false;
+    const id = parseInt(imgParam, 10);
+    if (Number.isNaN(id)) return false;
+    const img = IMAGES.find(i => i.id === id);
+    if (!img) return false; // ID sudah tidak ada (mis. dihapus admin) -> tampilkan galeri biasa
+
+    history.replaceState({ imgId: null }, '', window.location.pathname);
+    history.pushState({ imgId: img.id }, '', imageUrlPath(img));
+    openModal(img.id, { pushHistory: false });
+    return true;
+  }
+
+  // Sinkronkan modal dengan tombol Back/Forward browser.
+  window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(window.location.search);
+    const imgParam = params.get('img');
+    const id = imgParam ? parseInt(imgParam, 10) : NaN;
+    if (!Number.isNaN(id) && IMAGES.some(i => i.id === id)) {
+      openModal(id, { pushHistory: false });
+    } else if (currentModalImage) {
+      closeModal(null, { fromPopState: true });
+    }
+  });
+
+  function openModal(imgId, options = {}) {
+    const { pushHistory = true } = options;
     const img = IMAGES.find(i => i.id === imgId);
     if (!img) return;
     currentModalImage = img;
@@ -3469,6 +3874,11 @@ viewBox="0 0 0.16593 0.10268"
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
     document.querySelector('.modal-info').scrollTop = 0;
+
+    updateImageSEO(img);
+    if (pushHistory) {
+      history.pushState({ imgId: img.id }, '', imageUrlPath(img));
+    }
   }
 
   // ===== REKOMENDASI: GAMBAR SERUPA =====
@@ -3543,11 +3953,23 @@ viewBox="0 0 0.16593 0.10268"
     document.getElementById('modalFavBtn').style.color = isFav ? '#ef4444' : '';
   }
 
-  function closeModal(e) {
+  function closeModal(e, options = {}) {
     if (e && e.target !== e.currentTarget) return;
+    const { fromPopState = false } = options;
+    const wasOpen = document.getElementById('modal').classList.contains('open');
     document.getElementById('modal').classList.remove('open');
     document.body.style.overflow = '';
     currentModalImage = null;
+    restoreDefaultSEO();
+
+    // Ditutup lewat interaksi user (klik X/backdrop/Escape/Tutup), bukan
+    // lewat tombol Back browser -> mundurkan history 1 langkah supaya URL
+    // ?img= ikut hilang dari address bar, tanpa numpuk entry gallery baru
+    // tiap kali user buka-tutup modal berkali-kali.
+    if (wasOpen && !fromPopState) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('img')) history.back();
+    }
   }
 
   document.addEventListener('keydown', (e) => {
@@ -3660,6 +4082,74 @@ viewBox="0 0 0.16593 0.10268"
 
   function logShareEvent(imgId, method) {
     if (typeof gtag === 'function') gtag('event', 'share_image', { image_id: imgId, method });
+  }
+
+  // ===== SET SEBAGAI STATUS WHATSAPP =====
+  // Catatan teknis: WhatsApp tidak menyediakan cara resmi bagi WEBSITE untuk
+  // langsung membuka composer Status dengan gambar sudah terpasang otomatis
+  // (kemampuan itu cuma ada untuk app native lewat FileProvider + izin URI
+  // konten, bukan dari browser). Yang benar-benar bisa dilakukan dari web:
+  // pakai Web Share API supaya gambar tampil sebagai file di share sheet asli
+  // HP, lalu user pilih WhatsApp -> WhatsApp sendiri menampilkan "Status"
+  // sebagai salah satu tujuan kirim. Ini tetap jauh lebih cepat dibanding
+  // download manual dulu baru buka WA dan lampirkan sendiri dari galeri.
+  function setStatusCurrent() {
+    if (currentModalImage) setAsWhatsAppStatus(currentModalImage.id);
+  }
+
+  async function setAsWhatsAppStatus(imgId) {
+    const img = IMAGES.find(i => i.id === imgId);
+    if (!img) return;
+
+    const canShareFiles = !!(navigator.canShare && navigator.share);
+    if (!canShareFiles) {
+      await downloadThenOpenWaStatus(img, imgId);
+      return;
+    }
+
+    showToast('Menyiapkan gambar...');
+    try {
+      const response = await fetch(img.url);
+      if (!response.ok) throw new Error('Gagal mengambil gambar');
+      let blob = await response.blob();
+      blob = await addDownloadWatermark(blob);
+      const file = new File([blob], `status-${img.title.toLowerCase().replace(/\s+/g, '-')}.png`, {
+        type: blob.type || 'image/png'
+      });
+
+      if (!navigator.canShare({ files: [file] })) {
+        await downloadThenOpenWaStatus(img, imgId);
+        return;
+      }
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'set_wa_status', { image_id: imgId, image_title: img.title, method: 'native_file' });
+      }
+      showToast('Pilih WhatsApp, lalu ketuk "Status" 👆', 'success');
+      await navigator.share({ files: [file] });
+      // Set status = sinyal minat sekuat download (bukan cuma dilihat)
+      trackInteraction(img.category, 'download');
+    } catch (err) {
+      if (err.name === 'AbortError') return; // user batal dari share sheet, jangan fallback
+      console.warn('Gagal share file utk Status WA, fallback ke download:', err);
+      await downloadThenOpenWaStatus(img, imgId);
+    }
+  }
+
+  // Fallback untuk device/browser yang tidak bisa share file langsung (mis.
+  // desktop, atau share dibatalkan/gagal): tetap download gambarnya (dihitung
+  // sebagai pemakaian kuota gratis seperti download biasa), lalu kalau ini
+  // Android arahkan langsung ke tab Status WhatsApp biar tinggal pilih dari
+  // galeri HP.
+  async function downloadThenOpenWaStatus(img, imgId) {
+    if (!canDownload()) return;
+    await triggerDownload(img.url, img.title, imgId);
+    if (/Android/i.test(navigator.userAgent)) {
+      showToast('Gambar tersimpan — membuka Status WhatsApp...', 'success');
+      setTimeout(() => { window.location.href = 'https://wa.me/status'; }, 900);
+    } else {
+      showToast('Gambar tersimpan. Buka WhatsApp lalu tambahkan ke Status.', 'success');
+    }
   }
 
   // Share aplikasi secara umum (bukan 1 gambar spesifik) — dipakai dari
