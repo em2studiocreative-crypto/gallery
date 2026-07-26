@@ -2995,20 +2995,35 @@ viewBox="0 0 0.16593 0.10268"
   });
 
   // ===== PWA: SERVICE WORKER + NOTIFIKASI UPDATE =====
-  let waitingServiceWorker = null;
+  let updateBannerShown = false;
 
   function showUpdateBanner() {
+    updateBannerShown = true;
     document.getElementById('updateBanner').classList.add('show');
   }
 
   function applyAppUpdate() {
-    if (!waitingServiceWorker) return;
-    // Setelah versi baru aktif (controllerchange), reload halaman otomatis.
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    }, { once: true });
-    // Suruh service worker yang "menunggu" untuk langsung aktif.
-    waitingServiceWorker.postMessage({ type: 'SKIP_WAITING' });
+    if (!updateBannerShown) return;
+    // PENTING: jangan pakai referensi worker lama yang disimpan pas banner
+    // pertama kali muncul. OneSignal SDK bisa diam-diam register() ulang
+    // sw.js di belakang layar, sehingga worker lama itu jadi "redundant"
+    // (digantikan worker menunggu yang baru) dan postMessage ke dia gak
+    // berefek apa-apa -> controllerchange gak pernah kepicu -> banner
+    // nyangkut terus sampai user refresh manual. Makanya di sini kita
+    // selalu ambil reg.waiting yang BENERAN aktif saat tombol diklik.
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      const worker = reg && reg.waiting;
+      if (!worker) {
+        // Udah gak ada yang nunggu (kemungkinan udah keaktivasi diam-diam
+        // sebagai phantom re-check) -> tinggal reload biasa buat masuk versi baru.
+        window.location.reload();
+        return;
+      }
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      }, { once: true });
+      worker.postMessage({ type: 'SKIP_WAITING' });
+    });
   }
 
   // Ambil versi SW langsung dari teks sw.js di server (BUKAN lewat
@@ -3054,7 +3069,6 @@ viewBox="0 0 0.16593 0.10268"
       if (version) {
         try { localStorage.setItem('sg_last_notified_sw_version', version); } catch (e) {}
       }
-      waitingServiceWorker = worker;
       showUpdateBanner();
     });
   }
