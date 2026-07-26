@@ -45,6 +45,26 @@
   gtag('js', new Date());
   gtag('config', 'G-4SGWMRTPXL');
 </script>
+
+<!-- ===== ONESIGNAL WEB PUSH ===== -->
+<!-- TODO: ganti ONESIGNAL_APP_ID_DI_SINI dengan App ID asli dari dashboard OneSignal -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function (OneSignal) {
+    await OneSignal.init({
+      appId: "1e94ba58-e8c8-49d7-91e5-cdf9e578cc2e",
+      // Pakai sw.js kita sendiri (sudah di-set importScripts OneSignal di dalamnya),
+      // bukan file worker terpisah bawaan OneSignal -> gak bentrok sama PWA yang ada.
+      serviceWorkerParam: { scope: "/" },
+      serviceWorkerPath: "sw.js",
+      // Matikan bubble/tombol bawaan OneSignal: kita pakai toggle sendiri di
+      // menu Pengaturan > "Notifikasi Gambar Baru" (lihat toggleNotifPref()).
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true
+    });
+  });
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -3040,7 +3060,36 @@ viewBox="0 0 0.16593 0.10268"
     try { localStorage.setItem('sg_notif_pref', isOn ? '0' : '1'); } catch (e) {}
     document.getElementById('settingsNotifToggle').classList.toggle('on', !isOn);
     showToast(isOn ? 'Notifikasi dimatikan' : 'Notifikasi diaktifkan', 'success');
-    if (!isOn) checkForNewNotifications();
+    if (!isOn) {
+      checkForNewNotifications();
+      subscribeWebPush();
+    } else {
+      unsubscribeWebPush();
+    }
+  }
+
+  // ===== ONESIGNAL: PUSH NOTIFICATION ASLI (bukan cuma bell in-app) =====
+  // Dipanggil pas user nyalain toggle "Notifikasi Gambar Baru" di Pengaturan.
+  // Beda dari checkForNewNotifications() (yang cuma jalan pas app dibuka),
+  // ini beneran subscribe ke push browser -> user tetap dapat notif walau
+  // app/tab-nya udah ditutup.
+  async function subscribeWebPush() {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function (OneSignal) {
+      try {
+        await OneSignal.Notifications.requestPermission();
+        await OneSignal.User.PushSubscription.optIn();
+      } catch (e) {
+        console.warn('Gagal subscribe push notification:', e);
+      }
+    });
+  }
+
+  async function unsubscribeWebPush() {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function (OneSignal) {
+      try { await OneSignal.User.PushSubscription.optOut(); } catch (e) {}
+    });
   }
 
   function toggleThemePref() {
