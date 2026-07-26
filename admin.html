@@ -157,9 +157,10 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  table { width: 100%; border-collapse: collapse; }
+  table { width: 100%; min-width: 460px; border-collapse: collapse; }
   th, td {
     text-align: left; padding: 10px 12px; font-size: 13px;
     border-bottom: 1px solid var(--border);
@@ -247,7 +248,12 @@
 
   @media (max-width: 560px) {
     .row2 { grid-template-columns: 1fr; }
-    th:nth-child(4), td:nth-child(4) { display: none; } /* sembunyikan kolom downloads di mobile */
+    /* Sembunyikan kolom Download di tabel GAMBAR saja (bukan tabel lain) */
+    #panel-images th:nth-child(4), #panel-images td:nth-child(4) { display: none; }
+    /* Sembunyikan kolom Urutan di tabel KATEGORI saja, biar kolom Aksi
+       (tombol Edit/Hapus) dapat ruang lebih lega & selalu kelihatan */
+    #panel-categories th:nth-child(3), #panel-categories td:nth-child(3) { display: none; }
+    td.actions .btn { padding: 6px 8px; font-size: 12px; margin-left: 4px; }
   }
 </style>
 </head>
