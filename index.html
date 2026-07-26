@@ -1868,6 +1868,30 @@
       padding: var(--gap-2);
     }
     .modal-title { font-size: 18px; }
+
+    /* Khusus modal gambar (#modal): dulu gambar preview "diam" di atas dan
+       cuma panel info yang bisa discroll sendiri di dalamnya. Sekarang
+       dijadikan satu area scroll utuh -> pas discroll ke atas, gambar
+       preview ikut naik & hilang dari layar (persis kayak feed
+       Pinterest/detail post), baru sisanya (info + Gambar Serupa) nyusul. */
+    #modal .modal-content {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #modal .modal-image-wrap {
+      flex-shrink: 0;
+    }
+    #modal .modal-info {
+      flex: none;
+      overflow-y: visible;
+    }
+    /* Tombol close dilepas dari alur scroll modal-content (supaya gak
+       ikut naik & hilang pas discroll) -> dipaku ke pojok layar. */
+    #modal .modal-close {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+    }
   }
 
   /* Focus visibility (keyboard navigation) */
@@ -4046,6 +4070,10 @@ viewBox="0 0 0.16593 0.10268"
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
     document.querySelector('.modal-info').scrollTop = 0;
+    // Mobile: seluruh .modal-content yang jadi area scroll (bukan cuma
+    // .modal-info) -> ikut direset ke atas juga.
+    const modalContentEl = document.querySelector('#modal .modal-content');
+    if (modalContentEl) modalContentEl.scrollTop = 0;
 
     updateImageSEO(img);
     if (pushHistory) {
@@ -4143,29 +4171,44 @@ viewBox="0 0 0.16593 0.10268"
     appendModalSimilarBatch();
   }
 
-  // Cek jarak scroll di dalam panel .modal-info (bukan window, karena yang
-  // scroll di dalam modal adalah panel info-nya, bukan halaman utama) ->
-  // kalau sudah dekat bawah & stok gambar serupa masih ada, tambah batch
-  // berikutnya secara otomatis.
+  // Cek jarak scroll di dalam modal (bukan window, karena yang scroll di
+  // dalam modal itu panelnya sendiri, bukan halaman utama) -> kalau sudah
+  // dekat bawah & stok gambar serupa masih ada, tambah batch berikutnya
+  // secara otomatis.
+  // Catatan: container yang benar-benar scroll beda-beda tergantung layar:
+  // - Desktop (2 kolom): cuma .modal-info yang scroll, gambar preview diam.
+  // - Mobile (1 kolom): seluruh .modal-content yang scroll (gambar preview
+  //   ikut naik/hilang pas discroll), .modal-info gak scroll sendiri lagi.
+  // Jadi dicek satu-satu, dipakai yang scrollHeight-nya beneran melebihi
+  // clientHeight (berarti itu yang jadi container aktif).
   let modalSimilarScrollTicking = false;
   function maybeLoadMoreModalSimilar() {
     if (modalSimilarRendered >= modalSimilarPool.length) return;
-    const infoEl = document.querySelector('.modal-info');
-    if (!infoEl) return;
-    const distanceToBottom = infoEl.scrollHeight - (infoEl.scrollTop + infoEl.clientHeight);
-    if (distanceToBottom < 500) {
-      appendModalSimilarBatch();
+    const candidates = [
+      document.querySelector('#modal .modal-info'),
+      document.querySelector('#modal .modal-content')
+    ];
+    for (const el of candidates) {
+      if (!el) continue;
+      if (el.scrollHeight - el.clientHeight < 2) continue; // bukan container yang aktif scroll
+      const distanceToBottom = el.scrollHeight - (el.scrollTop + el.clientHeight);
+      if (distanceToBottom < 500) appendModalSimilarBatch();
+      return;
     }
   }
   document.addEventListener('DOMContentLoaded', () => {
-    const infoEl = document.querySelector('.modal-info');
-    if (!infoEl) return;
-    infoEl.addEventListener('scroll', () => {
-      if (modalSimilarScrollTicking) return;
-      modalSimilarScrollTicking = true;
-      requestAnimationFrame(() => {
-        maybeLoadMoreModalSimilar();
-        modalSimilarScrollTicking = false;
+    const scrollTargets = [
+      document.querySelector('#modal .modal-info'),
+      document.querySelector('#modal .modal-content')
+    ].filter(Boolean);
+    scrollTargets.forEach(el => {
+      el.addEventListener('scroll', () => {
+        if (modalSimilarScrollTicking) return;
+        modalSimilarScrollTicking = true;
+        requestAnimationFrame(() => {
+          maybeLoadMoreModalSimilar();
+          modalSimilarScrollTicking = false;
+        });
       });
     });
   });
