@@ -1109,6 +1109,35 @@
     overflow-y: auto;
   }
 
+  .modal-info-top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .modal-report-icon-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .modal-report-icon-btn:hover {
+    background: rgba(239,68,68,0.12);
+    color: #ef4444;
+    border-color: rgba(239,68,68,0.4);
+  }
+
   .modal-category {
     display: inline-flex;
     padding: 4px 12px;
@@ -1160,11 +1189,14 @@
 
   .modal-download-btn:hover { background: var(--accent-hover); }
 
-  .modal-status-btn {
+  /* Tombol Tutup dibuat beda dari tombol sekunder biasa (fav/bagikan) —
+     outline aksen yang keisi solid pas di-hover, biar keliatan lebih
+     "sengaja didesain" ketimbang cuma tombol abu-abu polos. */
+  .modal-close-btn {
     padding: 13px 24px;
-    background: #25D366;
-    color: #04240e;
-    border: none;
+    background: transparent;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
     border-radius: var(--radius-pill);
     font-size: 14px;
     font-weight: 700;
@@ -1174,10 +1206,14 @@
     justify-content: center;
     gap: 8px;
     font-family: inherit;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .modal-status-btn:hover { background: #1fb958; }
+  .modal-close-btn:hover {
+    background: var(--accent);
+    color: #000;
+  }
 
   .modal-similar {
     margin-top: 20px;
@@ -1829,6 +1865,8 @@
   .state-btn:focus-visible,
   .card-fav-btn:focus-visible,
   .modal-download-btn:focus-visible,
+  .modal-close-btn:focus-visible,
+  .modal-report-icon-btn:focus-visible,
   .modal-close:focus-visible,
   .gallery-card:focus-visible {
     outline: 2px solid var(--accent);
@@ -2054,7 +2092,12 @@ viewBox="0 0 1.49117 0.57976"
       <img id="modalImg" alt="" onerror="if(typeof currentModalImage!=='undefined' && currentModalImage && this.src!==currentModalImage.url){this.src=currentModalImage.url;}else{showToast('Gambar gagal dimuat', 'error');}">
     </div>
     <div class="modal-info">
-      <span class="modal-category" id="modalCategory"></span>
+      <div class="modal-info-top-row">
+        <span class="modal-category" id="modalCategory"></span>
+        <button class="modal-report-icon-btn" id="modalReportBtn" onclick="reportCurrent()" aria-label="Laporkan gambar ini" title="Laporkan">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>
+        </button>
+      </div>
       <h2 class="modal-title" id="modalTitle"></h2>
       <div class="modal-meta">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -2075,19 +2118,11 @@ viewBox="0 0 1.49117 0.57976"
             Bagikan
           </button>
         </div>
-        <button class="modal-status-btn" id="modalStatusBtn" onclick="setStatusCurrent()">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4a7.94 7.94 0 0 0-6.9 11.9L4 20l4.2-1.1a7.9 7.9 0 0 0 3.8 1h.02a7.94 7.94 0 0 0 5.58-13.58zm-5.55 12.2h-.02a6.6 6.6 0 0 1-3.36-.92l-.24-.14-2.5.65.67-2.44-.16-.25a6.6 6.6 0 0 1 10.24-8.2 6.55 6.55 0 0 1 1.94 4.67 6.62 6.62 0 0 1-6.57 6.63zm3.6-4.95c-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.19-.5.64-.62.77-.11.13-.23.15-.42.05a5.4 5.4 0 0 1-1.6-.99 6 6 0 0 1-1.1-1.37c-.12-.19 0-.3.09-.4.09-.09.19-.23.29-.34.1-.11.13-.19.2-.32.06-.13.03-.24-.02-.34-.05-.1-.44-1.06-.6-1.45-.16-.38-.32-.33-.44-.34h-.38c-.13 0-.34.05-.52.24-.18.19-.68.66-.68 1.62s.7 1.88.79 2.01c.1.13 1.37 2.09 3.32 2.93.46.2.83.32 1.11.41.47.15.89.13 1.23.08.37-.06 1.17-.48 1.34-.94.16-.46.16-.85.11-.94-.04-.09-.17-.14-.36-.24z"/></svg>
-          Set sebagai Status WA
-        </button>
         <button class="modal-download-btn" id="modalDownloadBtn" onclick="downloadCurrent()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download HD
         </button>
-        <button class="state-btn secondary" id="modalReportBtn" onclick="reportCurrent()" style="display:flex;align-items:center;justify-content:center;gap:8px;color:#ef4444;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>
-          Laporkan
-        </button>
-        <button class="state-btn secondary" onclick="closeModal()" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button class="modal-close-btn" onclick="closeModal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           Tutup
         </button>
@@ -4206,74 +4241,6 @@ viewBox="0 0 0.16593 0.10268"
 
   function logShareEvent(imgId, method) {
     if (typeof gtag === 'function') gtag('event', 'share_image', { image_id: imgId, method });
-  }
-
-  // ===== SET SEBAGAI STATUS WHATSAPP =====
-  // Catatan teknis: WhatsApp tidak menyediakan cara resmi bagi WEBSITE untuk
-  // langsung membuka composer Status dengan gambar sudah terpasang otomatis
-  // (kemampuan itu cuma ada untuk app native lewat FileProvider + izin URI
-  // konten, bukan dari browser). Yang benar-benar bisa dilakukan dari web:
-  // pakai Web Share API supaya gambar tampil sebagai file di share sheet asli
-  // HP, lalu user pilih WhatsApp -> WhatsApp sendiri menampilkan "Status"
-  // sebagai salah satu tujuan kirim. Ini tetap jauh lebih cepat dibanding
-  // download manual dulu baru buka WA dan lampirkan sendiri dari galeri.
-  function setStatusCurrent() {
-    if (currentModalImage) setAsWhatsAppStatus(currentModalImage.id);
-  }
-
-  async function setAsWhatsAppStatus(imgId) {
-    const img = IMAGES.find(i => i.id === imgId);
-    if (!img) return;
-
-    const canShareFiles = !!(navigator.canShare && navigator.share);
-    if (!canShareFiles) {
-      await downloadThenOpenWaStatus(img, imgId);
-      return;
-    }
-
-    showToast('Menyiapkan gambar...');
-    try {
-      const response = await fetch(img.url);
-      if (!response.ok) throw new Error('Gagal mengambil gambar');
-      let blob = await response.blob();
-      blob = await addDownloadWatermark(blob);
-      const file = new File([blob], `status-${img.title.toLowerCase().replace(/\s+/g, '-')}.png`, {
-        type: blob.type || 'image/png'
-      });
-
-      if (!navigator.canShare({ files: [file] })) {
-        await downloadThenOpenWaStatus(img, imgId);
-        return;
-      }
-
-      if (typeof gtag === 'function') {
-        gtag('event', 'set_wa_status', { image_id: imgId, image_title: img.title, method: 'native_file' });
-      }
-      showToast('Pilih WhatsApp, lalu ketuk "Status" 👆', 'success');
-      await navigator.share({ files: [file] });
-      // Set status = sinyal minat sekuat download (bukan cuma dilihat)
-      trackInteraction(img.category, 'download');
-    } catch (err) {
-      if (err.name === 'AbortError') return; // user batal dari share sheet, jangan fallback
-      console.warn('Gagal share file utk Status WA, fallback ke download:', err);
-      await downloadThenOpenWaStatus(img, imgId);
-    }
-  }
-
-  // Fallback untuk device/browser yang tidak bisa share file langsung (mis.
-  // desktop, atau share dibatalkan/gagal): tetap download gambarnya (dihitung
-  // sebagai pemakaian kuota gratis seperti download biasa), lalu kalau ini
-  // Android arahkan langsung ke tab Status WhatsApp biar tinggal pilih dari
-  // galeri HP.
-  async function downloadThenOpenWaStatus(img, imgId) {
-    if (!canDownload()) return;
-    await triggerDownload(img.url, img.title, imgId);
-    if (/Android/i.test(navigator.userAgent)) {
-      showToast('Gambar tersimpan — membuka Status WhatsApp...', 'success');
-      setTimeout(() => { window.location.href = 'https://wa.me/status'; }, 900);
-    } else {
-      showToast('Gambar tersimpan. Buka WhatsApp lalu tambahkan ke Status.', 'success');
-    }
   }
 
   // Share aplikasi secara umum (bukan 1 gambar spesifik) — dipakai dari
