@@ -262,6 +262,18 @@
 
   .categories::-webkit-scrollbar { display: none; }
 
+  .categories::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(to left, transparent, var(--bg));
+    pointer-events: none;
+    z-index: 2;
+  }
+
   .categories::after {
     content: '';
     position: absolute;
@@ -2801,6 +2813,10 @@ viewBox="0 0 0.16593 0.10268"
     highlightNav('Beranda');
     renderCategories();
     filterAndRender();
+    const activeChip = document.querySelector(`#categoriesBar .chip[data-cat="${catId}"]`);
+    if (activeChip) {
+      activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
   }
 
   // Klik ikon "Cari" berarti user mau menjelajah/mencari semua gambar —
@@ -3438,7 +3454,16 @@ viewBox="0 0 7.14519 2.77802"
       const y = canvas.height - wmH - pad;
 
       ctx.save();
-      ctx.globalAlpha = 0.5;
+      // Shadow gelap di belakang logo supaya watermark tetap kontras &
+      // terbaca baik di background gambar yang putih/terang maupun gelap.
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      ctx.shadowBlur = Math.max(2, wmW * 0.05);
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.globalAlpha = 0.85;
+      // Gambar 2x agar shadow menumpuk jadi outline gelap yang lebih tebal
+      // di sekeliling bentuk logo (bukan cuma bayangan tipis satu sisi).
+      ctx.drawImage(logoImg, x, y, wmW, wmH);
       ctx.drawImage(logoImg, x, y, wmW, wmH);
       ctx.restore();
 
