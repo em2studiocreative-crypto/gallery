@@ -1,7 +1,9 @@
 // Service Worker — Status Gallery
 // Cache "app shell" (file statis) supaya bisa dibuka offline / lebih cepat.
-// Data gambar & kategori TIDAK di-cache di sini karena selalu diambil live
-// dari Supabase (biar selalu update).
+// Data gambar & kategori dari Supabase: NETWORK-FIRST, tapi hasil sukses
+// terakhir tetap disimpan di DATA_CACHE. Jadi kalau lagi online selalu
+// dapat data terbaru, dan kalau lagi offline, galeri masih bisa render
+// pakai data terakhir yang berhasil dimuat (bukan halaman kosong/error).
 
 // ===== ONESIGNAL WEB PUSH =====
 // Menumpangkan handler push notification OneSignal ke service worker yang
@@ -9,10 +11,13 @@
 // yang sudah jalan gak kebentur / harus pilih salah satu.
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE_VERSION = 'sg-v6'; // naikkan angka ini SETIAP kali deploy versi baru,
+const CACHE_VERSION = 'sg-v7'; // naikkan angka ini SETIAP kali deploy versi baru,
 // supaya browser tahu ada update & banner "Perbarui" muncul ke user
 const THUMB_CACHE = 'sg-thumbs-v1'; // cache terpisah khusus thumbnail wsrv.nl,
 // TIDAK ikut terhapus tiap update versi app (lihat activate handler)
+const DATA_CACHE = 'sg-data-v1'; // cache terpisah khusus respons data Supabase
+// (daftar kategori & gambar), juga TIDAK ikut terhapus tiap update versi app,
+// supaya galeri offline tetap bisa pakai data terakhir walau app-nya di-update
 const APP_SHELL = [
   './',
   './index.html',
@@ -52,7 +57,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_VERSION && key !== THUMB_CACHE)
+          .filter((key) => key !== CACHE_VERSION && key !== THUMB_CACHE && key !== DATA_CACHE)
           .map((key) => caches.delete(key))
       )
     )
@@ -105,8 +110,36 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Request ke domain lain (Supabase data/auth, dll) dibiarkan lewat
-  // langsung ke jaringan, tidak di-cache, supaya selalu fresh.
+  // Query data (GET) ke Supabase REST API — dipakai buat daftar kategori &
+  // gambar (lihat loadData() di index.html). NETWORK-FIRST: kalau online,
+  // selalu ambil dari server & timpa cache lama supaya tetap fresh. Kalau
+  // gagal (offline), fallback ke hasil sukses terakhir yang ada di cache,
+  // supaya galeri (dan thumbnail yang sudah di-cache di atas) tetap bisa
+  // dibuka. RPC (increment_downloads, is_admin, dst) TIDAK ikut ke sini
+  // karena dikirim sebagai POST, sudah kefilter di method check paling atas.
+  if (url.pathname.includes('/rest/v1/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(DATA_CACHE).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          // Kalau belum pernah berhasil di-cache sebelumnya juga, balikin
+          // Response gagal (bukan undefined) — loadData() di index.html
+          // sudah nangkep ini lewat try/catch dan nampilin errorState.
+          return cached || new Response('', { status: 503, statusText: 'Data unavailable (offline)' });
+        })
+    );
+    return;
+  }
+
+  // Request ke domain lain (Supabase auth, storage upload, dll) dibiarkan
+  // lewat langsung ke jaringan, tidak di-cache, supaya selalu fresh.
   if (url.origin !== self.location.origin) {
     return;
   }
