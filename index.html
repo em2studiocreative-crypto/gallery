@@ -1229,17 +1229,23 @@
   }
 
   .modal-similar-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    column-count: 2;
+    column-gap: 8px;
+  }
+
+  @media (min-width: 1100px) {
+    .modal-similar-grid { column-count: 3; }
   }
 
   .modal-similar-item {
+    display: block;
+    width: 100%;
+    break-inside: avoid;
+    margin-bottom: 8px;
     position: relative;
     border-radius: var(--radius-sm);
     overflow: hidden;
     cursor: pointer;
-    aspect-ratio: 1/1;
     background: var(--card);
     border: none;
     padding: 0;
@@ -1247,9 +1253,9 @@
 
   .modal-similar-item img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
     display: block;
+    background: var(--skeleton);
     transition: transform 0.2s;
   }
 
@@ -1268,6 +1274,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .modal-similar-loading {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 10px 0 2px;
   }
 
   .modal-close {
@@ -4071,8 +4084,12 @@ viewBox="0 0 0.16593 0.10268"
   // Skor kemiripan = bonus kategori sama (2) + kemiripan kata di judul (x3).
   // Kategori jadi sinyal utama (karena judul biasanya pendek), kemiripan kata
   // jadi pembeda urutan di dalam kategori yang sama / lintas kategori.
-  function getSimilarImages(img, topN = 6) {
+  function getSimilarImages(img) {
     const tokens = titleTokens(img.title);
+    // Tidak lagi dipotong ke topN -> seluruh gambar lain diikutkan (terurut
+    // dari yang paling mirip ke paling kurang mirip) supaya section "Gambar
+    // Serupa" punya stok gambar yang cukup untuk infinite scroll ala
+    // Pinterest, bukan cuma berhenti di segelintir item.
     return IMAGES
       .filter(other => other.id !== img.id)
       .map(other => {
@@ -4080,29 +4097,78 @@ viewBox="0 0 0.16593 0.10268"
         const wordScore = jaccardSimilarity(tokens, titleTokens(other.title)) * 3;
         return { img: other, score: categoryBonus + wordScore };
       })
-      .filter(entry => entry.score > 0)
       .sort((a, b) => b.score - a.score)
-      .slice(0, topN)
       .map(entry => entry.img);
+  }
+
+  // ===== RENDER BERTAHAP UNTUK "GAMBAR SERUPA" (infinite scroll) =====
+  // Sama seperti galeri utama: render sedikit dulu, tambah otomatis pas
+  // panel modal-info di-scroll mendekati bawah -> hasilnya terasa seperti
+  // feed Pinterest yang gak pernah habis, bukan grid statis segelintir item.
+  const MODAL_SIMILAR_BATCH_SIZE = 8;
+  let modalSimilarPool = [];
+  let modalSimilarRendered = 0;
+
+  function modalSimilarItemHtml(s) {
+    const [w, h] = s.size.split('×').map(Number);
+    const ratio = (w && h) ? `${w}/${h}` : '1/1';
+    return `
+      <button class="modal-similar-item" onclick="openModal(${s.id})" aria-label="Buka ${s.title}">
+        <img src="${gridThumb(s.url)}" alt="Gambar status: ${s.title}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
+        <span class="modal-similar-item-label">${s.title}</span>
+      </button>
+    `;
+  }
+
+  function appendModalSimilarBatch() {
+    const grid = document.getElementById('modalSimilarGrid');
+    if (!grid) return;
+    const nextItems = modalSimilarPool.slice(modalSimilarRendered, modalSimilarRendered + MODAL_SIMILAR_BATCH_SIZE);
+    if (nextItems.length === 0) return;
+    grid.insertAdjacentHTML('beforeend', nextItems.map(modalSimilarItemHtml).join(''));
+    modalSimilarRendered += nextItems.length;
   }
 
   function renderModalSimilar(img) {
     const section = document.getElementById('modalSimilarSection');
     const grid = document.getElementById('modalSimilarGrid');
-    const similar = getSimilarImages(img);
-    if (similar.length === 0) {
+    modalSimilarPool = getSimilarImages(img);
+    modalSimilarRendered = 0;
+    grid.innerHTML = '';
+    if (modalSimilarPool.length === 0) {
       section.style.display = 'none';
-      grid.innerHTML = '';
       return;
     }
-    grid.innerHTML = similar.map(s => `
-      <button class="modal-similar-item" onclick="openModal(${s.id})" aria-label="Buka ${s.title}">
-        <img src="${gridThumb(s.url)}" alt="Gambar status: ${s.title}" loading="lazy" decoding="async">
-        <span class="modal-similar-item-label">${s.title}</span>
-      </button>
-    `).join('');
     section.style.display = '';
+    appendModalSimilarBatch();
   }
+
+  // Cek jarak scroll di dalam panel .modal-info (bukan window, karena yang
+  // scroll di dalam modal adalah panel info-nya, bukan halaman utama) ->
+  // kalau sudah dekat bawah & stok gambar serupa masih ada, tambah batch
+  // berikutnya secara otomatis.
+  let modalSimilarScrollTicking = false;
+  function maybeLoadMoreModalSimilar() {
+    if (modalSimilarRendered >= modalSimilarPool.length) return;
+    const infoEl = document.querySelector('.modal-info');
+    if (!infoEl) return;
+    const distanceToBottom = infoEl.scrollHeight - (infoEl.scrollTop + infoEl.clientHeight);
+    if (distanceToBottom < 500) {
+      appendModalSimilarBatch();
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const infoEl = document.querySelector('.modal-info');
+    if (!infoEl) return;
+    infoEl.addEventListener('scroll', () => {
+      if (modalSimilarScrollTicking) return;
+      modalSimilarScrollTicking = true;
+      requestAnimationFrame(() => {
+        maybeLoadMoreModalSimilar();
+        modalSimilarScrollTicking = false;
+      });
+    });
+  });
 
   function updateModalFavoriteBtn() {
     if (!currentModalImage) return;
