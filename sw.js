@@ -3,6 +3,12 @@
 // Data gambar & kategori TIDAK di-cache di sini karena selalu diambil live
 // dari Supabase (biar selalu update).
 
+// ===== ONESIGNAL WEB PUSH =====
+// Menumpangkan handler push notification OneSignal ke service worker yang
+// sudah ada ini (bukan file worker terpisah), supaya PWA install/update flow
+// yang sudah jalan gak kebentur / harus pilih salah satu.
+importScripts('https://cdn.onesignal.com/sdks/OneSignalSDKWorker.js');
+
 const CACHE_VERSION = 'sg-v4'; // naikkan angka ini SETIAP kali deploy versi baru,
 // supaya browser tahu ada update & banner "Perbarui" muncul ke user
 const THUMB_CACHE = 'sg-thumbs-v1'; // cache terpisah khusus thumbnail wsrv.nl,
