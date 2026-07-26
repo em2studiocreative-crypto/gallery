@@ -338,6 +338,10 @@
     cursor: pointer;
     background: var(--card);
     transition: transform 0.2s;
+    /* Biar browser skip render/paint kartu yang masih di luar layar —
+       scroll jadi jauh lebih ringan di galeri yang panjang. */
+    content-visibility: auto;
+    contain-intrinsic-size: 0 260px;
   }
 
   .gallery-card:hover {
@@ -2306,7 +2310,7 @@ viewBox="0 0 0.16593 0.10268"
   let IMAGES = [];
 
   // ===== IMAGE OPTIMIZATION HELPERS =====
-  // Membuat URL versi ringan (resize + kompres + WebP) via proxy wsrv.nl,
+  // Membuat URL versi ringan (resize + kompres) via proxy wsrv.nl,
   // TANPA menyentuh file aslinya. File asli (img.url) tetap dipakai saat
   // download supaya hasilnya tetap full resolusi/HD.
   function thumbUrl(url, width, quality = 75) {
@@ -2314,7 +2318,10 @@ viewBox="0 0 0.16593 0.10268"
       url,
       w: String(width),
       q: String(quality),
-      output: 'webp',
+      // 'output' sengaja TIDAK di-set: wsrv.nl otomatis pilih format
+      // paling ringan yang didukung browser (AVIF > WebP > JPEG) lewat
+      // content negotiation, jadi ukuran file makin kecil di browser modern
+      // tanpa perlu kode tambahan atau merusak kompatibilitas di browser lama.
       we: '' // strip metadata (we = "without exif") utk ukuran lebih kecil
     });
     return `https://wsrv.nl/?${params.toString()}`;
