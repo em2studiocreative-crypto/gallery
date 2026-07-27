@@ -2137,28 +2137,21 @@ viewBox="0 0 1.49117 0.57976"
       </div>
       <h2 class="modal-title" id="modalTitle"></h2>
       <div class="modal-meta">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span id="modalSize"></span>
-      </div>
-      <div class="modal-meta">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <span id="modalDownloads"></span>
       </div>
       <div class="modal-actions">
-        <div style="display:flex; gap:10px;">
-          <button class="state-btn secondary" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <svg id="modalFavIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            <span id="modalFavLabel">Tambah ke Favorit</span>
+        <div style="display:flex; gap:10px; justify-content:flex-start;">
+          <button class="state-btn secondary" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)" aria-label="Tambah ke Favorit" title="Tambah ke Favorit" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;flex:none;">
+            <svg id="modalFavIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
-          <button class="state-btn secondary" id="modalShareBtn" onclick="shareCurrent()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Bagikan
+          <button class="state-btn secondary" id="modalShareBtn" onclick="shareCurrent()" aria-label="Bagikan" title="Bagikan" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;flex:none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
+          <button class="modal-download-btn" id="modalDownloadBtn" onclick="downloadCurrent()" aria-label="Download HD" title="Download HD" style="width:44px;height:44px;padding:0;flex:none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </button>
         </div>
-        <button class="modal-download-btn" id="modalDownloadBtn" onclick="downloadCurrent()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download HD
-        </button>
         <button class="modal-close-btn" onclick="closeModal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           Tutup
@@ -2549,7 +2542,7 @@ viewBox="0 0 0.16593 0.10268"
     <strong>Versi baru tersedia</strong>
     <span>Perbarui untuk dapatkan pembaruan terbaru</span>
   </div>
-  <button class="update-btn" onclick="applyAppUpdate()">Perbarui</button>
+  <button class="update-btn" id="updateBtn" onclick="applyAppUpdate()">Perbarui</button>
 </div>
 
 <!-- ONBOARDING: PILIH MINAT DI AWAL -->
@@ -3091,25 +3084,55 @@ viewBox="0 0 0.16593 0.10268"
 
   function applyAppUpdate() {
     if (!updateBannerShown) return;
+
+    // Feedback instan begitu diklik, supaya user tau tombolnya kepencet
+    // dan proses lagi jalan (sebelumnya diam total sampai reload beneran
+    // terjadi -> kerasa kayak "gak ngefek").
+    const btn = document.getElementById('updateBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Memperbarui...';
+    }
+
+    // Guard supaya reload cuma dieksekusi sekali walau ada 2 jalur yang
+    // bisa memicu (controllerchange ATAU fallback timeout di bawah).
+    let didReload = false;
+    const doReload = () => {
+      if (didReload) return;
+      didReload = true;
+      window.location.reload();
+    };
+
+    // FALLBACK: kalau dalam 3 detik controllerchange gak kepicu (kejadian
+    // nyata di beberapa PWA standalone/WebView Android, atau kalau worker
+    // jadi "redundant" duluan karena OneSignal register() ulang di belakang
+    // layar), tetap paksa reload. Ini yang bikin banner sebelumnya nyangkut
+    // dan baru hilang kalau user refresh manual.
+    const fallbackTimer = setTimeout(doReload, 3000);
+
     // PENTING: jangan pakai referensi worker lama yang disimpan pas banner
     // pertama kali muncul. OneSignal SDK bisa diam-diam register() ulang
     // sw.js di belakang layar, sehingga worker lama itu jadi "redundant"
     // (digantikan worker menunggu yang baru) dan postMessage ke dia gak
-    // berefek apa-apa -> controllerchange gak pernah kepicu -> banner
-    // nyangkut terus sampai user refresh manual. Makanya di sini kita
-    // selalu ambil reg.waiting yang BENERAN aktif saat tombol diklik.
+    // berefek apa-apa -> controllerchange gak pernah kepicu. Makanya di sini
+    // kita selalu ambil reg.waiting yang BENERAN aktif saat tombol diklik.
     navigator.serviceWorker.getRegistration().then((reg) => {
       const worker = reg && reg.waiting;
       if (!worker) {
         // Udah gak ada yang nunggu (kemungkinan udah keaktivasi diam-diam
         // sebagai phantom re-check) -> tinggal reload biasa buat masuk versi baru.
-        window.location.reload();
+        clearTimeout(fallbackTimer);
+        doReload();
         return;
       }
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
+        clearTimeout(fallbackTimer);
+        doReload();
       }, { once: true });
       worker.postMessage({ type: 'SKIP_WAITING' });
+    }).catch(() => {
+      // getRegistration() gagal (jarang terjadi) -> tetap andalkan fallback
+      // timer di atas, jangan biarkan banner nyangkut selamanya.
     });
   }
 
@@ -4062,7 +4085,6 @@ viewBox="0 0 0.16593 0.10268"
 
     document.getElementById('modalTitle').textContent = img.title;
     document.getElementById('modalCategory').textContent = CATEGORIES.find(c => c.id === img.category)?.label || img.category;
-    document.getElementById('modalSize').textContent = img.size;
     document.getElementById('modalDownloads').textContent = img.downloads.toLocaleString('id-ID') + ' downloads';
     updateModalFavoriteBtn();
     renderModalSimilar(img);
@@ -4217,8 +4239,11 @@ viewBox="0 0 0.16593 0.10268"
     if (!currentModalImage) return;
     const isFav = favorites.has(currentModalImage.id);
     document.getElementById('modalFavIcon').setAttribute('fill', isFav ? 'currentColor' : 'none');
-    document.getElementById('modalFavLabel').textContent = isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit';
-    document.getElementById('modalFavBtn').style.color = isFav ? '#ef4444' : '';
+    const favBtnLabel = isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit';
+    const modalFavBtnEl = document.getElementById('modalFavBtn');
+    modalFavBtnEl.setAttribute('aria-label', favBtnLabel);
+    modalFavBtnEl.setAttribute('title', favBtnLabel);
+    modalFavBtnEl.style.color = isFav ? '#ef4444' : '';
   }
 
   function closeModal(e, options = {}) {
