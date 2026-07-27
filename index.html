@@ -47,7 +47,6 @@
 </script>
 
 <!-- ===== ONESIGNAL WEB PUSH ===== -->
-<!-- TODO: ganti ONESIGNAL_APP_ID_DI_SINI dengan App ID asli dari dashboard OneSignal -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -60,8 +59,7 @@
       serviceWorkerPath: "sw.js",
       // Matikan bubble/tombol bawaan OneSignal: kita pakai toggle sendiri di
       // menu Pengaturan > "Notifikasi Gambar Baru" (lihat toggleNotifPref()).
-      notifyButton: { enable: false },
-      allowLocalhostAsSecureOrigin: true
+      notifyButton: { enable: false }
     });
   });
 </script>
@@ -233,13 +231,6 @@
     pointer-events: none;
   }
 
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
   .icon-btn {
     width: 40px;
     height: 40px;
@@ -282,28 +273,31 @@
 
   .categories::-webkit-scrollbar { display: none; }
 
-  .categories::before {
+  .categories::before,
+  .categories::after {
     content: '';
-    position: absolute;
-    left: 0;
+    position: sticky;
     top: 0;
     bottom: 0;
-    width: 40px;
-    background: linear-gradient(to left, transparent, var(--bg));
+    width: 20px;
+    flex-shrink: 0;
+    align-self: stretch;
     pointer-events: none;
     z-index: 2;
   }
 
+  .categories::before {
+    left: 0;
+    order: -1;
+    margin-left: -8px;
+    background: linear-gradient(to left, transparent, var(--bg));
+  }
+
   .categories::after {
-    content: '';
-    position: absolute;
     right: 0;
-    top: 0;
-    bottom: 0;
-    width: 60px;
+    order: 9999;
+    margin-right: -8px;
     background: linear-gradient(to right, transparent, var(--bg));
-    pointer-events: none;
-    z-index: 2;
   }
 
   .chip {
@@ -419,8 +413,7 @@
     gap: 10px;
   }
 
-  .gallery-card:hover .card-overlay,
-  .gallery-card.show-overlay .card-overlay {
+  .gallery-card:hover .card-overlay {
     opacity: 1;
   }
 
@@ -1038,22 +1031,6 @@
 
   .settings-toggle.on::after { transform: translateX(16px); }
 
-  .settings-back-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    padding: 4px 4px 4px 0;
-    margin-bottom: 4px;
-  }
-
-  .settings-back-btn:hover { color: var(--text); }
-
   /* ===== MODAL ===== */
   .modal-backdrop {
     position: fixed;
@@ -1249,32 +1226,6 @@
 
   .modal-download-btn:hover { background: var(--accent-hover); }
 
-  /* Tombol Tutup dibuat beda dari tombol sekunder biasa (fav/bagikan) —
-     outline aksen yang keisi solid pas di-hover, biar keliatan lebih
-     "sengaja didesain" ketimbang cuma tombol abu-abu polos. */
-  .modal-close-btn {
-    padding: 13px 24px;
-    background: transparent;
-    color: var(--accent);
-    border: 1.5px solid var(--accent);
-    border-radius: var(--radius-pill);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: inherit;
-    transition: background 0.2s, color 0.2s;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .modal-close-btn:hover {
-    background: var(--accent);
-    color: #000;
-  }
-
   .modal-similar {
     margin-top: 20px;
     padding-top: 18px;
@@ -1334,13 +1285,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .modal-similar-loading {
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-dim);
-    padding: 10px 0 2px;
   }
 
   .modal-close {
@@ -1802,17 +1746,6 @@
     color: var(--accent);
   }
 
-  .side-nav-badge {
-    position: absolute;
-    top: 4px;
-    right: 6px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #ef4444;
-    border: 2px solid var(--bg-elevated);
-  }
-
   .side-nav-item[data-tooltip] {
     position: relative;
   }
@@ -1982,7 +1915,6 @@
   .state-btn:focus-visible,
   .card-fav-btn:focus-visible,
   .modal-download-btn:focus-visible,
-  .modal-close-btn:focus-visible,
   .modal-report-icon-btn:focus-visible,
   .modal-close:focus-visible,
   .gallery-card:focus-visible {
@@ -2094,7 +2026,7 @@
 <script>
   (function() {
     try {
-      var saved = localStorage.getItem('sg_theme_pref');
+      let saved = localStorage.getItem('sg_theme_pref');
       if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
     } catch (e) {}
   })();
@@ -4372,7 +4304,7 @@ viewBox="0 0 0.16593 0.10268"
 
     document.getElementById('modalTitle').textContent = img.title;
     document.getElementById('modalCategory').textContent = CATEGORIES.find(c => c.id === img.category)?.label || img.category;
-    document.getElementById('modalDownloads').textContent = img.downloads.toLocaleString('id-ID') + ' downloads';
+    document.getElementById('modalDownloads').textContent = (img.downloads || 0).toLocaleString('id-ID') + ' downloads';
     updateModalFavoriteBtn();
     renderModalSimilar(img);
 
@@ -4636,13 +4568,6 @@ viewBox="0 0 0.16593 0.10268"
       return false;
     }
     return true;
-  }
-
-  function downloadImage(imgId) {
-    const img = IMAGES.find(i => i.id === imgId);
-    if (!img) return;
-    if (!canDownload()) return;
-    triggerDownload(img.url, img.title, img.id);
   }
 
   function downloadCurrent() {
