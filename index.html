@@ -1886,11 +1886,23 @@
       overflow-y: visible;
     }
     /* Tombol close dilepas dari alur scroll modal-content (supaya gak
-       ikut naik & hilang pas discroll) -> dipaku ke pojok layar. */
+       ikut naik & hilang pas discroll) -> dipaku ke pojok layar.
+       modal-content punya overflow:hidden (buat bulatan sudut gambar),
+       jadi child position:fixed di dalamnya tetap harus dipaksa lepas
+       total dari box itu lewat overflow:visible + z-index tinggi
+       supaya gak ketutup/ke-clip pas modal-content di-scroll. */
+    #modal .modal-content {
+      overflow: visible;
+    }
+    #modal .modal-image-wrap {
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      overflow: hidden;
+    }
     #modal .modal-close {
-      position: fixed;
+      position: fixed !important;
       top: 24px;
       right: 24px;
+      z-index: 300;
     }
   }
 
