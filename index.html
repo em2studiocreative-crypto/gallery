@@ -478,6 +478,20 @@
 
   .gallery-card.img-error img { display: none; }
 
+  .modal-image-wrap.img-error img { display: none; }
+
+  .modal-image-wrap.img-error::before {
+    content: 'Gambar gagal dimuat';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    color: var(--text-dimmer);
+    font-size: 13px;
+    text-align: center;
+    padding: 16px;
+  }
+
   .gallery-card.img-error::before {
     content: 'Gambar gagal dimuat';
     display: flex;
@@ -1167,6 +1181,21 @@
     background: rgba(239,68,68,0.12);
     color: #ef4444;
     border-color: rgba(239,68,68,0.4);
+  }
+
+  /* State setelah gambar dilaporkan: nonaktif & warnanya redup, biar beda
+     jelas dari kondisi bisa-diklik biasa (bukan cuma disabled abu-abu default) */
+  .modal-report-icon-btn.reported {
+    color: var(--text-dimmer);
+    border-color: var(--border);
+    background: transparent;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .modal-report-icon-btn.reported:hover {
+    background: transparent;
+    color: var(--text-dimmer);
+    border-color: var(--border);
   }
 
   .modal-category {
@@ -1930,7 +1959,7 @@
         "meta    meta"
         "similar similar";
       align-items: start;
-      row-gap: var(--gap-2);
+      row-gap: 6px;
       column-gap: 10px;
     }
     /* 3 icon aksi (fav/share/download) dipindah sejajar Judul (kanan atas) */
@@ -2097,6 +2126,8 @@
 </head>
 <body>
 
+<h1 style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;">Status Gallery — Download Gambar Status Motivasi, Islami, Aesthetic & Quotes HD Gratis</h1>
+
 <!-- HEADER -->
 <header class="header">
   <a href="#" class="header-brand" onclick="resetAll(); return false;">
@@ -2178,8 +2209,8 @@ viewBox="0 0 1.49117 0.57976"
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="modal-content">
-    <div class="modal-image-wrap">
-      <img id="modalImg" alt="" onerror="if(typeof currentModalImage!=='undefined' && currentModalImage && this.src!==currentModalImage.url){this.src=currentModalImage.url;}else{showToast('Gambar gagal dimuat', 'error');}">
+    <div class="modal-image-wrap" id="modalImageWrap">
+      <img id="modalImg" alt="" onerror="handleModalImgError(this)">
     </div>
     <div class="modal-info">
       <div class="modal-info-top-row" style="align-items:center; justify-content:space-between; gap:10px;">
@@ -2189,11 +2220,11 @@ viewBox="0 0 1.49117 0.57976"
         </div>
       </div>
       <div class="modal-meta" style="justify-content:flex-start; margin:0 0 0;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span id="modalDownloads"></span>
-        <button class="modal-report-icon-btn" id="modalReportBtn" onclick="reportCurrent()" aria-label="Laporkan gambar ini" title="Laporkan" style="margin-left:4px;">
+        <button class="modal-report-icon-btn" id="modalReportBtn" onclick="reportCurrent()" aria-label="Laporkan gambar ini" title="Laporkan">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>
         </button>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-left:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span id="modalDownloads"></span>
       </div>
       <div class="modal-actions" style="margin-top:10px;">
         <div style="display:flex; gap:10px; justify-content:flex-start;">
@@ -2626,6 +2657,12 @@ viewBox="0 0 0.16593 0.10268"
   let CATEGORIES = [ { id: 'all', label: 'Semua' } ];
   let IMAGES = [];
 
+  // Helper global: nama kategori dari id-nya. Dipakai buat alt text gambar
+  // biar lebih deskriptif untuk SEO (Google Images), bukan cuma judulnya.
+  function catLabel(id) {
+    return (CATEGORIES.find(c => c.id === id) || {}).label || id;
+  }
+
   // ===== IMAGE OPTIMIZATION HELPERS =====
   // Membuat URL versi ringan (resize + kompres) via proxy wsrv.nl,
   // TANPA menyentuh file aslinya. File asli (img.url) tetap dipakai saat
@@ -2732,10 +2769,51 @@ viewBox="0 0 0.16593 0.10268"
   // Menyusun ulang gambar berdasarkan minat kategori user. Hanya dipakai untuk
   // feed default "Semua" (bukan saat search / filter favorit / kategori
   // spesifik dipilih user sendiri) supaya tidak terasa mengganggu kontrol user.
+  //
+  // CACHE URUTAN: filterAndRender() (dan applyCategoryAffinitySort di dalamnya)
+  // bisa terpanggil berkali-kali di background tanpa aksi user yang disengaja
+  // -- misal tiap ada event realtime dari Supabase (termasuk saat ada ORANG
+  // LAIN mendownload gambar, yang cuma menaikkan angka `downloads`). Kalau
+  // affinity sort dihitung ulang dari nol tiap kali itu terjadi, sementara
+  // categoryAffinity user SENDIRI juga baru saja berubah (krn habis buka
+  // modal preview -> trackInteraction menaikkan skor), hasil weightedInterleave
+  // bisa beda padahal SET gambarnya sama persis -> gambar yang tadinya
+  // terlihat di suatu posisi tiba-tiba berubah jadi gambar lain, padahal user
+  // tidak melakukan apa-apa.
+  //
+  // Supaya urutan yang SUDAH tampil di layar stabil, urutan hasil sort di-cache
+  // dan hanya dihitung ulang kalau SET id gambarnya benar-benar berubah (ada
+  // gambar baru/dihapus dari tabel `images`), atau kalau memang sengaja
+  // di-reset lewat resetAffinityOrderCache() (dipakai setelah user pilih minat
+  // di onboarding, supaya feed langsung menyesuaikan saat itu juga).
+  let cachedAffinityOrder = null; // array objek gambar, urutan terakhir yang dipakai
+  let cachedAffinityIds = null;   // Set id gambar yang jadi dasar urutan di atas
+
+  function resetAffinityOrderCache() {
+    cachedAffinityOrder = null;
+    cachedAffinityIds = null;
+  }
+
   function applyCategoryAffinitySort(images) {
     const hasAffinityData = Object.values(categoryAffinity).some(v => v > 0);
     if (!hasAffinityData) return images; // belum ada data -> urutan asli (terbaru dulu)
 
+    const currentIds = new Set(images.map(img => img.id));
+    const sameSet = cachedAffinityIds &&
+      currentIds.size === cachedAffinityIds.size &&
+      [...currentIds].every(id => cachedAffinityIds.has(id));
+
+    if (sameSet) {
+      // Set gambar tidak berubah -> pertahankan urutan lama (biar tidak
+      // "berubah sendiri"), tapi ambil objek gambar versi TERBARU dari
+      // `images` (mis. downloads/title yang baru saja ke-update lewat
+      // realtime) supaya data yang ditampilkan tetap fresh.
+      const byId = new Map(images.map(img => [img.id, img]));
+      return cachedAffinityOrder.map(img => byId.get(img.id)).filter(Boolean);
+    }
+
+    // Set gambar berubah (ada yang baru masuk / dihapus admin) -> baru di
+    // sini urutan dihitung ulang.
     const byCategory = new Map();
     images.forEach(img => {
       if (!byCategory.has(img.category)) byCategory.set(img.category, []);
@@ -2749,7 +2827,10 @@ viewBox="0 0 0.16593 0.10268"
       items
     }));
 
-    return weightedInterleave(groups);
+    const sorted = weightedInterleave(groups);
+    cachedAffinityOrder = sorted;
+    cachedAffinityIds = currentIds;
+    return sorted;
   }
 
   // ===== ONBOARDING: PILIH MINAT DI AWAL =====
@@ -2835,6 +2916,10 @@ viewBox="0 0 0.16593 0.10268"
     // Kalau lagi di feed "Semua" tanpa filter/search aktif, susun ulang feed
     // supaya kategori yang barusan dipilih langsung kelihatan lebih dominan.
     if (activeCategory === 'all' && !showFavoritesOnly && !searchQuery) {
+      // Reset cache urutan affinity dulu -> skor affinity baru saja berubah
+      // SENGAJA (user pilih minat), jadi resort kali ini memang harus kepakai,
+      // bukan dipertahankan ke urutan lama.
+      resetAffinityOrderCache();
       filterAndRender();
     }
   }
@@ -3597,6 +3682,22 @@ viewBox="0 0 0.16593 0.10268"
     imgEl.src = img.url;
   }
 
+  // Sama seperti handleGridImgError, tapi untuk gambar di dalam modal
+  // preview: fallback ke URL asli dulu, baru kalau tetap gagal tampilkan
+  // state error di modal (bukan diam-diam gagal tanpa feedback).
+  function handleModalImgError(imgEl) {
+    if (imgEl.dataset.fallback === '1') {
+      imgEl.dataset.loaded = '1';
+      const wrap = document.getElementById('modalImageWrap');
+      if (wrap) wrap.classList.add('img-error');
+      showToast('Gambar gagal dimuat', 'error');
+      return;
+    }
+    if (!currentModalImage || !currentModalImage.url) return;
+    imgEl.dataset.fallback = '1';
+    imgEl.src = currentModalImage.url;
+  }
+
   // ===== ANTI-MACET: watchdog buat thumbnail yang nyangkut loading =====
   // <img> tidak punya timeout bawaan di browser. Kalau request ke wsrv.nl
   // nyangkut (mis. cache proxy masih dingin & source-nya lambat diambil),
@@ -3628,6 +3729,117 @@ viewBox="0 0 0.16593 0.10268"
     imgEl.addEventListener('error', clear, { once: true });
   }
 
+  // Watchdog yang sama seperti watchImageLoad, tapi untuk gambar di modal
+  // preview (bukan kartu grid) -> supaya modal juga tidak diam selamanya
+  // kalau request ke wsrv.nl nyangkut, bukan cuma error langsung.
+  function watchModalImageLoad(imgEl, imgId) {
+    const timeoutId = setTimeout(() => {
+      if (imgEl.dataset.loaded === '1') return; // sudah kelar duluan, aman
+      // Modal sudah ganti ke gambar lain / sudah ditutup -> jangan utak-atik lagi
+      if (!currentModalImage || currentModalImage.id !== imgId) return;
+      const attempt = parseInt(imgEl.dataset.attempt || '0', 10);
+      if (attempt < 1) {
+        imgEl.dataset.attempt = '1';
+        const sep = imgEl.src.includes('?') ? '&' : '?';
+        imgEl.src = imgEl.src + sep + '_retry=' + Date.now();
+        watchModalImageLoad(imgEl, imgId);
+      } else {
+        handleModalImgError(imgEl);
+      }
+    }, IMG_LOAD_TIMEOUT_MS);
+
+    const clear = () => clearTimeout(timeoutId);
+    imgEl.addEventListener('load', clear, { once: true });
+    imgEl.addEventListener('error', clear, { once: true });
+  }
+
+  // ===== SMART SEARCH =====
+  // Search lama cuma cocok kalau frasa persis nemplok di title/kategori
+  // (pakai .includes()), jadi user harus ketik persis urutan & ejaan yang
+  // benar. Versi ini: pecah query jadi kata per kata, tiap kata dicocokkan
+  // bebas urutan ke kata manapun di title/kategori, dikasih skor beda-beda
+  // tergantung tipe kecocokan (persis > prefix > substring > typo ringan),
+  // baru hasilnya diurutkan dari yang paling relevan.
+
+  // Jarak edit (Levenshtein) antara 2 kata, berhenti lebih awal begitu
+  // udah kepastian lewat maxDist -> hemat kerja buat toleransi typo ringan.
+  function levenshteinDistance(a, b, maxDist) {
+    const la = a.length, lb = b.length;
+    if (Math.abs(la - lb) > maxDist) return maxDist + 1;
+    let prev = new Array(lb + 1);
+    for (let j = 0; j <= lb; j++) prev[j] = j;
+    for (let i = 1; i <= la; i++) {
+      const curr = new Array(lb + 1);
+      curr[0] = i;
+      let rowMin = curr[0];
+      for (let j = 1; j <= lb; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        curr[j] = Math.min(
+          prev[j] + 1,
+          curr[j - 1] + 1,
+          prev[j - 1] + cost
+        );
+        if (curr[j] < rowMin) rowMin = curr[j];
+      }
+      if (rowMin > maxDist) return maxDist + 1;
+      prev = curr;
+    }
+    return prev[lb];
+  }
+
+  // Skor kecocokan 1 kata query vs 1 kata target (title/kategori).
+  // 0 = ga nyambung sama sekali.
+  function wordMatchScore(queryWord, targetWord) {
+    if (!queryWord || !targetWord) return 0;
+    if (targetWord === queryWord) return 100;                 // persis sama
+    if (targetWord.startsWith(queryWord)) return 70;           // prefix, mis. "gau" -> "gaun"
+    if (queryWord.length >= 3 && targetWord.includes(queryWord)) return 45; // muncul di tengah kata
+    if (queryWord.length >= 4) {                                // typo ringan (maks 1 huruf beda)
+      if (levenshteinDistance(queryWord, targetWord, 1) <= 1) return 55;
+    }
+    return 0;
+  }
+
+  // Skor total 1 gambar untuk seluruh kata di query. Kalau ada 1 kata query
+  // yang sama sekali ga nemu padanan di title/kategori, gambar ini dianggap
+  // ga relevan (return -1) -> tetap butuh SEMUA kata match, tapi urutan bebas.
+  function smartSearchScore(queryWords, img) {
+    const titleWords = img.title.toLowerCase().split(/\s+/).filter(Boolean);
+    const categoryWords = img.category.toLowerCase().split(/\s+/).filter(Boolean);
+    const allTargetWords = titleWords.concat(categoryWords);
+
+    let totalScore = 0;
+    for (const qw of queryWords) {
+      let best = 0;
+      for (const tw of allTargetWords) {
+        const s = wordMatchScore(qw, tw);
+        if (s > best) best = s;
+      }
+      if (best === 0) return -1;
+      totalScore += best;
+    }
+    // Bonus kecil kalau frasa penuh query kebetulan nemplok persis di title
+    // (naikin hasil yang "paling pas" ke atas dibanding yang cuma cocok per-kata)
+    const fullQuery = queryWords.join(' ');
+    if (img.title.toLowerCase().includes(fullQuery)) totalScore += 20;
+    return totalScore;
+  }
+
+  // Filter + urutkan items berdasar relevansi ke query. Query dipecah jadi
+  // kata (toleransi urutan), tiap kata boleh cocok prefix/substring/typo-1-huruf.
+  function smartSearch(items, query) {
+    const queryWords = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    if (queryWords.length === 0) return items;
+
+    const scored = [];
+    for (const img of items) {
+      const score = smartSearchScore(queryWords, img);
+      if (score >= 0) scored.push({ img, score });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map(s => s.img);
+  }
+
   function filterAndRender() {
     recomputeTrendingIds();
     let filtered = IMAGES;
@@ -3638,10 +3850,7 @@ viewBox="0 0 0.16593 0.10268"
       filtered = filtered.filter(img => img.category === activeCategory);
     }
     if (searchQuery) {
-      filtered = filtered.filter(img =>
-        img.title.toLowerCase().includes(searchQuery) ||
-        img.category.toLowerCase().includes(searchQuery)
-      );
+      filtered = smartSearch(filtered, searchQuery);
     }
     // Urutan berdasar minat kategori hanya untuk feed default "Semua" —
     // saat user cari, filter favorit, atau pilih kategori sendiri, urutan
@@ -3669,7 +3878,7 @@ viewBox="0 0 0.16593 0.10268"
       <div class="gallery-card" role="button" tabindex="0" onclick="openModal(${img.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id});}">
         <img
           src="${gridThumb(img.url)}"
-          alt="Gambar status: ${img.title}"
+          alt="Status ${catLabel(img.category)} - ${img.title} | Download gambar status HD gratis"
           style="aspect-ratio:${ratio}"
           loading="${eager ? 'eager' : 'lazy'}"
           fetchpriority="${eager ? 'high' : 'low'}"
@@ -4114,16 +4323,30 @@ viewBox="0 0 0.16593 0.10268"
     const wasAlreadyOpen = document.getElementById('modal').classList.contains('open');
     currentModalImage = img;
     trackInteraction(img.category, 'view');
+    syncReportButtonState(img.id);
 
     const modalImg = document.getElementById('modalImg');
-    modalImg.alt = `Gambar status: ${img.title}`;
+    const modalImageWrap = document.getElementById('modalImageWrap');
+    modalImg.alt = `Gambar status ${catLabel(img.category)} - ${img.title}, download HD gratis di Status Gallery`;
+    // Reset state dari gambar sebelumnya (fallback/attempt/error) supaya
+    // watchdog & fallback jalan dari awal lagi untuk gambar yang baru ini.
+    delete modalImg.dataset.fallback;
+    delete modalImg.dataset.attempt;
+    modalImg.dataset.loaded = '0';
+    if (modalImageWrap) modalImageWrap.classList.remove('img-error');
 
     // Step 1: tampilkan langsung thumbnail grid (480px) yang kemungkinan
     // besar sudah ter-cache browser (sama persis dengan gambar di kartu
     // yang baru diklik) -> muncul instan, tidak ada jeda kosong/patah.
     modalImg.classList.remove('loaded');
     modalImg.src = gridThumb(img.url);
+    // Force reflow supaya transisi opacity ke-trigger dari awal (0 -> 1),
+    // sama seperti step 2 di bawah -- tanpa ini, remove+add class terjadi
+    // di tick yang sama dan transisi fade-nya tidak pernah kelihatan.
+    void modalImg.offsetWidth;
     modalImg.classList.add('loaded');
+    modalImg.addEventListener('load', () => { modalImg.dataset.loaded = '1'; }, { once: true });
+    watchModalImageLoad(modalImg, img.id);
 
     // Step 2: preload versi resolusi lebih tinggi (1080px) di background.
     // Baru setelah BENAR-BENAR selesai dimuat, ganti src-nya -> transisi
@@ -4139,6 +4362,11 @@ viewBox="0 0 0.16593 0.10268"
         void modalImg.offsetWidth;
         modalImg.classList.add('loaded');
       }
+    };
+    hiRes.onerror = () => {
+      // Versi HD gagal dimuat -> diam-diam tetap pakai gridThumb yang
+      // sudah tampil di step 1, tidak perlu fallback lagi karena modalImg
+      // sendiri sudah punya watchdog+fallback via watchModalImageLoad.
     };
     hiRes.src = previewThumb(img.url);
 
@@ -4227,7 +4455,7 @@ viewBox="0 0 0.16593 0.10268"
     const ratio = (w && h) ? `${w}/${h}` : '1/1';
     return `
       <button class="modal-similar-item" onclick="openModal(${s.id})" aria-label="Buka ${s.title}">
-        <img src="${gridThumb(s.url)}" alt="Gambar status: ${s.title}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
+        <img src="${gridThumb(s.url)}" alt="Status ${catLabel(s.category)} - ${s.title}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
         <span class="modal-similar-item-label">${s.title}</span>
       </button>
     `;
@@ -4332,11 +4560,45 @@ viewBox="0 0 0.16593 0.10268"
     if (e.key === 'Escape') closeModal();
   });
 
+  // Cegah spam laporan: satu gambar cukup dilaporkan sekali per browser.
+  // Sebelumnya tombol ini bisa diklik berkali-kali dan tiap klik insert baris
+  // baru ke tabel `reports` tanpa cek duplikat -> numpuk di panel admin.
+  // Pakai localStorage (pola sama seperti sg_guest_dl_count) supaya statusnya
+  // tetap kalau modal ditutup-buka lagi atau halaman di-reload.
+  function getReportedImageIds() {
+    try {
+      return new Set(JSON.parse(localStorage.getItem('sg_reported_ids') || '[]'));
+    } catch (e) { return new Set(); }
+  }
+
+  function markImageReported(imageId) {
+    const ids = getReportedImageIds();
+    ids.add(imageId);
+    try { localStorage.setItem('sg_reported_ids', JSON.stringify([...ids])); } catch (e) {}
+  }
+
+  // Sinkronkan tampilan tombol Laporkan di modal sesuai status gambar yang
+  // sedang dibuka: kalau sudah pernah dilaporkan, tombol dinonaktifkan biar
+  // user tahu laporannya sudah tercatat (bukan diam-diam boleh diklik lagi).
+  function syncReportButtonState(imageId) {
+    const btn = document.getElementById('modalReportBtn');
+    if (!btn) return;
+    const alreadyReported = getReportedImageIds().has(imageId);
+    btn.disabled = alreadyReported;
+    btn.setAttribute('aria-label', alreadyReported ? 'Sudah dilaporkan' : 'Laporkan gambar ini');
+    btn.title = alreadyReported ? 'Sudah dilaporkan' : 'Laporkan';
+    btn.classList.toggle('reported', alreadyReported);
+  }
+
   function reportCurrent() {
     if (!currentModalImage) return;
     const imageId = currentModalImage.id;
+    if (getReportedImageIds().has(imageId)) return; // jaga-jaga: harusnya tombol sudah disabled duluan
+
     if (typeof gtag === 'function') gtag('event', 'report_image', { image_id: imageId });
     showToast('Laporan terkirim, terima kasih sudah membantu kami.');
+    markImageReported(imageId);
+    syncReportButtonState(imageId);
 
     // Simpan ke tabel reports supaya bisa direview di panel admin
     // (sebelumnya cuma tercatat sebagai GA event, gak ada tempat reviewnya).
