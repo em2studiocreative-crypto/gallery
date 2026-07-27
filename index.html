@@ -1923,7 +1923,26 @@
     #modal .modal-info {
       flex: none;
       overflow-y: visible;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "toprow  actions"
+        "meta    meta"
+        "similar similar";
+      align-items: start;
+      row-gap: var(--gap-2);
+      column-gap: 10px;
     }
+    /* 3 icon aksi (fav/share/download) dipindah sejajar Judul (kanan atas) */
+    #modal .modal-info-top-row { grid-area: toprow; }
+    #modal .modal-actions {
+      grid-area: actions;
+      flex-direction: row;
+      margin-top: 0;
+      align-self: start;
+    }
+    #modal .modal-meta { grid-area: meta; }
+    #modal .modal-similar { grid-area: similar; }
   }
 
   /* Focus visibility (keyboard navigation) */
