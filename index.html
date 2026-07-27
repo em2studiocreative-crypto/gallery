@@ -257,18 +257,47 @@
     z-index: 90;
     background: var(--bg);
     border-bottom: 1px solid var(--border);
-    padding: var(--gap-2) 0;
+    padding: var(--gap-2) var(--gap-2) var(--gap-2) 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .categories {
     display: flex;
     gap: 8px;
-    padding: 0 var(--gap-2);
+    padding: 0 0 0 var(--gap-2);
     overflow-x: auto;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Tombol "semua kategori" — solusi kalau daftar kategori makin banyak dan
+     gak muat lagi discroll horizontal satu-satu. Selalu nempel di ujung
+     kanan (di luar area scroll .categories), buka modal berisi SEMUA
+     kategori yang bisa dicari & dikelompokkan per abjad. */
+  .categories-more-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--card);
+    color: var(--text-dim);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .categories-more-btn:hover {
+    background: var(--card-hover);
+    color: var(--accent);
   }
 
   .categories::-webkit-scrollbar { display: none; }
@@ -329,6 +358,85 @@
     background: var(--accent);
     color: #000;
     font-weight: 600;
+  }
+
+  /* ===== CATEGORIES MODAL (semua kategori, dikelompokkan per abjad) ===== */
+  .cat-modal-content {
+    max-width: 480px;
+    padding: 24px;
+    display: block;
+    max-height: 82vh;
+  }
+
+  .cat-modal-header {
+    padding-right: 28px;
+    margin-bottom: var(--gap-2);
+  }
+
+  .cat-modal-header .modal-title {
+    margin-bottom: 12px;
+  }
+
+  .cat-modal-list {
+    overflow-y: auto;
+    max-height: calc(82vh - 138px);
+    margin: 0 -8px;
+    padding: 0 8px;
+  }
+
+  .cat-modal-group {
+    margin-bottom: 4px;
+  }
+
+  .cat-modal-group-title {
+    position: sticky;
+    top: 0;
+    background: var(--bg-elevated);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 8px 4px 6px;
+    z-index: 1;
+  }
+
+  .cat-modal-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: var(--gap-2);
+  }
+
+  .cat-modal-chip {
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--card);
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .cat-modal-chip:hover {
+    background: var(--card-hover);
+    color: var(--text);
+  }
+
+  .cat-modal-chip.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+  }
+
+  .cat-modal-empty {
+    text-align: center;
+    color: var(--text-dimmer);
+    font-size: 13px;
+    padding: 28px 0;
   }
 
   /* ===== MAIN / GALLERY ===== */
@@ -2096,6 +2204,9 @@ viewBox="0 0 1.49117 0.57976"
 <!-- CATEGORIES -->
 <div class="categories-wrap">
   <div class="categories" id="categoriesBar"></div>
+  <button type="button" class="categories-more-btn" onclick="openCategoriesModal()" aria-label="Semua kategori" title="Semua kategori">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+  </button>
 </div>
 
 <!-- MAIN GALLERY -->
@@ -2530,6 +2641,24 @@ viewBox="0 0 0.16593 0.10268"
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
       <span>Sudah transfer? Kirim bukti transfer via WhatsApp atau email ke <span id="donateEmail">admin@em2studio.online</span> supaya kami bisa ucapkan terima kasih 🙏</span>
     </div>
+  </div>
+</div>
+
+<!-- SEMUA KATEGORI: solusi kalau kategori makin banyak & gak muat lagi
+     discroll satu-satu di chip bar. Bisa dicari & dikelompokkan per abjad. -->
+<div class="modal-backdrop" id="categoriesModal" onclick="closeCategoriesModal(event)">
+  <div class="modal-content cat-modal-content" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeCategoriesModal()" aria-label="Tutup">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="cat-modal-header">
+      <h2 class="modal-title" style="font-size:18px;">Semua Kategori</h2>
+      <div class="search-wrap" style="max-width:none;">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search-input" id="categoriesModalSearch" placeholder="Cari kategori..." autocomplete="off" oninput="filterCategoriesModal(this.value)">
+      </div>
+    </div>
+    <div class="cat-modal-list" id="categoriesModalList"></div>
   </div>
 </div>
 
@@ -3566,6 +3695,68 @@ viewBox="0 0 0.16593 0.10268"
     }
   }
 
+  // ===== MODAL "SEMUA KATEGORI" =====
+  // Solusi biar chip bar tetap enak dipakai walau kategori terus nambah:
+  // chip bar horizontal cuma nampung akses cepat, sementara modal ini
+  // nampilin SEMUA kategori sekaligus, dikelompokkan per huruf awal (mirip
+  // A-Z index kontak) plus kotak pencarian buat langsung loncat ke kategori
+  // yang dicari tanpa scroll manual.
+  function openCategoriesModal() {
+    const search = document.getElementById('categoriesModalSearch');
+    search.value = '';
+    renderCategoriesModalList('');
+    document.getElementById('categoriesModal').classList.add('open');
+    setTimeout(() => search.focus(), 250);
+  }
+
+  function closeCategoriesModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('categoriesModal').classList.remove('open');
+  }
+
+  function filterCategoriesModal(query) {
+    renderCategoriesModalList(query);
+  }
+
+  function renderCategoriesModalList(query) {
+    const list = document.getElementById('categoriesModalList');
+    const q = query.trim().toLowerCase();
+    const realCats = CATEGORIES.filter(c => c.id !== 'all');
+    const filtered = q ? realCats.filter(c => c.label.toLowerCase().includes(q)) : realCats;
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="cat-modal-empty">Kategori "${query}" tidak ditemukan</div>`;
+      return;
+    }
+
+    // Kelompokkan per huruf awal (CATEGORIES sudah terurut abjad dari
+    // sortCategories(), jadi tinggal group berurutan tanpa sort ulang).
+    const groups = [];
+    let currentLetter = '';
+    filtered.forEach(c => {
+      const letter = (c.label[0] || '#').toUpperCase();
+      if (letter !== currentLetter) {
+        currentLetter = letter;
+        groups.push({ letter, items: [] });
+      }
+      groups.at(-1).items.push(c);
+    });
+
+    list.innerHTML = groups.map(g => `
+      <div class="cat-modal-group">
+        <div class="cat-modal-group-title">${g.letter}</div>
+        <div class="cat-modal-grid">
+          ${g.items.map(c => `<button type="button" class="cat-modal-chip ${c.id === activeCategory ? 'active' : ''}" onclick="selectCategoryFromModal('${c.id}')">${c.label}</button>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function selectCategoryFromModal(catId) {
+    selectCategory(catId);
+    closeCategoriesModal();
+  }
+
   // Klik ikon "Cari" berarti user mau menjelajah/mencari semua gambar —
   // kalau lagi di mode Favorit-only, filter itu harus dimatikan dulu,
   // supaya galeri tidak tetap kosong sebelum user sempat mengetik apa pun.
@@ -3970,13 +4161,14 @@ viewBox="0 0 0.16593 0.10268"
     return { id: r.id, label: r.label, sort_order: r.sort_order };
   }
 
-  // Urutkan CATEGORIES sesuai sort_order dari database, dengan 'all' selalu
-  // di posisi pertama (sama seperti urutan awal di loadData()).
+  // Urutkan CATEGORIES berdasarkan abjad (label), dengan 'all' selalu di
+  // posisi pertama. Pakai localeCompare 'id' + sensitivity 'base' supaya
+  // besar/kecil huruf dan variasi aksen diurutkan secara natural.
   function sortCategories() {
     const all = CATEGORIES.find(c => c.id === 'all') || { id: 'all', label: 'Semua' };
     const rest = CATEGORIES
       .filter(c => c.id !== 'all')
-      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      .sort((a, b) => a.label.localeCompare(b.label, 'id', { sensitivity: 'base' }));
     CATEGORIES = [all, ...rest];
   }
 
@@ -4047,6 +4239,7 @@ viewBox="0 0 0.16593 0.10268"
         { id: 'all', label: 'Semua' },
         ...catRows.filter(c => c.id !== 'all').map(c => ({ id: c.id, label: c.label, sort_order: c.sort_order }))
       ];
+      sortCategories();
 
       IMAGES = imgRows.map(r => ({
         id: r.id,
