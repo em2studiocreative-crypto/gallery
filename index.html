@@ -190,6 +190,7 @@ viewBox="0 0 1.49117 0.57976"
     <div class="modal-content">
     <div class="modal-image-wrap" id="modalImageWrap">
       <img id="modalImg" alt="" onerror="handleModalImgError(this)">
+      <div class="img-touch-catcher" id="modalImgTouchCatcher" aria-hidden="true"></div>
     </div>
     <div class="modal-info">
       <div class="modal-info-top-row" style="align-items:center; justify-content:space-between; gap:10px;">
@@ -740,6 +741,10 @@ viewBox="0 0 0.16593 0.10268"
     <button class="onboarding-skip-link" onclick="finishOnboarding(true)">Lewati</button>
   </div>
 </div>
+
+<!-- CUSTOM LONG-PRESS MENU (pengganti context-menu bawaan browser saat tekan-lama gambar) -->
+<div class="long-press-menu" id="longPressMenu" role="menu"></div>
+<div class="long-press-menu-backdrop" id="longPressMenuBackdrop"></div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
