@@ -1225,6 +1225,13 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.25s, visibility 0.25s;
+    /* #modal punya onclick (buat nutup kalau tap area luar) yang
+       menyelimuti seluruh gambar preview di dalamnya -- dipasang eksplisit
+       di sini juga (selain rule global di baris atas) sebagai jaring
+       pengaman, soalnya beberapa WebView Android lama kadang gak konsisten
+       nerapin -webkit-tap-highlight-color ke elemen yg punya onclick lewat
+       selector universal (*) saja. */
+    -webkit-tap-highlight-color: transparent;
   }
 
   .modal-backdrop.open {
@@ -1269,6 +1276,7 @@
     max-height: 90vh;
     transform: scale(0.95);
     transition: transform 0.25s;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .modal-backdrop.open .modal-shell {
@@ -1291,6 +1299,7 @@
     min-height: 300px;
     max-height: 90vh;
     overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .modal-image-wrap img {
