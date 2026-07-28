@@ -2977,6 +2977,17 @@ viewBox="0 0 0.16593 0.10268"
     return (CATEGORIES.find(c => c.id === id) || {}).label || id;
   }
 
+  // Escape teks (judul gambar, label kategori, dll) sebelum disisipkan ke
+  // innerHTML/insertAdjacentHTML/template string HTML. Data ini berasal dari
+  // Supabase (diisi lewat panel admin) - escaping tetap dipasang sebagai
+  // lapisan pertahanan kalau suatu saat ada karakter aneh (kutip, "<", "&")
+  // di judul/label, supaya tidak merusak markup atau jadi celah XSS.
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, ch => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+  }
+
   // ===== IMAGE OPTIMIZATION HELPERS =====
   // Membuat URL versi ringan (resize + kompres) via proxy wsrv.nl,
   // TANPA menyentuh file aslinya. File asli (img.url) tetap dipakai saat
@@ -2998,6 +3009,13 @@ viewBox="0 0 0.16593 0.10268"
   // Untuk grid: kecil & sangat terkompresi (cukup utk thumbnail)
   function gridThumb(url) {
     return thumbUrl(url, 480, 70);
+  }
+
+  // Versi 2x dari gridThumb, khusus utk atribut srcset supaya layar
+  // HiDPI/retina tetap tajam tanpa menaikkan ukuran gambar di layar biasa
+  // (browser yang pilih sendiri versi mana yang dipakai sesuai densitas layar).
+  function gridThumbSrcset(url) {
+    return `${thumbUrl(url, 480, 70)} 1x, ${thumbUrl(url, 960, 65)} 2x`;
   }
 
   // Untuk modal preview: cukup besar utk dilihat jelas, tapi masih jauh
@@ -3178,7 +3196,7 @@ viewBox="0 0 0.16593 0.10268"
     onboardingSelectedCats = new Set();
     const grid = document.getElementById('onboardingChipGrid');
     grid.innerHTML = realCats.map(c =>
-      `<button type="button" class="onboarding-chip" data-cat="${c.id}" onclick="event.stopPropagation(); toggleOnboardingChip('${c.id}', this)">${c.label}</button>`
+      `<button type="button" class="onboarding-chip" data-cat="${c.id}" onclick="event.stopPropagation(); toggleOnboardingChip('${c.id}', this)">${escapeHtml(c.label)}</button>`
     ).join('');
     updateOnboardingConfirmBtn();
     document.getElementById('onboardingModal').classList.add('open');
@@ -3484,7 +3502,7 @@ viewBox="0 0 0.16593 0.10268"
       <div class="notif-item ${n.read ? '' : 'unread'}" onclick="openNotifItem('${n.id}')">
         <img class="notif-thumb" src="${gridThumb(n.url)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${n.url}'">
         <div class="notif-content">
-          <div class="notif-text"><b>Gambar baru</b> di kategori <b>${n.categoryLabel}</b> — ${n.title || ''}</div>
+          <div class="notif-text"><b>Gambar baru</b> di kategori <b>${escapeHtml(n.categoryLabel)}</b> — ${escapeHtml(n.title || '')}</div>
           <div class="notif-time">${timeAgo(n.created_at)}</div>
         </div>
         ${n.read ? '' : '<span class="notif-dot"></span>'}
@@ -3954,7 +3972,7 @@ viewBox="0 0 0.16593 0.10268"
   function renderCategories() {
     const bar = document.getElementById('categoriesBar');
     bar.innerHTML = CATEGORIES.map(c =>
-      `<button class="chip ${c.id === activeCategory ? 'active' : ''}" data-cat="${c.id}" aria-pressed="${c.id === activeCategory}" onclick="selectCategory('${c.id}')">${c.label}</button>`
+      `<button class="chip ${c.id === activeCategory ? 'active' : ''}" data-cat="${c.id}" aria-pressed="${c.id === activeCategory}" onclick="selectCategory('${c.id}')">${escapeHtml(c.label)}</button>`
     ).join('');
   }
 
@@ -4021,7 +4039,7 @@ viewBox="0 0 0.16593 0.10268"
       <div class="cat-modal-group">
         <div class="cat-modal-group-title">${g.letter}</div>
         <div class="cat-modal-grid">
-          ${g.items.map(c => `<button type="button" class="cat-modal-chip ${c.id === activeCategory ? 'active' : ''}" onclick="selectCategoryFromModal('${c.id}')">${c.label}</button>`).join('')}
+          ${g.items.map(c => `<button type="button" class="cat-modal-chip ${c.id === activeCategory ? 'active' : ''}" onclick="selectCategoryFromModal('${c.id}')">${escapeHtml(c.label)}</button>`).join('')}
         </div>
       </div>
     `).join('');
@@ -4276,7 +4294,8 @@ viewBox="0 0 0.16593 0.10268"
       <div class="gallery-card" role="button" tabindex="0" onclick="openModal(${img.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id});}">
         <img
           src="${gridThumb(img.url)}"
-          alt="Status ${catLabel(img.category)} - ${img.title} | Download gambar status HD gratis"
+          srcset="${gridThumbSrcset(img.url)}"
+          alt="Status ${escapeHtml(catLabel(img.category))} - ${escapeHtml(img.title)} | Download gambar status HD gratis"
           style="aspect-ratio:${ratio}"
           loading="${eager ? 'eager' : 'lazy'}"
           fetchpriority="${eager ? 'high' : 'low'}"
@@ -4289,7 +4308,7 @@ viewBox="0 0 0.16593 0.10268"
         </button>
         ${trendingIds.has(img.id) ? '<span class="card-trending-badge">🔥 Trending</span>' : ''}
         <div class="card-overlay">
-          <div class="card-title">${img.title}</div>
+          <div class="card-title">${escapeHtml(img.title)}</div>
         </div>
       </div>
     `;
@@ -4854,9 +4873,9 @@ viewBox="0 0 0.16593 0.10268"
     const [w, h] = s.size.split('×').map(Number);
     const ratio = (w && h) ? `${w}/${h}` : '1/1';
     return `
-      <button class="modal-similar-item" onclick="openModal(${s.id})" aria-label="Buka ${s.title}">
-        <img src="${gridThumb(s.url)}" alt="Status ${catLabel(s.category)} - ${s.title}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
-        <span class="modal-similar-item-label">${s.title}</span>
+      <button class="modal-similar-item" onclick="openModal(${s.id})" aria-label="Buka ${escapeHtml(s.title)}">
+        <img src="${gridThumb(s.url)}" srcset="${gridThumbSrcset(s.url)}" alt="Status ${escapeHtml(catLabel(s.category))} - ${escapeHtml(s.title)}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
+        <span class="modal-similar-item-label">${escapeHtml(s.title)}</span>
       </button>
     `;
   }
