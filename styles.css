@@ -516,6 +516,8 @@
     justify-content: center;
     transition: background 0.2s, color 0.2s, transform 0.15s;
     backdrop-filter: blur(4px);
+    /* Harus di atas .img-touch-catcher (z-index:1) supaya tetap bisa diklik */
+    z-index: 2;
   }
 
   .card-fav-btn:hover { background: rgba(0,0,0,0.75); transform: scale(1.08); }
@@ -1313,6 +1315,80 @@
   .modal-image-wrap img.loaded {
     opacity: 1;
   }
+
+  /* Lapisan transparan di atas <img>: menangkap sentuhan duluan supaya
+     Android/Chrome tidak mendeteksi tekan-lama di atas elemen <img> asli
+     (itu yang memunculkan menu bawaan "Salin gambar / Download gambar").
+     Long-press ditangani manual lewat JS (lihat attachCustomLongPress). */
+  .img-touch-catcher {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .modal-image-wrap { position: relative; }
+
+  /* ===== CUSTOM LONG-PRESS MENU (ala Pinterest) ===== */
+  .long-press-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: transparent;
+    display: none;
+  }
+
+  .long-press-menu-backdrop.open { display: block; }
+
+  .long-press-menu {
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 6px;
+    opacity: 0;
+    transform: scale(0.85);
+    transform-origin: var(--lpm-origin, center);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+  }
+
+  .long-press-menu.open {
+    display: flex;
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  .long-press-menu-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(20,20,20,0.92);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .long-press-menu-btn:active { transform: scale(0.92); }
+
+  .long-press-menu-btn.accent {
+    background: var(--accent);
+    color: #0a0a0a;
+  }
+
+  .long-press-menu-btn svg { width: 20px; height: 20px; }
 
   .modal-info {
     flex: 0.7;
