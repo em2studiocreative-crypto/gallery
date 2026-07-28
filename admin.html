@@ -174,6 +174,8 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--card-hover); }
   td.thumb-cell { width: 56px; }
+  .col-no { width: 40px; }
+  td.no-cell { color: var(--text-dimmer); font-variant-numeric: tabular-nums; }
   td.thumb-cell img {
     width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-sm);
     display: block; background: var(--bg-elevated);
@@ -187,6 +189,25 @@
   .badge-on { background: rgba(76,175,80,0.15); color: var(--success); }
   .badge-off { background: var(--danger-dim); color: var(--danger); }
   .empty-row td { text-align: center; color: var(--text-dimmer); padding: var(--gap-4) 12px; }
+
+  /* ===== PAGINATION ===== */
+  .pagination-bar {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    gap: var(--gap-2); margin-top: var(--gap-2); padding: 2px;
+  }
+  .pagination-info { font-size: 12px; color: var(--text-dim); }
+  .pagination-controls { display: flex; align-items: center; gap: 8px; }
+  .pagination-size {
+    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text);
+    border-radius: var(--radius-sm); padding: 7px 8px; font-size: 12px;
+  }
+  .pagination-size:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .pagination-page { font-size: 13px; color: var(--text-dim); min-width: 50px; text-align: center; }
+  .pagination-nav {
+    width: 30px; height: 30px; padding: 0; display: inline-flex;
+    align-items: center; justify-content: center; font-size: 15px; line-height: 1;
+  }
+  .pagination-nav:disabled { opacity: 0.35; cursor: not-allowed; }
 
   .toggle {
     width: 36px; height: 20px; border-radius: var(--radius-pill);
@@ -338,6 +359,7 @@
         <table>
           <thead>
             <tr>
+              <th class="col-no">No</th>
               <th></th>
               <th>Judul</th>
               <th>Kategori</th>
@@ -347,10 +369,11 @@
             </tr>
           </thead>
           <tbody id="imagesTbody">
-            <tr class="empty-row"><td colspan="6">Memuat...</td></tr>
+            <tr class="empty-row"><td colspan="7">Memuat...</td></tr>
           </tbody>
         </table>
       </div>
+      <div class="pagination-bar" id="imagesPagination"></div>
     </div>
 
     <!-- PANEL: CATEGORIES -->
@@ -363,6 +386,7 @@
         <table>
           <thead>
             <tr>
+              <th class="col-no">No</th>
               <th>ID</th>
               <th>Label</th>
               <th>Urutan</th>
@@ -370,10 +394,11 @@
             </tr>
           </thead>
           <tbody id="categoriesTbody">
-            <tr class="empty-row"><td colspan="4">Memuat...</td></tr>
+            <tr class="empty-row"><td colspan="5">Memuat...</td></tr>
           </tbody>
         </table>
       </div>
+      <div class="pagination-bar" id="categoriesPagination"></div>
     </div>
 
     <!-- PANEL: REPORTS -->
@@ -391,6 +416,7 @@
         <table>
           <thead>
             <tr>
+              <th class="col-no">No</th>
               <th></th>
               <th>Judul</th>
               <th>Dilaporkan</th>
@@ -399,10 +425,11 @@
             </tr>
           </thead>
           <tbody id="reportsTbody">
-            <tr class="empty-row"><td colspan="5">Memuat...</td></tr>
+            <tr class="empty-row"><td colspan="6">Memuat...</td></tr>
           </tbody>
         </table>
       </div>
+      <div class="pagination-bar" id="reportsPagination"></div>
     </div>
   </main>
 </div>
@@ -484,7 +511,42 @@
 
   let CATEGORIES = [];
   let IMAGES = [];
+  let REPORTS = [];
   let editingCategoryId = null; // null = mode tambah, isi = mode edit
+
+  // ===== PAGINATION =====
+  // Dipakai bareng oleh tabel Gambar, Kategori, dan Laporan supaya konsisten
+  // & gak berat kalau datanya udah ratusan baris. Filter jumlah per halaman
+  // selalu 10/20/50/100.
+  const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+  let imagesPage = 1, imagesPageSize = 20;
+  let categoriesPage = 1, categoriesPageSize = 20;
+  let reportsPage = 1, reportsPageSize = 20;
+
+  function paginateSlice(list, page, pageSize) {
+    const start = (page - 1) * pageSize;
+    return list.slice(start, start + pageSize);
+  }
+
+  // goFnName & sizeFnName adalah nama fungsi global (string) yang dipanggil
+  // lewat onclick/onchange, misalnya 'goToImagesPage' & 'setImagesPageSize'.
+  function buildPaginationHTML(totalItems, page, pageSize, goFnName, sizeFnName) {
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const curPage = Math.min(Math.max(1, page), totalPages);
+    const startItem = totalItems === 0 ? 0 : (curPage - 1) * pageSize + 1;
+    const endItem = Math.min(curPage * pageSize, totalItems);
+    return `
+      <div class="pagination-info">${totalItems === 0 ? 'Tidak ada data' : `Menampilkan ${startItem}–${endItem} dari ${totalItems}`}</div>
+      <div class="pagination-controls">
+        <select class="pagination-size" onchange="${sizeFnName}(parseInt(this.value))" aria-label="Jumlah baris per halaman">
+          ${PAGE_SIZE_OPTIONS.map(n => `<option value="${n}" ${n === pageSize ? 'selected' : ''}>${n} / halaman</option>`).join('')}
+        </select>
+        <button type="button" class="btn btn-ghost btn-sm pagination-nav" ${curPage <= 1 ? 'disabled' : ''} onclick="${goFnName}(${curPage - 1})" aria-label="Halaman sebelumnya">‹</button>
+        <span class="pagination-page">${curPage} / ${totalPages}</span>
+        <button type="button" class="btn btn-ghost btn-sm pagination-nav" ${curPage >= totalPages ? 'disabled' : ''} onclick="${goFnName}(${curPage + 1})" aria-label="Halaman berikutnya">›</button>
+      </div>
+    `;
+  }
 
   // ===== TOAST =====
   function showToast(msg, type = '') {
@@ -632,6 +694,7 @@
 
     if (error) { showToast('Gagal memuat kategori', 'error'); return; }
     CATEGORIES = data;
+    categoriesPage = 1;
     renderCategoriesTable();
     populateCategorySelect();
   }
@@ -644,6 +707,7 @@
 
     if (error) { showToast('Gagal memuat gambar', 'error'); return; }
     IMAGES = data;
+    imagesPage = 1;
     renderImagesTable();
   }
 
@@ -652,15 +716,33 @@
     return c ? c.label : id;
   }
 
+  function goToImagesPage(p) {
+    imagesPage = p;
+    renderImagesTable();
+  }
+
+  function setImagesPageSize(size) {
+    imagesPageSize = size;
+    imagesPage = 1;
+    renderImagesTable();
+  }
+
   // ===== RENDER: IMAGES =====
   function renderImagesTable() {
     const tbody = document.getElementById('imagesTbody');
+    const pagination = document.getElementById('imagesPagination');
     if (IMAGES.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Belum ada gambar. Klik "Tambah Gambar" untuk mulai.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada gambar. Klik "Tambah Gambar" untuk mulai.</td></tr>';
+      pagination.innerHTML = buildPaginationHTML(0, 1, imagesPageSize, 'goToImagesPage', 'setImagesPageSize');
       return;
     }
-    tbody.innerHTML = IMAGES.map(img => `
+    const totalPages = Math.max(1, Math.ceil(IMAGES.length / imagesPageSize));
+    if (imagesPage > totalPages) imagesPage = totalPages;
+    const pageItems = paginateSlice(IMAGES, imagesPage, imagesPageSize);
+
+    tbody.innerHTML = pageItems.map((img, i) => `
       <tr>
+        <td class="no-cell">${(imagesPage - 1) * imagesPageSize + i + 1}</td>
         <td class="thumb-cell"><img src="${escapeAttr(img.url)}" alt="" loading="lazy" onerror="this.style.opacity=0.2"></td>
         <td>${escapeHtml(img.title)}</td>
         <td>${escapeHtml(categoryLabel(img.category_id))}</td>
@@ -677,6 +759,7 @@
         </td>
       </tr>
     `).join('');
+    pagination.innerHTML = buildPaginationHTML(IMAGES.length, imagesPage, imagesPageSize, 'goToImagesPage', 'setImagesPageSize');
   }
 
   async function toggleImageActive(id, newVal) {
@@ -727,7 +810,7 @@
 
   async function loadReports() {
     const tbody = document.getElementById('reportsTbody');
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Memuat...</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Memuat...</td></tr>';
 
     const filter = document.getElementById('reportsFilter').value;
     let query = supabaseClient
@@ -738,10 +821,13 @@
 
     const { data, error } = await query;
     if (error) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Gagal memuat laporan.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Gagal memuat laporan.</td></tr>';
+      document.getElementById('reportsPagination').innerHTML = '';
       return;
     }
-    renderReportsTable(data);
+    REPORTS = data;
+    reportsPage = 1;
+    renderReportsTable();
   }
 
   function reportStatusLabel(status) {
@@ -750,13 +836,30 @@
     return 'Belum ditangani';
   }
 
-  function renderReportsTable(reports) {
+  function goToReportsPage(p) {
+    reportsPage = p;
+    renderReportsTable();
+  }
+
+  function setReportsPageSize(size) {
+    reportsPageSize = size;
+    reportsPage = 1;
+    renderReportsTable();
+  }
+
+  function renderReportsTable() {
     const tbody = document.getElementById('reportsTbody');
-    if (reports.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Tidak ada laporan di kategori ini.</td></tr>';
+    const pagination = document.getElementById('reportsPagination');
+    if (REPORTS.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Tidak ada laporan di kategori ini.</td></tr>';
+      pagination.innerHTML = buildPaginationHTML(0, 1, reportsPageSize, 'goToReportsPage', 'setReportsPageSize');
       return;
     }
-    tbody.innerHTML = reports.map(r => {
+    const totalPages = Math.max(1, Math.ceil(REPORTS.length / reportsPageSize));
+    if (reportsPage > totalPages) reportsPage = totalPages;
+    const pageItems = paginateSlice(REPORTS, reportsPage, reportsPageSize);
+
+    tbody.innerHTML = pageItems.map((r, i) => {
       // Gambar bisa saja sudah dihapus duluan (images null) — tetap
       // tampilkan barisnya supaya histori laporan tidak hilang begitu saja.
       const img = r.images;
@@ -764,8 +867,10 @@
       const thumb = img ? `<img src="${escapeAttr(img.url)}" alt="" loading="lazy" onerror="this.style.opacity=0.2">` : '';
       const tanggal = new Date(r.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
       const isOpen = r.status === 'open';
+      const rowNo = (reportsPage - 1) * reportsPageSize + i + 1;
       return `
       <tr>
+        <td class="no-cell">${rowNo}</td>
         <td class="thumb-cell">${thumb}</td>
         <td>${title}</td>
         <td>${tanggal}</td>
@@ -777,6 +882,7 @@
         </td>
       </tr>`;
     }).join('');
+    pagination.innerHTML = buildPaginationHTML(REPORTS.length, reportsPage, reportsPageSize, 'goToReportsPage', 'setReportsPageSize');
   }
 
   async function setReportStatus(reportId, status) {
@@ -1075,15 +1181,33 @@
   }
 
   // ===== RENDER: CATEGORIES =====
+  function goToCategoriesPage(p) {
+    categoriesPage = p;
+    renderCategoriesTable();
+  }
+
+  function setCategoriesPageSize(size) {
+    categoriesPageSize = size;
+    categoriesPage = 1;
+    renderCategoriesTable();
+  }
+
   function renderCategoriesTable() {
     const tbody = document.getElementById('categoriesTbody');
+    const pagination = document.getElementById('categoriesPagination');
     const list = CATEGORIES.filter(c => c.id !== 'all');
     if (list.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Belum ada kategori.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada kategori.</td></tr>';
+      pagination.innerHTML = buildPaginationHTML(0, 1, categoriesPageSize, 'goToCategoriesPage', 'setCategoriesPageSize');
       return;
     }
-    tbody.innerHTML = list.map(c => `
+    const totalPages = Math.max(1, Math.ceil(list.length / categoriesPageSize));
+    if (categoriesPage > totalPages) categoriesPage = totalPages;
+    const pageItems = paginateSlice(list, categoriesPage, categoriesPageSize);
+
+    tbody.innerHTML = pageItems.map((c, i) => `
       <tr>
+        <td class="no-cell">${(categoriesPage - 1) * categoriesPageSize + i + 1}</td>
         <td>${escapeHtml(c.id)}</td>
         <td>${escapeHtml(c.label)}</td>
         <td>${c.sort_order}</td>
@@ -1093,6 +1217,7 @@
         </td>
       </tr>
     `).join('');
+    pagination.innerHTML = buildPaginationHTML(list.length, categoriesPage, categoriesPageSize, 'goToCategoriesPage', 'setCategoriesPageSize');
   }
 
   function openCategoryModal(id) {
