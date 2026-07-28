@@ -390,14 +390,30 @@
     padding: var(--gap-3) var(--gap-2);
   }
 
+  // CATATAN: dulu di sini pakai CSS `column-count` (masonry ala koran),
+  // sama seperti .modal-similar-grid -- dan punya masalah yang persis
+  // sama: browser MENGHITUNG ULANG pembagian semua kartu ke kolom setiap
+  // kali ada tambahan konten, jadi kartu yang sudah tampil bisa "pindah"
+  // kolom/baris begitu infinite scroll nambah batch baru, walau datanya
+  // sama sekali tidak berubah. Sekarang kolomnya dibuat & dikelola manual
+  // lewat JS (lihat setupGalleryColumns/appendItemsToColumns) supaya kartu
+  // baru selalu ditambahkan ke kolom yang saat itu paling pendek, dan
+  // kartu yang sudah ada tidak pernah disentuh/dipindah lagi.
   .gallery {
-    column-count: 2;
-    column-gap: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .gallery-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .gallery-card {
-    break-inside: avoid;
-    margin-bottom: 12px;
     position: relative;
     border-radius: var(--radius-md);
     overflow: hidden;
@@ -1409,20 +1425,33 @@
     margin-bottom: 12px;
   }
 
+  // CATATAN: dulu di sini pakai CSS `column-count` (masonry ala koran).
+  // Masalahnya, `column-count` MENGHITUNG ULANG pembagian semua item ke
+  // kolom setiap kali konten berubah (bukan cuma nambah di akhir) --
+  // begitu infinite scroll nambah batch baru, item yang SUDAH tampil bisa
+  // "pindah" kolom/baris walau datanya sama sekali tidak berubah. Efeknya
+  // kelihatan seperti "gambar di posisi itu tiba-tiba berubah" padahal
+  // cuma reflow. Sekarang kolomnya dibuat & dikelola manual lewat JS
+  // (lihat renderModalSimilar/appendModalSimilarBatch) supaya item baru
+  // SELALU ditambahkan ke akhir kolom yang paling pendek saat itu, dan
+  // item yang sudah ditaruh tidak pernah disentuh/dipindah lagi.
   .modal-similar-grid {
-    column-count: 2;
-    column-gap: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
   }
 
-  @media (min-width: 1100px) {
-    .modal-similar-grid { column-count: 3; }
+  .modal-similar-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .modal-similar-item {
     display: block;
     width: 100%;
-    break-inside: avoid;
-    margin-bottom: 8px;
     position: relative;
     border-radius: var(--radius-sm);
     overflow: hidden;
@@ -1998,25 +2027,15 @@
 
   /* ===== RESPONSIVE ===== */
   @media (min-width: 640px) {
-    .gallery { column-count: 3; column-gap: 14px; }
-    .gallery-card { margin-bottom: 14px; }
+    .gallery, .gallery-col { gap: 14px; }
     .header { padding: 0 var(--gap-3); }
     .categories { padding: 0 var(--gap-3); }
     .main { padding: var(--gap-3); }
   }
 
   @media (min-width: 900px) {
-    .gallery { column-count: 4; column-gap: 16px; }
-    .gallery-card { margin-bottom: 16px; }
+    .gallery, .gallery-col { gap: 16px; }
     .header-title span { display: none; }
-  }
-
-  @media (min-width: 1200px) {
-    .gallery { column-count: 5; }
-  }
-
-  @media (min-width: 1400px) {
-    .gallery { column-count: 6; }
   }
 
   /* Mobile: always show overlay */
