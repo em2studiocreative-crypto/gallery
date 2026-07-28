@@ -1,4 +1,4 @@
-  // ===== DATA =====
+// ===== DATA =====
   // URL publik resmi aplikasi (dipakai untuk share link), diambil dari
   // <link rel="canonical"> di <head>. Ini sengaja TIDAK pakai
   // window.location langsung, supaya link yang dibagikan selalu benar
@@ -1334,7 +1334,7 @@
     // 6 kartu pertama (kira-kira yang tampak tanpa scroll) dimuat lebih prioritas
     const eager = idx < 6;
     return `
-      <div class="gallery-card" role="button" tabindex="0" onclick="openModal(${img.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id});}">
+      <div class="gallery-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id});}">
         <img
           src="${gridThumb(img.url)}"
           srcset="${gridThumbSrcset(img.url)}"
@@ -2657,6 +2657,10 @@ viewBox="0 0 7.14519 2.77802"
       gallery.addEventListener('touchend', (e) => {
         const catcher = e.target.closest('.img-touch-catcher');
         if (!catcher) return;
+        // Cegah browser mobile nembak "click" sintetis sesudah ini -> tanpa
+        // preventDefault, klik delegated di bawah (buat mouse/desktop) ikut
+        // kepanggil lagi buat tap yang sama, bikin openModal() jalan 2x.
+        e.preventDefault();
         const imgId = Number(catcher.dataset.imgId);
         handleCatcherEnd(e, imgId, () => openModal(imgId));
       });
