@@ -2256,6 +2256,50 @@
     if (typeof gtag === 'function') gtag('event', 'share_image', { image_id: imgId, method });
   }
 
+  // ===== JADIKAN WALLPAPER =====
+  // Browser tidak punya API resmi untuk "set wallpaper" langsung dari web,
+  // jadi kita pakai 2 pendekatan (mirip alur shareImage):
+  // 1) Web Share API dengan file gambar — di banyak HP Android/Samsung,
+  //    sheet share bawaan OS punya opsi aplikasi "Wallpaper"/"Wallpaper &
+  //    Style" langsung di daftar tujuan, jadi user tinggal pilih itu.
+  // 2) Kalau device/browser tidak support share file, fallback: gambar
+  //    tetap didownload otomatis lalu user dikasih instruksi manual untuk
+  //    membukanya lewat galeri HP dan pilih "Jadikan Wallpaper" dari sana.
+  function wallpaperCurrent() {
+    if (currentModalImage) setAsWallpaper(currentModalImage.id);
+  }
+
+  async function setAsWallpaper(imgId) {
+    const img = IMAGES.find(i => i.id === imgId);
+    if (!img) return;
+
+    showToast('Menyiapkan gambar...');
+
+    try {
+      const response = await fetch(img.url);
+      const blob = await response.blob();
+      const file = new File([blob], `wallpaper-${img.title.toLowerCase().replace(/\s+/g, '-')}.png`, {
+        type: blob.type || 'image/png'
+      });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: img.title, text: 'Jadikan wallpaper dari Status Gallery' });
+        logShareEvent(imgId, 'wallpaper_native_file');
+        if (typeof gtag === 'function') gtag('event', 'set_wallpaper', { image_id: imgId, method: 'native_file' });
+        return;
+      }
+      throw new Error('share_file_unsupported');
+    } catch (err) {
+      if (err && err.name === 'AbortError') return; // user batal dari share sheet, jangan lanjut fallback
+
+      // Fallback: device/browser tidak bisa share file langsung ke opsi
+      // "Wallpaper" OS — download saja gambarnya lalu arahkan manual.
+      await triggerDownload(img.url, img.title, imgId);
+      showToast('Gambar tersimpan! Buka galeri HP kamu lalu pilih "Jadikan Wallpaper".', 'success');
+      if (typeof gtag === 'function') gtag('event', 'set_wallpaper', { image_id: imgId, method: 'download_fallback' });
+    }
+  }
+
   // Share aplikasi secara umum (bukan 1 gambar spesifik) — dipakai dari
   // tombol "Bagikan Aplikasi" di Pengaturan. Alurnya sama seperti share
   // gambar: coba Web Share API dulu (share sheet asli HP), fallback ke
@@ -2507,6 +2551,12 @@ viewBox="0 0 7.14519 2.77802"
         accent: isFav,
         svg: '<svg viewBox="0 0 24 24" fill="' + (isFav ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-heart"></use></svg>',
         onClick: () => toggleFavorite(imgId)
+      },
+      {
+        label: 'Jadikan Wallpaper',
+        accent: false,
+        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-wallpaper"></use></svg>',
+        onClick: () => setAsWallpaper(imgId)
       },
       {
         label: 'Download HD',
