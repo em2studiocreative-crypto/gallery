@@ -11,9 +11,9 @@
     --bg-elevated: #141414;
     --card: #1a1a1a;
     --card-hover: #222222;
-    --accent: #C1892F;
-    --accent-hover: #A47428;
-    --accent-dim: rgba(193, 137, 47, 0.15);
+    --accent: #E8A33D;
+    --accent-hover: #C58A34;
+    --accent-dim: rgba(232, 163, 61, 0.15);
     --text: #F0F0F0;
     --text-dim: #9a9a9a;
     --text-dimmer: #6e6e6e;
@@ -39,9 +39,9 @@
     --bg-elevated: #ffffff;
     --card: #ffffff;
     --card-hover: #efeeea;
-    --accent: #B87A22;
-    --accent-hover: #9c6819;
-    --accent-dim: rgba(184, 122, 34, 0.12);
+    --accent: #E8A33D;
+    --accent-hover: #C58A34;
+    --accent-dim: rgba(232, 163, 61, 0.12);
     --text: #1c1a17;
     --text-dim: #6b6560;
     --text-dimmer: #948f89;
@@ -813,7 +813,7 @@
     position: absolute;
     inset: 0;
     background:
-      repeating-linear-gradient(115deg, rgba(193,137,47,0.12) 0px, rgba(193,137,47,0.12) 1px, transparent 1px, transparent 90px),
+      repeating-linear-gradient(115deg, rgba(232, 163, 61, 0.12) 0px, rgba(232, 163, 61, 0.12) 1px, transparent 1px, transparent 90px),
       repeating-linear-gradient(25deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 70px);
     mix-blend-mode: screen;
   }
@@ -822,7 +822,7 @@
     position: absolute;
     width: 340px;
     height: 340px;
-    background: radial-gradient(circle, rgba(193,137,47,0.35), transparent 70%);
+    background: radial-gradient(circle, rgba(232, 163, 61, 0.35), transparent 70%);
     top: -70px;
     right: -90px;
     filter: blur(6px);
@@ -842,9 +842,9 @@
     position: relative; z-index: 1;
     margin-top: 22px;
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(193,137,47,0.16);
-    border: 1px solid rgba(193,137,47,0.4);
-    color: #e8c17f;
+    background: rgba(232, 163, 61, 0.16);
+    border: 1px solid rgba(232, 163, 61, 0.4);
+    color: #F0C589;
     font-size: 11.5px; font-weight: 700;
     padding: 6px 14px;
     border-radius: var(--radius-pill);
@@ -975,8 +975,8 @@
     width: 46px;
     height: 46px;
     border-radius: 13px;
-    background: linear-gradient(155deg, var(--accent-dim), rgba(193,137,47,0.03));
-    border: 1px solid rgba(193,137,47,0.28);
+    background: linear-gradient(155deg, var(--accent-dim), rgba(232, 163, 61, 0.03));
+    border: 1px solid rgba(232, 163, 61, 0.28);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 2px rgba(0,0,0,0.2);
     display: flex;
     align-items: center;
@@ -1705,7 +1705,7 @@
 
   .notif-item:hover { background: var(--card-hover); }
   .notif-item.unread { background: var(--accent-dim); }
-  .notif-item.unread:hover { background: rgba(193,137,47,0.22); }
+  .notif-item.unread:hover { background: rgba(232, 163, 61, 0.22); }
 
   .notif-thumb {
     width: 52px;
