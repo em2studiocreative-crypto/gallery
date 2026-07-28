@@ -1,4 +1,4 @@
-  // ===== DATA =====
+// ===== DATA =====
   // URL publik resmi aplikasi (dipakai untuk share link), diambil dari
   // <link rel="canonical"> di <head>. Ini sengaja TIDAK pakai
   // window.location langsung, supaya link yang dibagikan selalu benar
@@ -1403,6 +1403,8 @@
     error.classList.add('hidden');
 
     if (items.length === 0) {
+      currentFilteredItems = [];
+      renderedCount = 0;
       gallery.classList.add('hidden');
       empty.classList.remove('hidden');
       const title = document.getElementById('emptyStateTitle');
@@ -1423,8 +1425,44 @@
     empty.classList.add('hidden');
     gallery.classList.remove('hidden');
 
-    // Reset & render batch pertama saja; sisanya nyusul saat discroll
+    // BUG FIX: filterAndRender() (=> renderGallery()) bisa terpanggil
+    // berkali-kali di background tanpa aksi user yg disengaja -- misal tiap
+    // ada event realtime dari Supabase (termasuk saat ada ORANG LAIN
+    // mendownload gambar, yg cuma menaikkan angka `downloads`), atau saat
+    // toggleFavorite() dipanggil. Sebelumnya, fungsi ini SELALU mereset
+    // `renderedCount` ke 0 dan mengosongkan grid lalu render ulang cuma
+    // batch pertama (20 item) -- padahal kalau user sudah scroll jauh dan
+    // memuat beberapa batch, itu artinya batch2 yg sudah dimuat itu HILANG
+    // dan grid "mundur" ke 20 item pertama tanpa user sadar. Efeknya:
+    // gambar yg tadi keliatan di posisi bawah viewport tiba2 "berubah"
+    // begitu discroll, padahal sebenarnya itu grid yg diam2 di-render ulang
+    // dari awal.
+    //
+    // Kalau SET & URUTAN gambar (`items`) sebenarnya sama persis dgn yg
+    // sudah tampil, kita tidak perlu reset ke batch pertama -- cukup
+    // render ulang JUMLAH kartu yg SUDAH tampil (bukan cuma 20), supaya
+    // scroll & batch yg sudah dimuat user tetap utuh. Ini juga otomatis
+    // me-refresh data terbaru di tiap kartu (status favorit, judul, dsb).
+    const sameOrder = renderedCount > 0 && items.length === currentFilteredItems.length &&
+      items.every((img, i) => img.id === currentFilteredItems[i].id);
+
     currentFilteredItems = items;
+
+    if (sameOrder) {
+      const keepCount = Math.min(renderedCount, items.length);
+      const html = items.slice(0, keepCount).map((img, i) => cardHtml(img, i)).join('');
+      gallery.innerHTML = html;
+      renderedCount = keepCount;
+      const cards = Array.from(gallery.children);
+      cards.forEach((card, i) => {
+        const imgEl = card.querySelector('img');
+        if (imgEl) watchImageLoad(imgEl, items[i].id);
+      });
+      return;
+    }
+
+    // Set/urutan gambar benar2 berubah (filter/kategori/pencarian diganti,
+    // ada gambar baru/dihapus, atau ini render pertama) -> render dari awal.
     renderedCount = 0;
     gallery.innerHTML = '';
     appendNextBatch();
