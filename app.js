@@ -1915,14 +1915,26 @@
     // Step 1: tampilkan langsung thumbnail grid (480px) yang kemungkinan
     // besar sudah ter-cache browser (sama persis dengan gambar di kartu
     // yang baru diklik) -> muncul instan, tidak ada jeda kosong/patah.
+    //
+    // PENTING: sebelum ganti src, kosongkan dulu <img> yang sedang
+    // menampilkan gambar modal SEBELUMNYA. Kalau langsung ganti src lalu
+    // add class 'loaded', browser masih menampilkan bitmap gambar lama
+    // (belum di-clear) sampai gambar baru selesai di-decode -> yang
+    // ke-fade-in kelihatannya gambar lama, baru "meloncat" ganti ke gambar
+    // yang benar begitu request selesai. Makanya harus nunggu event
+    // 'load' dari src yang baru sebelum class 'loaded' ditambahkan lagi.
     modalImg.classList.remove('loaded');
-    modalImg.src = gridThumb(img.url);
-    // Force reflow supaya transisi opacity ke-trigger dari awal (0 -> 1),
-    // sama seperti step 2 di bawah -- tanpa ini, remove+add class terjadi
-    // di tick yang sama dan transisi fade-nya tidak pernah kelihatan.
+    modalImg.removeAttribute('src');
     void modalImg.offsetWidth;
-    modalImg.classList.add('loaded');
-    modalImg.addEventListener('load', () => { modalImg.dataset.loaded = '1'; }, { once: true });
+    modalImg.src = gridThumb(img.url);
+    modalImg.addEventListener('load', () => {
+      modalImg.dataset.loaded = '1';
+      // Pastikan modal belum keburu ganti ke gambar lain lagi sebelum ini
+      // sempat kelar (mis. user klik cepat beberapa gambar berturut-turut).
+      if (currentModalImage && currentModalImage.id === img.id) {
+        modalImg.classList.add('loaded');
+      }
+    }, { once: true });
     watchModalImageLoad(modalImg, img.id);
 
     // Step 2: preload versi resolusi lebih tinggi (1080px) di background.
