@@ -1346,6 +1346,7 @@
           data-loaded="0"
           onload="this.dataset.loaded='1'; this.closest('.gallery-card').classList.remove('img-error')"
           onerror="handleGridImgError(this, ${img.id})">
+        <div class="img-touch-catcher" data-img-id="${img.id}" aria-hidden="true"></div>
         <button class="card-fav-btn ${favorites.has(img.id) ? 'active' : ''}" aria-label="${favorites.has(img.id) ? 'Hapus dari favorit' : 'Tambah ke favorit'}" onclick="event.stopPropagation(); toggleFavorite(${img.id})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${favorites.has(img.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-heart"></use></svg>
         </button>
@@ -2473,4 +2474,170 @@ viewBox="0 0 7.14519 2.77802"
     clearTimeout(toastTimer);
     const toast = document.getElementById('toast');
     if (toast) toast.classList.remove('show');
+  });
+
+  // ===== CUSTOM LONG-PRESS MENU (pengganti menu bawaan "Salin gambar /
+  // Download gambar" milik Android/Chrome saat tekan-lama sebuah <img>) =====
+  //
+  // Triknya: setiap thumbnail (kartu galeri & gambar besar di modal) punya
+  // lapisan transparan (.img-touch-catcher) yang menutupinya. Sentuhan
+  // mendarat di lapisan itu, bukan di elemen <img> asli — jadi Android tidak
+  // pernah mendeteksi "tekan-lama di atas gambar" dan menu bawaannya tidak
+  // pernah muncul. Long-press kita deteksi manual lewat timer, lalu kita
+  // tampilkan menu sendiri (mirip action-sheet Pinterest).
+  const LONG_PRESS_MS = 420;
+  const LONG_PRESS_MOVE_TOLERANCE = 10; // px, batal kalau jari geser lebih dari ini
+  let lpTimer = null;
+  let lpStartX = 0, lpStartY = 0;
+  let lpTriggered = false;
+  let lpActiveEl = null;
+
+  function buildLongPressActions(imgId) {
+    const img = IMAGES.find(i => i.id === imgId);
+    const isFav = img && favorites.has(imgId);
+    const actions = [
+      {
+        label: 'Bagikan',
+        accent: false,
+        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+        onClick: () => shareImage(imgId)
+      },
+      {
+        label: isFav ? 'Hapus dari favorit' : 'Tambah ke favorit',
+        accent: isFav,
+        svg: '<svg viewBox="0 0 24 24" fill="' + (isFav ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-heart"></use></svg>',
+        onClick: () => toggleFavorite(imgId)
+      },
+      {
+        label: 'Download HD',
+        accent: false,
+        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><use href="#icon-download"></use></svg>',
+        onClick: () => { if (img) triggerDownload(img.url, img.title, img.id); }
+      }
+    ];
+    return actions;
+  }
+
+  function openLongPressMenu(imgId, x, y) {
+    const menu = document.getElementById('longPressMenu');
+    const backdrop = document.getElementById('longPressMenuBackdrop');
+    if (!menu || !backdrop) return;
+
+    const actions = buildLongPressActions(imgId);
+    menu.innerHTML = actions.map(a => `
+      <button type="button" class="long-press-menu-btn${a.accent ? ' accent' : ''}" aria-label="${a.label}" title="${a.label}">${a.svg}</button>
+    `).join('');
+
+    // Posisikan menu vertikal ke atas titik sentuh (kalau kepepet ke tepi
+    // layar, geser biar tetap kelihatan penuh).
+    const menuWidth = 56;
+    const menuHeight = actions.length * 58;
+    let left = Math.min(Math.max(x - menuWidth / 2, 8), window.innerWidth - menuWidth - 8);
+    let top = y - menuHeight - 24;
+    let origin = 'bottom center';
+    if (top < 8) { top = y + 24; origin = 'top center'; }
+
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    menu.style.setProperty('--lpm-origin', origin);
+
+    [...menu.children].forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        actions[i].onClick();
+        closeLongPressMenu();
+      });
+    });
+
+    menu.classList.add('open');
+    backdrop.classList.add('open');
+    if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
+  }
+
+  function closeLongPressMenu() {
+    const menu = document.getElementById('longPressMenu');
+    const backdrop = document.getElementById('longPressMenuBackdrop');
+    if (menu) menu.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+  }
+
+  function getTouchPoint(e) {
+    if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function handleCatcherStart(e, imgId) {
+    lpTriggered = false;
+    lpActiveEl = e.currentTarget;
+    const p = getTouchPoint(e);
+    lpStartX = p.x;
+    lpStartY = p.y;
+    clearTimeout(lpTimer);
+    lpTimer = setTimeout(() => {
+      lpTriggered = true;
+      openLongPressMenu(imgId, p.x, p.y);
+    }, LONG_PRESS_MS);
+  }
+
+  function handleCatcherMove(e) {
+    const p = getTouchPoint(e);
+    if (Math.abs(p.x - lpStartX) > LONG_PRESS_MOVE_TOLERANCE || Math.abs(p.y - lpStartY) > LONG_PRESS_MOVE_TOLERANCE) {
+      clearTimeout(lpTimer);
+    }
+  }
+
+  function handleCatcherEnd(e, imgId, onShortTap) {
+    clearTimeout(lpTimer);
+    if (!lpTriggered && onShortTap) onShortTap();
+    lpActiveEl = null;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Delegasi untuk kartu-kartu galeri (di-render ulang terus, jadi tidak
+    // bisa attach listener satu-satu per kartu).
+    const gallery = document.getElementById('gallery');
+    if (gallery) {
+      gallery.addEventListener('touchstart', (e) => {
+        const catcher = e.target.closest('.img-touch-catcher');
+        if (!catcher) return;
+        handleCatcherStart(e, Number(catcher.dataset.imgId));
+      }, { passive: true });
+
+      gallery.addEventListener('touchmove', handleCatcherMove, { passive: true });
+
+      gallery.addEventListener('touchend', (e) => {
+        const catcher = e.target.closest('.img-touch-catcher');
+        if (!catcher) return;
+        const imgId = Number(catcher.dataset.imgId);
+        handleCatcherEnd(e, imgId, () => openModal(imgId));
+      });
+
+      // Desktop: klik biasa tetap buka modal, klik-kanan tetap dimatikan
+      // (kita punya menu sendiri).
+      gallery.addEventListener('click', (e) => {
+        const catcher = e.target.closest('.img-touch-catcher');
+        if (!catcher) return;
+        openModal(Number(catcher.dataset.imgId));
+      });
+      gallery.addEventListener('contextmenu', (e) => {
+        if (e.target.closest('.img-touch-catcher')) e.preventDefault();
+      });
+    }
+
+    // Gambar besar di dalam modal (elemen statis, tidak di-render ulang).
+    const modalCatcher = document.getElementById('modalImgTouchCatcher');
+    if (modalCatcher) {
+      modalCatcher.addEventListener('touchstart', (e) => {
+        if (!currentModalImage) return;
+        handleCatcherStart(e, currentModalImage.id);
+      }, { passive: true });
+      modalCatcher.addEventListener('touchmove', handleCatcherMove, { passive: true });
+      modalCatcher.addEventListener('touchend', (e) => {
+        if (!currentModalImage) return;
+        handleCatcherEnd(e, currentModalImage.id, null);
+      });
+      modalCatcher.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+
+    document.getElementById('longPressMenuBackdrop')?.addEventListener('click', closeLongPressMenu);
+    window.addEventListener('scroll', closeLongPressMenu, { passive: true });
   });
