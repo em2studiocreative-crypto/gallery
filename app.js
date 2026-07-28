@@ -1384,18 +1384,56 @@
       col.className = 'gallery-col';
       gallery.appendChild(col);
     }
+    // Reset estimasi tinggi kolom tiap kali kolom dibuat ulang (lihat
+    // catatan panjang di appendItemsToColumns soal kenapa ini dibutuhkan).
+    gallery._colHeights = new Array(colCount).fill(0);
   }
 
+  // PERBAIKAN PERFORMANCE: sebelumnya kolom "paling pendek" dipilih pakai
+  // `col.offsetHeight` yang dibaca ULANG setelah tiap 1 kartu di-insert.
+  // Pola tulis-DOM -> baca-offsetHeight -> tulis-DOM -> baca-offsetHeight
+  // ini memaksa browser melakukan *synchronous layout reflow* di SETIAP
+  // iterasi (layout thrashing) -- untuk 20 kartu per batch itu 20 reflow
+  // paksa, dan ini terpanggil ulang tiap ada event realtime dari Supabase
+  // (termasuk cuma gara-gara ada ORANG LAIN mendownload gambar). Di HP,
+  // ini yang paling bikin terasa "berat"/nge-lag.
+  //
+  // Solusinya: estimasi tinggi tiap kolom dari DATA (rasio lebar/tinggi
+  // gambar yang sudah kita punya), bukan dari DOM -- jadi tidak ada
+  // pembacaan layout sama sekali saat nge-append kartu.
   function appendItemsToColumns(gallery, items, baseIdx) {
     const cols = Array.from(gallery.querySelectorAll('.gallery-col'));
     if (cols.length === 0) return;
+    if (!gallery._colHeights || gallery._colHeights.length !== cols.length) {
+      gallery._colHeights = cols.map(() => 0);
+    }
+    const heights = gallery._colHeights;
+    const CARD_CHROME = 46; // perkiraan tinggi tetap (overlay judul, dll)
+    const REF_WIDTH = 300;  // lebar acuan buat estimasi -- sama utk semua kolom, jadi hasil bandingnya tetap valid walau bukan pixel asli
+
+    const frags = cols.map(() => document.createDocumentFragment());
+
     items.forEach((img, i) => {
-      const shortest = cols.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a));
-      shortest.insertAdjacentHTML('beforeend', cardHtml(img, baseIdx + i));
-      const card = shortest.lastElementChild;
+      let shortestIdx = 0;
+      for (let c = 1; c < heights.length; c++) {
+        if (heights[c] < heights[shortestIdx]) shortestIdx = c;
+      }
+      const [w, h] = img.size.split('×').map(Number);
+      const estHeight = (w && h) ? (h / w) * REF_WIDTH + CARD_CHROME : REF_WIDTH + CARD_CHROME;
+      heights[shortestIdx] += estHeight;
+
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = cardHtml(img, baseIdx + i).trim();
+      const card = wrapper.firstElementChild;
+      frags[shortestIdx].appendChild(card);
       const imgEl = card.querySelector('img');
       if (imgEl) watchImageLoad(imgEl, img.id);
     });
+
+    // Semua kartu ditulis ke DOM sekaligus per kolom di akhir (bukan
+    // satu-satu bercampur baca-offsetHeight), jadi browser cuma perlu
+    // 1 layout pass per kolom, bukan 1 per kartu.
+    cols.forEach((col, c) => col.appendChild(frags[c]));
   }
 
   function appendNextBatch() {
@@ -1526,6 +1564,18 @@
   // Dashboard -> Database -> Replication -> aktifkan tabel `images`,
   // ATAU jalankan SQL ini sekali di SQL Editor:
   //   alter publication supabase_realtime add table images;
+  // PERBAIKAN PERFORMANCE: event realtime dari Supabase bisa datang
+  // beruntun dalam waktu singkat (mis. beberapa orang download gambar
+  // yang berbeda hampir bersamaan). Kalau tiap event langsung memicu
+  // filterAndRender() (yang menyusun ulang seluruh grid), grid bisa
+  // di-render ulang berkali-kali dalam sedetik. scheduleRealtimeRender()
+  // menggabungkan event-event yang datang berdekatan jadi 1 render saja.
+  let realtimeRenderTimer = null;
+  function scheduleRealtimeRender() {
+    clearTimeout(realtimeRenderTimer);
+    realtimeRenderTimer = setTimeout(filterAndRender, 350);
+  }
+
   function setupRealtimeImages() {
     supabaseClient
       .channel('public:images')
@@ -1534,7 +1584,7 @@
         if (!row.is_active) return; // belum aktif -> jangan tampilkan dulu
         if (IMAGES.some(i => i.id === row.id)) return; // jaga-jaga duplikat
         IMAGES.unshift(mapImageRow(row));
-        filterAndRender();
+        scheduleRealtimeRender();
         showToast(`Gambar baru ditambahkan: ${row.title}`, 'success');
         checkForNewNotifications();
       })
@@ -1543,17 +1593,17 @@
         const idx = IMAGES.findIndex(i => i.id === row.id);
         if (!row.is_active) {
           // Admin menyembunyikan gambar ini -> hapus dari tampilan publik
-          if (idx !== -1) { IMAGES.splice(idx, 1); filterAndRender(); }
+          if (idx !== -1) { IMAGES.splice(idx, 1); scheduleRealtimeRender(); }
           return;
         }
         const mapped = mapImageRow(row);
         if (idx !== -1) IMAGES[idx] = mapped; else IMAGES.unshift(mapped);
-        filterAndRender();
+        scheduleRealtimeRender();
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'images' }, (payload) => {
         const oldId = payload.old.id;
         const idx = IMAGES.findIndex(i => i.id === oldId);
-        if (idx !== -1) { IMAGES.splice(idx, 1); filterAndRender(); }
+        if (idx !== -1) { IMAGES.splice(idx, 1); scheduleRealtimeRender(); }
       })
       .subscribe();
   }
@@ -1598,7 +1648,7 @@
         renderCategories();
         // Label kategori bisa berubah -> render ulang gallery supaya nama
         // kategori di kartu/modal ikut ter-update kalau lagi ditampilkan.
-        filterAndRender();
+        scheduleRealtimeRender();
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'categories' }, (payload) => {
         const oldId = payload.old.id;
@@ -1611,7 +1661,7 @@
         if (activeCategory === oldId) {
           activeCategory = 'all';
         }
-        filterAndRender();
+        scheduleRealtimeRender();
       })
       .subscribe();
   }
