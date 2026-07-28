@@ -2584,6 +2584,7 @@ viewBox="0 0 7.14519 2.77802"
   let lpTimer = null;
   let lpStartX = 0, lpStartY = 0;
   let lpTriggered = false;
+  let lpMoved = false; // true kalau jari sempat geser melewati toleransi (berarti user scroll, bukan tap)
   let lpActiveEl = null;
 
   function buildLongPressActions(imgId) {
@@ -2667,6 +2668,7 @@ viewBox="0 0 7.14519 2.77802"
 
   function handleCatcherStart(e, imgId) {
     lpTriggered = false;
+    lpMoved = false;
     lpActiveEl = e.currentTarget;
     const p = getTouchPoint(e);
     lpStartX = p.x;
@@ -2682,12 +2684,17 @@ viewBox="0 0 7.14519 2.77802"
     const p = getTouchPoint(e);
     if (Math.abs(p.x - lpStartX) > LONG_PRESS_MOVE_TOLERANCE || Math.abs(p.y - lpStartY) > LONG_PRESS_MOVE_TOLERANCE) {
       clearTimeout(lpTimer);
+      lpMoved = true;
     }
   }
 
   function handleCatcherEnd(e, imgId, onShortTap) {
     clearTimeout(lpTimer);
-    if (!lpTriggered && onShortTap) onShortTap();
+    // Hanya anggap ini tap kalau long-press tidak sempat terpicu DAN jari
+    // tidak pernah geser melewati toleransi. Kalau jari sempat geser
+    // (berarti user scroll galeri), jangan buka modal walau geraknya
+    // berakhir tepat di atas kartu yang sama.
+    if (!lpTriggered && !lpMoved && onShortTap) onShortTap();
     lpActiveEl = null;
   }
 
