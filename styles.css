@@ -390,15 +390,15 @@
     padding: var(--gap-3) var(--gap-2);
   }
 
-  // CATATAN: dulu di sini pakai CSS `column-count` (masonry ala koran),
-  // sama seperti .modal-similar-grid -- dan punya masalah yang persis
-  // sama: browser MENGHITUNG ULANG pembagian semua kartu ke kolom setiap
-  // kali ada tambahan konten, jadi kartu yang sudah tampil bisa "pindah"
-  // kolom/baris begitu infinite scroll nambah batch baru, walau datanya
-  // sama sekali tidak berubah. Sekarang kolomnya dibuat & dikelola manual
-  // lewat JS (lihat setupGalleryColumns/appendItemsToColumns) supaya kartu
-  // baru selalu ditambahkan ke kolom yang saat itu paling pendek, dan
-  // kartu yang sudah ada tidak pernah disentuh/dipindah lagi.
+  /* CATATAN: dulu di sini pakai CSS `column-count` (masonry ala koran),
+     sama seperti .modal-similar-grid -- dan punya masalah yang persis
+     sama: browser MENGHITUNG ULANG pembagian semua kartu ke kolom setiap
+     kali ada tambahan konten, jadi kartu yang sudah tampil bisa "pindah"
+     kolom/baris begitu infinite scroll nambah batch baru, walau datanya
+     sama sekali tidak berubah. Sekarang kolomnya dibuat & dikelola manual
+     lewat JS (lihat setupGalleryColumns/appendItemsToColumns) supaya kartu
+     baru selalu ditambahkan ke kolom yang saat itu paling pendek, dan
+     kartu yang sudah ada tidak pernah disentuh/dipindah lagi. */
   .gallery {
     display: flex;
     align-items: flex-start;
@@ -1425,16 +1425,16 @@
     margin-bottom: 12px;
   }
 
-  // CATATAN: dulu di sini pakai CSS `column-count` (masonry ala koran).
-  // Masalahnya, `column-count` MENGHITUNG ULANG pembagian semua item ke
-  // kolom setiap kali konten berubah (bukan cuma nambah di akhir) --
-  // begitu infinite scroll nambah batch baru, item yang SUDAH tampil bisa
-  // "pindah" kolom/baris walau datanya sama sekali tidak berubah. Efeknya
-  // kelihatan seperti "gambar di posisi itu tiba-tiba berubah" padahal
-  // cuma reflow. Sekarang kolomnya dibuat & dikelola manual lewat JS
-  // (lihat renderModalSimilar/appendModalSimilarBatch) supaya item baru
-  // SELALU ditambahkan ke akhir kolom yang paling pendek saat itu, dan
-  // item yang sudah ditaruh tidak pernah disentuh/dipindah lagi.
+  /* CATATAN: dulu di sini pakai CSS `column-count` (masonry ala koran).
+     Masalahnya, `column-count` MENGHITUNG ULANG pembagian semua item ke
+     kolom setiap kali konten berubah (bukan cuma nambah di akhir) --
+     begitu infinite scroll nambah batch baru, item yang SUDAH tampil bisa
+     "pindah" kolom/baris walau datanya sama sekali tidak berubah. Efeknya
+     kelihatan seperti "gambar di posisi itu tiba-tiba berubah" padahal
+     cuma reflow. Sekarang kolomnya dibuat & dikelola manual lewat JS
+     (lihat renderModalSimilar/appendModalSimilarBatch) supaya item baru
+     SELALU ditambahkan ke akhir kolom yang paling pendek saat itu, dan
+     item yang sudah ditaruh tidak pernah disentuh/dipindah lagi. */
   .modal-similar-grid {
     display: flex;
     align-items: flex-start;
