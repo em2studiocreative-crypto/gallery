@@ -1,4 +1,10 @@
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Matikan highlight biru transparan bawaan browser mobile (terutama
+     Android/Chrome/WebView) yang muncul tiap elemen disentuh/ditap.
+     Sebelumnya cuma dipasang di beberapa elemen tertentu (kartu galeri,
+     tombol lapor) -- dipasang global di sini (bukan animasi/efek yang
+     sengaja dibuat situs ini) supaya konsisten di SEMUA tombol, link, dan
+     kartu yang bisa ditap, termasuk yang lupa/belum kena rule khusus. */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   :root {
     --bg: #0a0a0a;
