@@ -1,4 +1,4 @@
-// ===== DATA =====
+  // ===== DATA =====
   // URL publik resmi aplikasi (dipakai untuk share link), diambil dari
   // <link rel="canonical"> di <head>. Ini sengaja TIDAK pakai
   // window.location langsung, supaya link yang dibagikan selalu benar
@@ -1357,20 +1357,51 @@
     `;
   }
 
+  // Berapa kolom yang dipakai di galeri utama, mengikuti breakpoint yang
+  // sama seperti CSS lama (2 di HP, naik sampai 6 di layar lebar).
+  function galleryColumnCount() {
+    if (window.matchMedia('(min-width: 1400px)').matches) return 6;
+    if (window.matchMedia('(min-width: 1200px)').matches) return 5;
+    if (window.matchMedia('(min-width: 900px)').matches) return 4;
+    if (window.matchMedia('(min-width: 640px)').matches) return 3;
+    return 2;
+  }
+
+  // Kosongkan galeri & siapkan kolom² baru (dipanggil tiap mulai render
+  // dari awal). Dulu galeri cuma satu container flat yg disusun ke kolom
+  // pakai CSS `column-count` -- tapi itu bikin SEMUA item ke-reflow /
+  // pindah kolom tiap kali ada tambahan konten (lihat catatan panjang di
+  // CSS .gallery & di renderModalSimilar). Sekarang kolomnya dibuat manual
+  // di sini, item baru selalu masuk lewat appendItemsToColumns() ke kolom
+  // yang saat itu paling pendek, dan item yang sudah ada tidak pernah
+  // disentuh ulang.
+  function setupGalleryColumns(gallery) {
+    gallery.innerHTML = '';
+    const colCount = galleryColumnCount();
+    for (let i = 0; i < colCount; i++) {
+      const col = document.createElement('div');
+      col.className = 'gallery-col';
+      gallery.appendChild(col);
+    }
+  }
+
+  function appendItemsToColumns(gallery, items, baseIdx) {
+    const cols = Array.from(gallery.querySelectorAll('.gallery-col'));
+    if (cols.length === 0) return;
+    items.forEach((img, i) => {
+      const shortest = cols.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a));
+      shortest.insertAdjacentHTML('beforeend', cardHtml(img, baseIdx + i));
+      const card = shortest.lastElementChild;
+      const imgEl = card.querySelector('img');
+      if (imgEl) watchImageLoad(imgEl, img.id);
+    });
+  }
+
   function appendNextBatch() {
     const gallery = document.getElementById('gallery');
     const nextItems = currentFilteredItems.slice(renderedCount, renderedCount + GALLERY_BATCH_SIZE);
     if (nextItems.length === 0) return;
-    const html = nextItems.map((img, i) => cardHtml(img, renderedCount + i)).join('');
-    gallery.insertAdjacentHTML('beforeend', html);
-
-    // Pasang watchdog anti-macet ke tiap gambar yang baru saja ditambahkan
-    const newCards = Array.from(gallery.children).slice(-nextItems.length);
-    newCards.forEach((card, i) => {
-      const imgEl = card.querySelector('img');
-      if (imgEl) watchImageLoad(imgEl, nextItems[i].id);
-    });
-
+    appendItemsToColumns(gallery, nextItems, renderedCount);
     renderedCount += nextItems.length;
   }
 
@@ -1450,21 +1481,16 @@
 
     if (sameOrder) {
       const keepCount = Math.min(renderedCount, items.length);
-      const html = items.slice(0, keepCount).map((img, i) => cardHtml(img, i)).join('');
-      gallery.innerHTML = html;
+      setupGalleryColumns(gallery);
+      appendItemsToColumns(gallery, items.slice(0, keepCount), 0);
       renderedCount = keepCount;
-      const cards = Array.from(gallery.children);
-      cards.forEach((card, i) => {
-        const imgEl = card.querySelector('img');
-        if (imgEl) watchImageLoad(imgEl, items[i].id);
-      });
       return;
     }
 
     // Set/urutan gambar benar2 berubah (filter/kategori/pencarian diganti,
     // ada gambar baru/dihapus, atau ini render pertama) -> render dari awal.
     renderedCount = 0;
-    gallery.innerHTML = '';
+    setupGalleryColumns(gallery);
     appendNextBatch();
 
     // Jaga-jaga kalau layar besar & batch pertama belum memenuhi
@@ -1961,12 +1987,26 @@
     `;
   }
 
+  // Berapa kolom yang dipakai, mengikuti breakpoint yang sama seperti CSS
+  // lama (2 kolom di HP, 3 kolom di layar >=1100px).
+  function modalSimilarColumnCount() {
+    return window.matchMedia('(min-width: 1100px)').matches ? 3 : 2;
+  }
+
   function appendModalSimilarBatch() {
     const grid = document.getElementById('modalSimilarGrid');
     if (!grid) return;
     const nextItems = modalSimilarPool.slice(modalSimilarRendered, modalSimilarRendered + MODAL_SIMILAR_BATCH_SIZE);
     if (nextItems.length === 0) return;
-    grid.insertAdjacentHTML('beforeend', nextItems.map(modalSimilarItemHtml).join(''));
+    const cols = Array.from(grid.querySelectorAll('.modal-similar-col'));
+    if (cols.length === 0) return;
+    // Tiap item baru ditaruh ke kolom yang SAAT INI paling pendek. Kolom &
+    // item yang sudah ada TIDAK PERNAH disentuh ulang -> tidak ada reflow
+    // yang bikin gambar lama "pindah tempat" (lihat catatan di CSS).
+    nextItems.forEach(s => {
+      const shortest = cols.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a));
+      shortest.insertAdjacentHTML('beforeend', modalSimilarItemHtml(s));
+    });
     modalSimilarRendered += nextItems.length;
   }
 
@@ -1981,6 +2021,14 @@
       return;
     }
     section.style.display = '';
+    // Siapkan kolom² kosong dulu (baru sekali per modal dibuka), baru
+    // batch pertama diisi lewat appendModalSimilarBatch.
+    const colCount = modalSimilarColumnCount();
+    for (let i = 0; i < colCount; i++) {
+      const col = document.createElement('div');
+      col.className = 'modal-similar-col';
+      grid.appendChild(col);
+    }
     appendModalSimilarBatch();
   }
 
