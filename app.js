@@ -67,6 +67,25 @@
     return thumbUrl(url, 1080, 82);
   }
 
+  // Mulai fetch versi preview (1080px) SEDINI MUNGKIN — begitu jari
+  // menyentuh kartu (touchstart) / tombol mouse ditekan (mousedown),
+  // bukan menunggu openModal() benar-benar jalan. Selisih waktu antara
+  // jari menyentuh layar sampai tap-nya kelar (~150-300ms) dipakai buat
+  // request resize duluan ke wsrv.nl, jadi pas modal beneran terbuka,
+  // gambar HD-nya kemungkinan sudah setengah/selesai dimuat. openModal()
+  // tetap bikin request previewThumb() sendiri seperti biasa — kalau URL-
+  // nya sama persis, browser otomatis pakai ulang request/cache ini,
+  // jadi TIDAK ada request dobel.
+  const prefetchedPreviewIds = new Set();
+  function prefetchPreview(imgId) {
+    if (prefetchedPreviewIds.has(imgId)) return;
+    const img = IMAGES.find(i => i.id === imgId);
+    if (!img) return;
+    prefetchedPreviewIds.add(imgId);
+    const p = new Image();
+    p.src = previewThumb(img.url);
+  }
+
   // ===== STATE =====
   let activeCategory = 'all';
   let searchQuery = '';
@@ -2043,7 +2062,7 @@
     const [w, h] = s.size.split('×').map(Number);
     const ratio = (w && h) ? `${w}/${h}` : '1/1';
     return `
-      <button class="modal-similar-item" onclick="openModal(${s.id})" aria-label="Buka ${escapeHtml(s.title)}">
+      <button class="modal-similar-item" onclick="openModal(${s.id})" ontouchstart="prefetchPreview(${s.id})" onmousedown="prefetchPreview(${s.id})" aria-label="Buka ${escapeHtml(s.title)}">
         <img src="${gridThumb(s.url)}" srcset="${gridThumbSrcset(s.url)}" alt="Status ${escapeHtml(catLabel(s.category))} - ${escapeHtml(s.title)}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
         <span class="modal-similar-item-label">${escapeHtml(s.title)}</span>
       </button>
@@ -2718,7 +2737,9 @@ viewBox="0 0 7.14519 2.77802"
       gallery.addEventListener('touchstart', (e) => {
         const catcher = e.target.closest('.img-touch-catcher');
         if (!catcher) return;
-        handleCatcherStart(e, Number(catcher.dataset.imgId));
+        const imgId = Number(catcher.dataset.imgId);
+        prefetchPreview(imgId);
+        handleCatcherStart(e, imgId);
       }, { passive: true });
 
       gallery.addEventListener('touchmove', handleCatcherMove, { passive: true });
@@ -2732,6 +2753,15 @@ viewBox="0 0 7.14519 2.77802"
         e.preventDefault();
         const imgId = Number(catcher.dataset.imgId);
         handleCatcherEnd(e, imgId, () => openModal(imgId));
+      });
+
+      // Desktop: mousedown terjadi sebelum click (biasanya beberapa puluh
+      // ms), dipakai buat mulai fetch versi HD lebih dini juga -- lebih
+      // kecil manfaatnya dibanding touchstart di HP, tapi tetap membantu.
+      gallery.addEventListener('mousedown', (e) => {
+        const catcher = e.target.closest('.img-touch-catcher');
+        if (!catcher) return;
+        prefetchPreview(Number(catcher.dataset.imgId));
       });
 
       // Desktop: klik biasa tetap buka modal, klik-kanan tetap dimatikan
