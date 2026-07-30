@@ -9,6 +9,27 @@
   // ===== SUPABASE CLIENT =====
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  // ===== GUEST VISIT TRACKING =====
+  // Mencatat setiap kunjungan tamu (orang yang buka galeri tanpa login) ke
+  // tabel guest_visits, supaya "Total Kunjungan Tamu" di panel admin
+  // (loadGuestVisits() -> RPC get_guest_visit_stats()) tidak selalu 0.
+  // "visitor_id" acak disimpan di localStorage per browser supaya statistik
+  // "pengunjung unik" bisa dihitung. Gagal insert (mis. offline) sengaja
+  // tidak mengganggu tampilan galeri, cuma dicatat ke console.
+  async function recordGuestVisit() {
+    try {
+      let visitorId = localStorage.getItem('sg_visitor_id');
+      if (!visitorId) {
+        visitorId = crypto.randomUUID();
+        localStorage.setItem('sg_visitor_id', visitorId);
+      }
+      const { error } = await supabaseClient.from('guest_visits').insert({ visitor_id: visitorId });
+      if (error) console.error('Gagal mencatat kunjungan tamu:', error);
+    } catch (err) {
+      console.error('Gagal mencatat kunjungan tamu:', err);
+    }
+  }
+
   // CATEGORIES & IMAGES sekarang diisi dari Supabase saat load (lihat loadData()).
   // 'all' selalu ada duluan sebagai filter khusus "tampilkan semua".
   let CATEGORIES = [ { id: 'all', label: 'Semua' } ];
@@ -1017,6 +1038,7 @@
     initAuth();
     setupRealtimeImages();
     setupRealtimeCategories();
+    recordGuestVisit();
   });
 
   function renderCategories() {
