@@ -69,6 +69,13 @@
 
   // ===== STATE =====
   let activeCategory = 'all';
+  // Penanda "loadData() awal sudah pernah berhasil setidaknya sekali".
+  // Dipakai scheduleRealtimeRender() supaya event realtime (Supabase
+  // Realtime) yang masuk SEBELUM data awal selesai dimuat tidak ikut
+  // memanggil filterAndRender() dengan IMAGES yang masih kosong -- yang
+  // tadinya bisa nampilin "Belum ada gambar" secara keliru, menimpa
+  // loading state, padahal loadData() masih proses / baru gagal.
+  let initialLoadDone = false;
   let searchQuery = '';
   let currentModalImage = null;
   let showFavoritesOnly = false;
@@ -1572,6 +1579,11 @@
   // menggabungkan event-event yang datang berdekatan jadi 1 render saja.
   let realtimeRenderTimer = null;
   function scheduleRealtimeRender() {
+    // Abaikan event realtime yang masuk sebelum loadData() awal pernah
+    // berhasil -- kalau tidak, ini bisa memanggil filterAndRender() dengan
+    // IMAGES yang masih kosong dan keliru menampilkan "Belum ada gambar"
+    // di tengah proses loadData() awal (lihat catatan di loadData()).
+    if (!initialLoadDone) return;
     clearTimeout(realtimeRenderTimer);
     realtimeRenderTimer = setTimeout(filterAndRender, 350);
   }
@@ -1705,11 +1717,17 @@
 
       renderCategories();
       filterAndRender();
+      initialLoadDone = true;
       checkForNewNotifications();
       const openedFromUrl = openInitialImageFromUrl();
       if (!openedFromUrl) maybeShowOnboarding();
     } catch (err) {
       console.error(err);
+      // Pastikan empty state ikut disembunyikan di sini juga -- kalau
+      // sebelum ini sempat ada render dengan hasil kosong (mis. dari
+      // filterAndRender() lain yang lolos race condition), errorState
+      // gak akan numpuk keliatan bareng emptyState kayak sebelumnya.
+      empty.classList.add('hidden');
       loading.classList.add('hidden');
       error.classList.remove('hidden');
       showToast('Gagal memuat data', 'error');
