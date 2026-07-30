@@ -339,6 +339,7 @@
         <div class="stat-card"><div class="stat-value" id="statTotalCategories">—</div><div class="stat-label">Total Kategori</div></div>
         <div class="stat-card"><div class="stat-value" id="statTotalDownloads">—</div><div class="stat-label">Total Download</div></div>
         <div class="stat-card"><div class="stat-value" id="statTotalUsers">—</div><div class="stat-label">User Terdaftar</div></div>
+        <div class="stat-card"><div class="stat-value" id="statGuestVisits">—</div><div class="stat-label">Total Kunjungan Tamu</div></div>
       </div>
       <div class="dash-section-title">🔥 Gambar Terpopuler</div>
       <div class="top-list" id="dashTopList">
@@ -666,6 +667,7 @@
     await Promise.all([loadCategories(), loadImages()]);
     renderDashboard();
     loadUserCount();
+    loadGuestVisits();
     refreshReportsBadge();
   }
 
@@ -714,6 +716,26 @@
     }
     el.classList.remove('muted');
     el.textContent = Number(data).toLocaleString('id-ID');
+  }
+
+  // Total kunjungan tamu (orang yang buka galeri tanpa login) dicatat lewat
+  // tabel guest_visits di database, diisi otomatis dari halaman galeri
+  // publik. Dibaca lewat RPC get_guest_visit_stats() (admin-only), lihat
+  // SQL yang menyertai ini. Kalau function belum dibuat, tampilkan "—".
+  async function loadGuestVisits() {
+    const el = document.getElementById('statGuestVisits');
+    const { data, error } = await supabaseClient.rpc('get_guest_visit_stats');
+    if (error || !data || !data.length) {
+      console.error('Gagal ambil statistik kunjungan tamu (pastikan function get_guest_visit_stats sudah dibuat):', error);
+      el.textContent = '—';
+      el.classList.add('muted');
+      el.title = 'Function get_guest_visit_stats belum tersedia di database';
+      return;
+    }
+    const stats = data[0];
+    el.classList.remove('muted');
+    el.textContent = Number(stats.total_visits || 0).toLocaleString('id-ID');
+    el.title = `${Number(stats.unique_visitors || 0).toLocaleString('id-ID')} pengunjung unik · ${Number(stats.today_visits || 0).toLocaleString('id-ID')} hari ini`;
   }
 
   async function loadCategories() {
