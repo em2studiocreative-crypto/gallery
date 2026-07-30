@@ -9,27 +9,6 @@
   // ===== SUPABASE CLIENT =====
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ===== GUEST VISIT TRACKING =====
-  // Mencatat setiap kunjungan tamu (orang yang buka galeri tanpa login) ke
-  // tabel guest_visits, supaya "Total Kunjungan Tamu" di panel admin
-  // (loadGuestVisits() -> RPC get_guest_visit_stats()) tidak selalu 0.
-  // "visitor_id" acak disimpan di localStorage per browser supaya statistik
-  // "pengunjung unik" bisa dihitung. Gagal insert (mis. offline) sengaja
-  // tidak mengganggu tampilan galeri, cuma dicatat ke console.
-  async function recordGuestVisit() {
-    try {
-      let visitorKey = localStorage.getItem('sg_visitor_id');
-      if (!visitorKey) {
-        visitorKey = crypto.randomUUID();
-        localStorage.setItem('sg_visitor_id', visitorKey);
-      }
-      const { error } = await supabaseClient.from('guest_visits').insert({ visitor_key: visitorKey });
-      if (error) console.error('Gagal mencatat kunjungan tamu:', error);
-    } catch (err) {
-      console.error('Gagal mencatat kunjungan tamu:', err);
-    }
-  }
-
   // CATEGORIES & IMAGES sekarang diisi dari Supabase saat load (lihat loadData()).
   // 'all' selalu ada duluan sebagai filter khusus "tampilkan semua".
   let CATEGORIES = [ { id: 'all', label: 'Semua' } ];
@@ -90,13 +69,6 @@
 
   // ===== STATE =====
   let activeCategory = 'all';
-  // Penanda "loadData() awal sudah pernah berhasil setidaknya sekali".
-  // Dipakai scheduleRealtimeRender() supaya event realtime (Supabase
-  // Realtime) yang masuk SEBELUM data awal selesai dimuat tidak ikut
-  // memanggil filterAndRender() dengan IMAGES yang masih kosong -- yang
-  // tadinya bisa nampilin "Belum ada gambar" secara keliru, menimpa
-  // loading state, padahal loadData() masih proses / baru gagal.
-  let initialLoadDone = false;
   let searchQuery = '';
   let currentModalImage = null;
   let showFavoritesOnly = false;
@@ -1038,7 +1010,6 @@
     initAuth();
     setupRealtimeImages();
     setupRealtimeCategories();
-    recordGuestVisit();
   });
 
   function renderCategories() {
@@ -1601,11 +1572,6 @@
   // menggabungkan event-event yang datang berdekatan jadi 1 render saja.
   let realtimeRenderTimer = null;
   function scheduleRealtimeRender() {
-    // Abaikan event realtime yang masuk sebelum loadData() awal pernah
-    // berhasil -- kalau tidak, ini bisa memanggil filterAndRender() dengan
-    // IMAGES yang masih kosong dan keliru menampilkan "Belum ada gambar"
-    // di tengah proses loadData() awal (lihat catatan di loadData()).
-    if (!initialLoadDone) return;
     clearTimeout(realtimeRenderTimer);
     realtimeRenderTimer = setTimeout(filterAndRender, 350);
   }
@@ -1739,17 +1705,11 @@
 
       renderCategories();
       filterAndRender();
-      initialLoadDone = true;
       checkForNewNotifications();
       const openedFromUrl = openInitialImageFromUrl();
       if (!openedFromUrl) maybeShowOnboarding();
     } catch (err) {
       console.error(err);
-      // Pastikan empty state ikut disembunyikan di sini juga -- kalau
-      // sebelum ini sempat ada render dengan hasil kosong (mis. dari
-      // filterAndRender() lain yang lolos race condition), errorState
-      // gak akan numpuk keliatan bareng emptyState kayak sebelumnya.
-      empty.classList.add('hidden');
       loading.classList.add('hidden');
       error.classList.remove('hidden');
       showToast('Gagal memuat data', 'error');
@@ -2266,7 +2226,7 @@
   // ===== DOWNLOAD =====
   // Batas download gratis untuk guest (belum login). Setelah tercapai,
   // guest wajib login (Google) supaya bisa lanjut download tanpa batas.
-  const GUEST_DOWNLOAD_LIMIT = 1;
+  const GUEST_DOWNLOAD_LIMIT = 3;
 
   function getGuestDownloadCount() {
     const n = parseInt(localStorage.getItem('sg_guest_dl_count') || '0', 10);
