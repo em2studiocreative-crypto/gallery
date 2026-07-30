@@ -2226,7 +2226,7 @@
   // ===== DOWNLOAD =====
   // Batas download gratis untuk guest (belum login). Setelah tercapai,
   // guest wajib login (Google) supaya bisa lanjut download tanpa batas.
-  const GUEST_DOWNLOAD_LIMIT = 1;
+  const GUEST_DOWNLOAD_LIMIT = 3;
 
   function getGuestDownloadCount() {
     const n = parseInt(localStorage.getItem('sg_guest_dl_count') || '0', 10);
