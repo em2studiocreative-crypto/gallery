@@ -325,6 +325,7 @@
       <button class="tab-btn" data-tab="images" onclick="switchTab('images')">Gambar</button>
       <button class="tab-btn" data-tab="categories" onclick="switchTab('categories')">Kategori</button>
       <button class="tab-btn" data-tab="reports" onclick="switchTab('reports')">Laporan <span class="tab-badge hidden" id="reportsBadge">0</span></button>
+      <button class="tab-btn" data-tab="users" onclick="switchTab('users')">Pengguna</button>
     </div>
 
     <!-- PANEL: DASHBOARD -->
@@ -431,6 +432,30 @@
       </div>
       <div class="pagination-bar" id="reportsPagination"></div>
     </div>
+
+    <!-- PANEL: PENGGUNA -->
+    <div class="panel" id="panel-users">
+      <div class="panel-head">
+        <h2>Pengguna Terdaftar</h2>
+        <input type="text" id="usersSearchInput" placeholder="Cari email..." oninput="onUsersSearchInput()" style="background:var(--bg-elevated); border:1px solid var(--border); color:var(--text); border-radius:var(--radius-sm); padding:8px 10px; font-size:13px; width:220px;">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-no">No</th>
+              <th>Email</th>
+              <th>Terdaftar</th>
+              <th>Login Terakhir</th>
+            </tr>
+          </thead>
+          <tbody id="usersTbody">
+            <tr class="empty-row"><td colspan="4">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-bar" id="usersPagination"></div>
+    </div>
   </main>
 </div>
 
@@ -512,6 +537,8 @@
   let CATEGORIES = [];
   let IMAGES = [];
   let REPORTS = [];
+  let USERS = [];
+  let usersSearchTerm = '';
   let editingCategoryId = null; // null = mode tambah, isi = mode edit
 
   // ===== PAGINATION =====
@@ -522,6 +549,7 @@
   let imagesPage = 1, imagesPageSize = 20;
   let categoriesPage = 1, categoriesPageSize = 20;
   let reportsPage = 1, reportsPageSize = 20;
+  let usersPage = 1, usersPageSize = 20;
 
   function paginateSlice(list, page, pageSize) {
     const start = (page - 1) * pageSize;
@@ -628,7 +656,9 @@
     document.getElementById('panel-images').classList.toggle('active', tab === 'images');
     document.getElementById('panel-categories').classList.toggle('active', tab === 'categories');
     document.getElementById('panel-reports').classList.toggle('active', tab === 'reports');
+    document.getElementById('panel-users').classList.toggle('active', tab === 'users');
     if (tab === 'reports') loadReports();
+    if (tab === 'users') loadUsers();
   }
 
   // ===== LOAD DATA =====
@@ -913,6 +943,78 @@
     showToast('Gambar dihapus', 'success');
     loadReports();
     refreshReportsBadge();
+  }
+
+  // ===== PENGGUNA =====
+  // Daftar email yang terdaftar butuh akses tabel auth.users, yang tidak
+  // bisa diquery langsung lewat anon key. Makanya lewat RPC get_users_list()
+  // (function di database, admin-only, lihat SQL yang menyertai ini).
+  // Kalau function-nya belum dibuat di Supabase, tabel akan menampilkan
+  // pesan error yang jelas tanpa mengganggu bagian lain.
+  async function loadUsers() {
+    const tbody = document.getElementById('usersTbody');
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Memuat...</td></tr>';
+
+    const { data, error } = await supabaseClient.rpc('get_users_list');
+    if (error) {
+      console.error('Gagal ambil daftar pengguna (pastikan function get_users_list sudah dibuat):', error);
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Gagal memuat daftar pengguna. Pastikan function get_users_list() sudah dibuat di database.</td></tr>';
+      document.getElementById('usersPagination').innerHTML = '';
+      return;
+    }
+    USERS = data || [];
+    usersPage = 1;
+    renderUsersTable();
+  }
+
+  function onUsersSearchInput() {
+    usersSearchTerm = document.getElementById('usersSearchInput').value.trim().toLowerCase();
+    usersPage = 1;
+    renderUsersTable();
+  }
+
+  function goToUsersPage(p) {
+    usersPage = p;
+    renderUsersTable();
+  }
+
+  function setUsersPageSize(size) {
+    usersPageSize = size;
+    usersPage = 1;
+    renderUsersTable();
+  }
+
+  function renderUsersTable() {
+    const tbody = document.getElementById('usersTbody');
+    const pagination = document.getElementById('usersPagination');
+
+    const filtered = usersSearchTerm
+      ? USERS.filter(u => (u.email || '').toLowerCase().includes(usersSearchTerm))
+      : USERS;
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="4">${usersSearchTerm ? 'Tidak ada email yang cocok.' : 'Belum ada pengguna terdaftar.'}</td></tr>`;
+      pagination.innerHTML = buildPaginationHTML(0, 1, usersPageSize, 'goToUsersPage', 'setUsersPageSize');
+      return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / usersPageSize));
+    if (usersPage > totalPages) usersPage = totalPages;
+    const pageItems = paginateSlice(filtered, usersPage, usersPageSize);
+
+    tbody.innerHTML = pageItems.map((u, i) => {
+      const rowNo = (usersPage - 1) * usersPageSize + i + 1;
+      const terdaftar = u.created_at ? new Date(u.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+      const loginTerakhir = u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+      return `
+      <tr>
+        <td class="no-cell">${rowNo}</td>
+        <td>${escapeHtml(u.email || '(tanpa email)')}</td>
+        <td>${terdaftar}</td>
+        <td>${loginTerakhir}</td>
+      </tr>`;
+    }).join('');
+    pagination.innerHTML = buildPaginationHTML(filtered.length, usersPage, usersPageSize, 'goToUsersPage', 'setUsersPageSize');
   }
 
   // ===== MIGRASI KE STORAGE =====
