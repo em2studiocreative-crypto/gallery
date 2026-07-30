@@ -38,20 +38,39 @@
 <link rel="preconnect" href="https://vedlsmxfitglmaxhizpb.supabase.co" crossorigin>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="dns-prefetch" href="https://image.qwenlm.ai">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet">
-<!-- ===== GOOGLE ANALYTICS (GA4) — Measurement ID: G-4SGWMRTPXL ===== -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-4SGWMRTPXL"></script>
+
+<!-- ===== GOOGLE ANALYTICS (GA4) — Measurement ID: G-4SGWMRTPXL =====
+     Script fisik ditunda sampai window 'load' (bukan pakai async biasa),
+     supaya request-nya gak ikut rebutan bandwidth/koneksi dgn resource
+     kritis (CSS, font, app.js) saat render pertama. gtag()/dataLayer
+     tetap disiapkan dari awal (aman dipanggil sebelum script fisik-nya
+     kelar dimuat), cuma waktu FETCH SDK-nya yang ditunda. -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){ dataLayer.push(arguments); }
   gtag('js', new Date());
   gtag('config', 'G-4SGWMRTPXL');
+  window.addEventListener('load', function () {
+    var ga = document.createElement('script');
+    ga.async = true;
+    ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-4SGWMRTPXL';
+    document.head.appendChild(ga);
+  });
 </script>
 
-<!-- ===== ONESIGNAL WEB PUSH ===== -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<!-- ===== ONESIGNAL WEB PUSH =====
+     Sama seperti GA4: SDK-nya berat (push notification) dan gak dibutuhkan
+     utk render awal, jadi baru di-fetch & di-init setelah window 'load'. -->
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.addEventListener('load', function () {
+    var os = document.createElement('script');
+    os.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+    os.defer = true;
+    document.head.appendChild(os);
+  });
   OneSignalDeferred.push(async function (OneSignal) {
     await OneSignal.init({
       appId: "1e94ba58-e8c8-49d7-91e5-cdf9e578cc2e",
@@ -65,7 +84,7 @@
     });
   });
 </script>
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.min.css?v=3">
 <script defer src="https://unpkg.com/@supabase/supabase-js@2.45.4"></script>
 <script defer src="config.js"></script>
 <script>
@@ -754,6 +773,6 @@ viewBox="0 0 0.16593 0.10268"
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script defer src="app.js"></script>
+<script defer src="app.min.js?v=1"></script>
 </body>
 </html>
