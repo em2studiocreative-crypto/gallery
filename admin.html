@@ -958,7 +958,7 @@
     const { data, error } = await supabaseClient.rpc('get_users_list');
     if (error) {
       console.error('Gagal ambil daftar pengguna (pastikan function get_users_list sudah dibuat):', error);
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Gagal memuat daftar pengguna. Pastikan function get_users_list() sudah dibuat di database.</td></tr>';
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="4">Gagal memuat daftar pengguna: ${escapeHtml(error.message || 'error tidak diketahui')}</td></tr>`;
       document.getElementById('usersPagination').innerHTML = '';
       return;
     }
