@@ -18,12 +18,12 @@
   // tidak mengganggu tampilan galeri, cuma dicatat ke console.
   async function recordGuestVisit() {
     try {
-      let visitorId = localStorage.getItem('sg_visitor_id');
-      if (!visitorId) {
-        visitorId = crypto.randomUUID();
-        localStorage.setItem('sg_visitor_id', visitorId);
+      let visitorKey = localStorage.getItem('sg_visitor_id');
+      if (!visitorKey) {
+        visitorKey = crypto.randomUUID();
+        localStorage.setItem('sg_visitor_id', visitorKey);
       }
-      const { error } = await supabaseClient.from('guest_visits').insert({ visitor_id: visitorId });
+      const { error } = await supabaseClient.from('guest_visits').insert({ visitor_key: visitorKey });
       if (error) console.error('Gagal mencatat kunjungan tamu:', error);
     } catch (err) {
       console.error('Gagal mencatat kunjungan tamu:', err);
