@@ -354,6 +354,7 @@
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn btn-ghost" style="width:auto;" id="cleanupBtn" onclick="cleanupOrphanFiles()">Bersihkan File Tak Terpakai</button>
           <button class="btn btn-ghost" style="width:auto;" id="migrateAllBtn" onclick="migrateAllImages()">Pindahkan Semua ke Storage</button>
+          <button class="btn btn-ghost" style="width:auto;" id="reoptimizeAllBtn" onclick="reoptimizeAllImages()">Kompres Ulang Gambar Besar</button>
           <button class="btn btn-primary" style="width:auto;" onclick="openImageModal()">+ Tambah Gambar</button>
         </div>
       </div>
@@ -1102,6 +1103,79 @@
     showToast(`Migrasi selesai: ${ok} berhasil${fail ? `, ${fail} gagal (lihat console)` : ''}`, fail ? 'error' : 'success');
   }
 
+  // ===== KOMPRES ULANG GAMBAR BESAR =====
+  // Untuk gambar yang sudah terlanjur terupload dengan file mentah (besar)
+  // sebelum resizeImageForUpload() ada. Download dari Storage, kompres ulang
+  // di browser, upload versi barunya, update url+width+height di DB, lalu
+  // hapus file lama supaya tidak menumpuk sampah di bucket.
+  async function doReoptimizeOne(id) {
+    const img = IMAGES.find(i => i.id === id);
+    if (!img) throw new Error('Gambar tidak ditemukan');
+    if (!isStorageUrl(img.url)) throw new Error('Gambar belum ada di Storage, migrasi dulu');
+
+    const res = await fetch(img.url);
+    if (!res.ok) throw new Error('Gagal mengunduh gambar dari Storage');
+    const blob = await res.blob();
+
+    const resized = await resizeImageForUpload(blob);
+    if (resized.blob === blob) {
+      // Tidak ada perubahan berarti (SVG/GIF, sudah kecil, atau kompresi gagal)
+      return { skipped: true };
+    }
+
+    const oldUrl = img.url;
+    const { url: newUrl } = await uploadFileToStorage(resized.blob, img.url);
+
+    const updatePayload = { url: newUrl };
+    if (resized.width && resized.height) {
+      updatePayload.width = resized.width;
+      updatePayload.height = resized.height;
+    }
+    const { error } = await supabaseClient.from('images').update(updatePayload).eq('id', id);
+    if (error) throw error;
+
+    // Hapus file lama dari storage supaya tidak jadi sampah
+    const oldPath = oldUrl.slice(storagePublicPrefix().length);
+    await supabaseClient.storage.from('images').remove([oldPath]).catch(err => {
+      console.warn('Gagal hapus file lama dari storage:', err);
+    });
+
+    img.url = newUrl;
+    if (resized.width && resized.height) {
+      img.width = resized.width;
+      img.height = resized.height;
+    }
+    return { skipped: false };
+  }
+
+  async function reoptimizeAllImages() {
+    const targets = IMAGES.filter(i => isStorageUrl(i.url) &&
+      (!i.width || !i.height || i.width > MAX_UPLOAD_DIMENSION || i.height > MAX_UPLOAD_DIMENSION));
+    if (targets.length === 0) {
+      showToast('Semua gambar di Storage sudah teroptimasi', 'success');
+      return;
+    }
+    if (!confirm(`Kompres ulang ${targets.length} gambar berukuran besar di Storage? File lama otomatis diganti versi terkompresi. Ini bisa memakan waktu beberapa menit, jangan tutup halaman ini.`)) return;
+
+    const btn = document.getElementById('reoptimizeAllBtn');
+    btn.disabled = true;
+    let ok = 0, skip = 0, fail = 0;
+    for (const img of targets) {
+      btn.textContent = `Mengompres... (${ok + skip + fail + 1}/${targets.length})`;
+      try {
+        const result = await doReoptimizeOne(img.id);
+        if (result.skipped) skip++; else ok++;
+      } catch (err) {
+        fail++;
+        console.error(`Gagal kompres ulang gambar "${img.title}":`, err);
+      }
+      renderImagesTable();
+    }
+    btn.disabled = false;
+    btn.textContent = 'Kompres Ulang Gambar Besar';
+    showToast(`Kompres ulang selesai: ${ok} berhasil${skip ? `, ${skip} dilewati (sudah kecil)` : ''}${fail ? `, ${fail} gagal (lihat console)` : ''}`, fail ? 'error' : 'success');
+  }
+
   // ===== BERSIHKAN FILE TAK TERPAKAI =====
   // Mencari file di bucket Storage 'images' yang tidak dirujuk oleh baris
   // manapun di tabel images (misal sisa dari penghapusan sebelum fitur ini
@@ -1203,6 +1277,80 @@
     return typeof url === 'string' && url.startsWith(storagePublicPrefix());
   }
 
+  // Foto mentah (mis. langsung dari HP) bisa berdimensi 4000px+ & berukuran
+  // beberapa MB. Ukuran gambar terbesar yang pernah ditampilkan di app ini
+  // cuma previewThumb() = 1080px lebar, jadi menyimpan file jauh lebih besar
+  // dari itu tidak menambah kualitas yang kelihatan, cuma bikin:
+  // (1) upload ke storage lebih lambat, dan
+  // (2) wsrv.nl (proxy resize thumbnail di app.js) harus download file
+  //     mentah yang besar itu dulu tiap kali ada yang buka gambarnya buat
+  //     pertama kali (cache dingin) -> ini penyebab utama gambar lambat
+  //     dibuka di galeri.
+  // Makanya di-resize+kompres dulu di browser (canvas) sebelum diupload.
+  const MAX_UPLOAD_DIMENSION = 2000; // px, batas sisi terpanjang
+  const UPLOAD_JPEG_QUALITY = 0.85;
+  const SKIP_PROCESSING_UNDER_BYTES = 500 * 1024; // file kecil, jangan diapa-apain lagi
+
+  function probeImageDimensions(fileOrBlob) {
+    return new Promise((resolve, reject) => {
+      const objUrl = URL.createObjectURL(fileOrBlob);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(objUrl);
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objUrl);
+        reject(new Error('Gagal membaca dimensi gambar'));
+      };
+      img.src = objUrl;
+    });
+  }
+
+  async function resizeImageForUpload(file) {
+    // SVG (vector, sudah ringan) & GIF (animasi -> canvas cuma ambil 1 frame,
+    // bisa merusak animasinya) sengaja dilewati, dipakai apa adanya.
+    if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
+      return { blob: file, width: null, height: null };
+    }
+    if (file.size < SKIP_PROCESSING_UNDER_BYTES) {
+      // File sudah kecil, tidak perlu dikompres lagi, tapi tetap probe
+      // dimensinya biar width/height yang tersimpan tetap akurat.
+      try {
+        const dim = await probeImageDimensions(file);
+        return { blob: file, width: dim.width, height: dim.height };
+      } catch {
+        return { blob: file, width: null, height: null };
+      }
+    }
+
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, MAX_UPLOAD_DIMENSION / Math.max(bitmap.width, bitmap.height));
+      const width = Math.round(bitmap.width * scale);
+      const height = Math.round(bitmap.height * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0, width, height);
+      if (bitmap.close) bitmap.close();
+
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', UPLOAD_JPEG_QUALITY));
+      if (!blob || blob.size >= file.size) {
+        // Hasil kompresi malah lebih besar atau gagal -> pakai file aslinya saja
+        const dim = await probeImageDimensions(file).catch(() => ({ width: null, height: null }));
+        return { blob: file, width: dim.width, height: dim.height };
+      }
+      return { blob, width, height };
+    } catch (err) {
+      // createImageBitmap/canvas gagal (mis. format tidak didukung) -> fallback file asli
+      const dim = await probeImageDimensions(file).catch(() => ({ width: null, height: null }));
+      return { blob: file, width: dim.width, height: dim.height };
+    }
+  }
+
   // Upload File object ke bucket storage 'images', kembalikan { url }
   async function uploadFileToStorage(fileOrBlob, hintName) {
     const rawExt = (hintName || fileOrBlob.name || '').split('.').pop() || '';
@@ -1232,7 +1380,9 @@
     const res = await fetch(sourceUrl);
     if (!res.ok) throw new Error('Gagal mengambil gambar dari URL');
     const blob = await res.blob();
-    return uploadFileToStorage(blob, sourceUrl);
+    const resized = await resizeImageForUpload(blob);
+    const { url } = await uploadFileToStorage(resized.blob, sourceUrl);
+    return { url, width: resized.width, height: resized.height };
   }
 
   async function saveImage() {
@@ -1240,8 +1390,8 @@
     const title = document.getElementById('imgTitle').value.trim();
     const category_id = document.getElementById('imgCategory').value;
     let url = document.getElementById('imgUrl').value.trim();
-    const width = parseInt(document.getElementById('imgWidth').value) || null;
-    const height = parseInt(document.getElementById('imgHeight').value) || null;
+    let width = parseInt(document.getElementById('imgWidth').value) || null;
+    let height = parseInt(document.getElementById('imgHeight').value) || null;
     const is_active = document.getElementById('imgActive').checked;
     const file = document.getElementById('imgFile').files[0];
 
@@ -1262,7 +1412,14 @@
 
     if (file) {
       try {
-        ({ url } = await uploadFileToStorage(file));
+        const resized = await resizeImageForUpload(file);
+        ({ url } = await uploadFileToStorage(resized.blob, file.name));
+        if (resized.width && resized.height) {
+          width = resized.width;
+          height = resized.height;
+          document.getElementById('imgWidth').value = width;
+          document.getElementById('imgHeight').value = height;
+        }
       } catch (err) {
         btn.disabled = false;
         btn.textContent = 'Simpan';
@@ -1273,7 +1430,14 @@
     } else if (url && urlChanged) {
       btn.textContent = 'Memproses gambar...';
       try {
-        ({ url } = await fetchUrlAndUploadToStorage(url));
+        const result = await fetchUrlAndUploadToStorage(url);
+        url = result.url;
+        if (result.width && result.height) {
+          width = result.width;
+          height = result.height;
+          document.getElementById('imgWidth').value = width;
+          document.getElementById('imgHeight').value = height;
+        }
       } catch (err) {
         console.warn('Gagal mengambil gambar dari URL, disimpan apa adanya:', err);
         showToast('Gagal mengambil gambar dari URL ini (kemungkinan CORS) — disimpan apa adanya', 'error');
