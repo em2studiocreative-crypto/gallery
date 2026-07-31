@@ -83,7 +83,7 @@
     });
   });
 </script>
-<link rel="stylesheet" href="styles.min.css?v=8">
+<link rel="stylesheet" href="styles.min.css?v=9">
 <script defer src="supabase.min.js"></script>
 <script defer src="config.js"></script>
 <script>
@@ -204,6 +204,9 @@ viewBox="0 0 1.49117 0.57976"
 
 <!-- MAIN GALLERY -->
 <main class="main">
+  <!-- Trending Section: diisi/disembunyikan lewat renderTrendingSection() di app.js -->
+  <div id="trendingSection" class="trending-section hidden"></div>
+
   <!-- Loading State -->
   <div id="loadingState" class="gallery">
     <div class="skeleton-card" style="height:280px"></div>
@@ -799,6 +802,6 @@ viewBox="0 0 0.16593 0.10268"
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script defer src="app.min.js?v=8"></script>
+<script defer src="app.min.js?v=9"></script>
 </body>
 </html>
