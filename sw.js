@@ -170,7 +170,20 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(async () => {
+          // Coba cache utk URL persis ini dulu (jarang ada, krn tiap query
+          // string ?img=xxx beda jadi cache key beda) -- kalau gak ada,
+          // fallback ke app shell index.html yg SELALU ke-cache saat install.
+          // Query string (?img=..) ditangani client-side di app.js, jadi
+          // menyajikan index.html generik di sini tetap aman/benar.
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          const shell = await caches.match('./index.html');
+          if (shell) return shell;
+          // Bener-bener gak ada apapun di cache (mis. install pertama gagal)
+          // -> WAJIB tetap balikin Response valid, jangan undefined.
+          return new Response('', { status: 503, statusText: 'Offline and not cached' });
+        })
     );
     return;
   }
