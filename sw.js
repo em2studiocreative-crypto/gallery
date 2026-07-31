@@ -11,7 +11,7 @@
 // yang sudah jalan gak kebentur / harus pilih salah satu.
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE_VERSION = 'sg-v8'; // naikkan angka ini SETIAP kali deploy versi baru,
+const CACHE_VERSION = 'sg-v9'; // naikkan angka ini SETIAP kali deploy versi baru,
 // supaya browser tahu ada update & banner "Perbarui" muncul ke user
 const THUMB_CACHE = 'sg-thumbs-v1'; // cache terpisah khusus thumbnail wsrv.nl,
 // TIDAK ikut terhapus tiap update versi app (lihat activate handler)
@@ -28,18 +28,24 @@ const APP_SHELL = [
 ];
 
 // ===== INSTALL: simpan app shell ke cache =====
-// CATATAN: skipWaiting() SENGAJA tidak dipanggil otomatis di sini.
-// Service worker versi baru akan menunggu (state "waiting") sampai
-// user menekan tombol "Perbarui" di banner update (lihat index.html).
-// Ini supaya user nggak tiba-tiba dipindah ke versi baru tanpa sadar.
+// skipWaiting() dipanggil otomatis di sini: SW baru langsung lanjut ke
+// state "activating" begitu app shell selesai di-cache, TANPA nunggu user
+// klik tombol apa pun. Sesi/tab yang sedang terbuka TIDAK direload paksa --
+// itu urusan activate handler (clients.claim()) di bawah, dan halaman yang
+// sedang berjalan cuma dikasih toast info ringan (lihat app.js), bukan
+// dipaksa reload di tengah pemakaian.
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.addAll(APP_SHELL))
+    caches.open(CACHE_VERSION)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Terima sinyal dari halaman (tombol "Perbarui") untuk langsung aktifkan
-// service worker versi baru yang sedang menunggu.
+// Listener ini dibiarkan ada untuk kompatibilitas mundur (kalau ada versi
+// app lama di HP user yang masih kirim sinyal ini) -- tapi sudah TIDAK
+// diperlukan lagi karena skipWaiting() sekarang otomatis dipanggil sendiri
+// di install handler di atas.
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
