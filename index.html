@@ -268,9 +268,14 @@ viewBox="0 0 1.49117 0.57976"
       </div>
       <div class="modal-actions" style="margin-top:10px;">
         <div style="display:flex; gap:10px; justify-content:flex-start;">
-          <button class="state-btn secondary" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)" aria-label="Tambah ke Favorit" title="Tambah ke Favorit" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;flex:none;">
-            <svg id="modalFavIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-heart"></use></svg>
-          </button>
+          <div style="display:inline-flex;flex-direction:column;align-items:center;flex:none;">
+            <button class="state-btn secondary" id="modalFavBtn" onclick="toggleFavorite(currentModalImage.id)" aria-label="Tambah ke Favorit" title="Tambah ke Favorit" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;flex:none;">
+              <svg id="modalFavIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-heart"></use></svg>
+            </button>
+            <!-- Jumlah orang yang like -- CUMA di modal, tidak ikut di kartu grid.
+                 Kosong (bukan "0") kalau belum ada yang like, biar tidak terkesan sepi. -->
+            <span id="modalFavCount" style="font-size:11px;color:var(--text-dim);margin-top:2px;line-height:1;"></span>
+          </div>
           <button class="state-btn secondary" id="modalShareBtn" onclick="shareCurrent()" aria-label="Bagikan" title="Bagikan" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;flex:none;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           </button>
