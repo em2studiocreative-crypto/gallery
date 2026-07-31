@@ -2291,36 +2291,57 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
-    background: var(--bg);
+    gap: 26px;
+    background: #0a0a0a; /* selalu gelap (bukan var(--bg)) -- logo ini putih/kuning, jadi butuh dasar gelap biar tetap kebaca jelas walau user pakai mode terang */
     opacity: 1;
     transition: opacity 0.35s ease;
   }
   .app-loader.hide { opacity: 0; pointer-events: none; }
   .app-loader-logo {
-    width: 72px; height: 72px;
-    border-radius: 20px;
-    animation: app-loader-pulse 1.6s ease-in-out infinite;
+    width: min(260px, 62vw);
+    height: auto;
+    filter: drop-shadow(0 4px 24px rgba(255, 204, 0, 0.18));
+    animation: app-loader-breathe 2.2s ease-in-out infinite;
   }
-  @keyframes app-loader-pulse {
+  @keyframes app-loader-breathe {
     0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(0.94); opacity: 0.75; }
+    50% { transform: scale(0.97); opacity: 0.92; }
   }
   .app-loader-bar {
-    width: 160px; height: 4px;
+    position: relative;
+    width: min(200px, 50vw);
+    height: 6px;
     border-radius: var(--radius-pill);
-    background: var(--bg-elevated);
+    background: #1c1c1c;
     overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(255, 204, 0, 0.12);
   }
   .app-loader-fill {
+    position: relative;
     height: 100%; width: 0%;
-    background: var(--accent);
+    background: linear-gradient(90deg, #C99900, #FFCC00 60%, #FFE082);
     border-radius: var(--radius-pill);
-    transition: width 0.25s ease;
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.65);
+    transition: width 0.3s ease;
+    overflow: hidden;
+  }
+  /* Kilau bergerak di atas fill, biar progress bar kerasa "hidup" bukan statis */
+  .app-loader-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,0.65) 50%, transparent 80%);
+    background-size: 200% 100%;
+    animation: app-loader-shimmer 1.3s linear infinite;
+  }
+  @keyframes app-loader-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -50% 0; }
   }
   .app-loader-percent {
     font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dim);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #FFCC00;
     font-variant-numeric: tabular-nums;
   }
