@@ -1987,6 +1987,7 @@
         url: r.url,
         size: (r.width && r.height) ? `${r.width}×${r.height}` : '',
         downloads: r.downloads,
+        favorites_count: r.favorites_count || 0,
         created_at: r.created_at
       }));
 
