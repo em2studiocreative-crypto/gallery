@@ -61,10 +61,13 @@
     return `${thumbUrl(url, 480, 70)} 1x, ${thumbUrl(url, 960, 65)} 2x`;
   }
 
-  // Untuk modal preview: cukup besar utk dilihat jelas, tapi masih jauh
-  // lebih kecil filenya dibanding file asli (bukan untuk download)
+  // Untuk modal preview: dibuat KECIL demi kecepatan (bukan untuk
+  // download) -- file asli/HD tetap dipakai lewat img.url saat tombol
+  // download ditekan (lihat triggerDownload/downloadCurrent), jadi
+  // preview kecil di sini SAMA SEKALI tidak memengaruhi kualitas file
+  // yang didownload.
   function previewThumb(url) {
-    return thumbUrl(url, 1080, 82);
+    return thumbUrl(url, 720, 75);
   }
 
   // ===== STATE =====
