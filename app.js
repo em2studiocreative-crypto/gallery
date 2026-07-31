@@ -1250,6 +1250,21 @@
   const EAGER_CARD_COUNT = 10;
   let currentFilteredItems = [];
   let renderedCount = 0;
+  // Jumlah item ASLI hasil filter (sebelum disambung ulang secara random).
+  // Dipakai buat tau di mana "putaran pertama" berakhir, dan sebagai acuan
+  // perbandingan sameOrder di renderGallery (lihat catatan di sana).
+  let baseItemsLength = 0;
+
+  // Fisher-Yates shuffle biasa -- dipakai buat menyusun ulang urutan gambar
+  // tiap kali galeri "nyambung" ke putaran baru (lihat extendGalleryLoop).
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
 
   function cardHtml(img, idx) {
     const [w, h] = img.size.split('×').map(Number);
@@ -1359,19 +1374,45 @@
     cols.forEach((col, c) => col.appendChild(frags[c]));
   }
 
+  // Kalau galeri sudah mentok (semua item hasil filter sudah ditampilkan),
+  // JANGAN berhenti -- sambung lagi dengan urutan gambar yang sama tapi
+  // di-random ulang, supaya user ngerasain galeri sebagai "tanpa batas"
+  // (mirip feed Pinterest/Instagram Explore), bukan mentok "sudah habis".
+  //
+  // Cuma jalan kalau item dasarnya cukup banyak (>= 6) -- kalau hasil
+  // filter/pencarian cuma dikit banget, loop random malah bikin gambar yg
+  // itu2 aja langsung keulang persis, jadi kerasa aneh; di kasus itu lebih
+  // baik biarkan berhenti wajar.
+  function extendGalleryLoop() {
+    if (baseItemsLength < 6) return;
+    const base = currentFilteredItems.slice(0, baseItemsLength);
+    const shuffled = shuffleArray(base);
+    // Hindari gambar terakhir yg baru tampil jadi gambar pertama lagi di
+    // sambungan berikutnya -- biar sambungannya gak kerasa "nempel" identik.
+    const lastId = currentFilteredItems[currentFilteredItems.length - 1]?.id;
+    if (shuffled[0]?.id === lastId) {
+      const lastIdx = shuffled.length - 1;
+      [shuffled[0], shuffled[lastIdx]] = [shuffled[lastIdx], shuffled[0]];
+    }
+    currentFilteredItems = currentFilteredItems.concat(shuffled);
+  }
+
   function appendNextBatch() {
     const gallery = document.getElementById('gallery');
+    if (renderedCount >= currentFilteredItems.length) {
+      extendGalleryLoop();
+    }
     const nextItems = currentFilteredItems.slice(renderedCount, renderedCount + GALLERY_BATCH_SIZE);
-    if (nextItems.length === 0) return;
+    if (nextItems.length === 0) return; // hasil filter kosong/terlalu sedikit -> berhenti wajar
     appendItemsToColumns(gallery, nextItems, renderedCount);
     renderedCount += nextItems.length;
   }
 
-  // Cek jarak ke bawah halaman; kalau sudah dekat & masih ada sisa item,
-  // render batch berikutnya. Dipanggil saat scroll (throttled lewat rAF).
+  // Cek jarak ke bawah halaman; kalau sudah dekat, render batch berikutnya
+  // (appendNextBatch sendiri yg nentuin: masih ada sisa, atau perlu nyambung
+  // putaran baru random). Dipanggil saat scroll (throttled lewat rAF).
   let scrollTicking = false;
   function maybeLoadMoreGallery() {
-    if (renderedCount >= currentFilteredItems.length) return;
     const distanceToBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
     if (distanceToBottom < 900) {
       appendNextBatch();
@@ -1398,6 +1439,7 @@
     if (items.length === 0) {
       currentFilteredItems = [];
       renderedCount = 0;
+      baseItemsLength = 0;
       gallery.classList.add('hidden');
       empty.classList.remove('hidden');
       const title = document.getElementById('emptyStateTitle');
@@ -1436,21 +1478,34 @@
     // render ulang JUMLAH kartu yg SUDAH tampil (bukan cuma 20), supaya
     // scroll & batch yg sudah dimuat user tetap utuh. Ini juga otomatis
     // me-refresh data terbaru di tiap kartu (status favorit, judul, dsb).
-    const sameOrder = renderedCount > 0 && items.length === currentFilteredItems.length &&
+    // CATATAN infinite-loop: sejak galeri bisa "nyambung" random tiap kali
+    // mentok (lihat extendGalleryLoop), currentFilteredItems bisa jadi LEBIH
+    // PANJANG dari `items` (hasil filter asli). Jadi sameOrder dibandingkan
+    // ke `baseItemsLength` potongan PERTAMA currentFilteredItems (putaran
+    // pertama, urutan asli belum di-random) -- bukan ke panjang total
+    // currentFilteredItems seperti sebelumnya.
+    const sameOrder = renderedCount > 0 && items.length === baseItemsLength &&
       items.every((img, i) => img.id === currentFilteredItems[i].id);
 
-    currentFilteredItems = items;
-
     if (sameOrder) {
-      const keepCount = Math.min(renderedCount, items.length);
+      // Filter/urutan dasar tidak berubah -- cukup segarkan referensi objek
+      // gambar putaran pertama (misal ada perubahan data seperti downloads),
+      // lalu render ulang JUMLAH kartu yg sudah tampil (renderedCount),
+      // termasuk kartu2 dari putaran random tambahan yg sudah dimuat --
+      // biar tetap utuh (tidak "mundur" & tidak berubah acak tiap refresh).
+      for (let i = 0; i < items.length; i++) currentFilteredItems[i] = items[i];
+      const keepCount = Math.min(renderedCount, currentFilteredItems.length);
       setupGalleryColumns(gallery);
-      appendItemsToColumns(gallery, items.slice(0, keepCount), 0);
+      appendItemsToColumns(gallery, currentFilteredItems.slice(0, keepCount), 0);
       renderedCount = keepCount;
       return;
     }
 
     // Set/urutan gambar benar2 berubah (filter/kategori/pencarian diganti,
-    // ada gambar baru/dihapus, atau ini render pertama) -> render dari awal.
+    // ada gambar baru/dihapus, atau ini render pertama) -> render dari awal,
+    // dan reset baseItemsLength/currentFilteredItems ke putaran pertama yg baru.
+    baseItemsLength = items.length;
+    currentFilteredItems = items.slice();
     renderedCount = 0;
     setupGalleryColumns(gallery);
     appendNextBatch();
