@@ -571,6 +571,15 @@
 
   .trending-row {
     display: flex;
+    /* PENTING: default flex "stretch" bikin SEMUA card di baris ini
+       ikut setinggi card paling tinggi (mis. gambar portrait 9:16).
+       Untuk gambar rasio lain (1:1, landscape, dst.) yang natural-nya
+       lebih pendek, ini nyisain ruang kosong di bawah gambar sebelum
+       trending-card-title (yang absolute bottom:0 ke tinggi CARD, bukan
+       ke tinggi GAMBAR) -- kelihatan kayak ada "bolong" hitam.
+       align-items: flex-start bikin tiap card tingginya ngikutin
+       gambarnya sendiri, gak ke-stretch ikut tetangga. */
+    align-items: flex-start;
     gap: 12px;
     overflow-x: auto;
     scrollbar-width: none;
