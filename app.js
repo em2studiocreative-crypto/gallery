@@ -2924,7 +2924,17 @@ viewBox="0 0 7.14519 2.77802"
       // Catat +1 download ke Supabase (tidak menghalangi UI kalau gagal)
       if (imgId != null) {
         const found = IMAGES.find(i => i.id === imgId);
-        if (found) found.downloads += 1; // update tampilan lokal langsung
+        if (found) {
+          found.downloads = (found.downloads || 0) + 1; // update data lokal
+          // Kalau modal yang lagi kebuka memang gambar ini, update angkanya
+          // di layar juga -- sebelumnya cuma data `IMAGES` yang berubah,
+          // teks #modalDownloads baru ke-refresh lagi pas openModal()
+          // dipanggil ulang (mis. setelah reload halaman).
+          if (currentModalImage && currentModalImage.id === imgId) {
+            const el = document.getElementById('modalDownloads');
+            if (el) el.textContent = found.downloads.toLocaleString('id-ID') + ' downloads';
+          }
+        }
         supabaseClient.rpc('increment_downloads', { image_id: imgId })
           .then(({ error }) => { if (error) console.error('Gagal mencatat download:', error); });
       }
