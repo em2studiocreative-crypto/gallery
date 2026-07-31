@@ -2566,7 +2566,8 @@
   function downloadCurrent() {
     if (currentModalImage) {
       if (!canDownload()) return;
-      triggerDownload(currentModalImage.url, currentModalImage.title, currentModalImage.id);
+      const btnEl = document.getElementById('modalDownloadBtn');
+      triggerDownload(currentModalImage.url, currentModalImage.title, currentModalImage.id, btnEl);
     }
   }
 
@@ -2786,9 +2787,36 @@ viewBox="0 0 7.14519 2.77802"
   // Catatan: <a download> tidak berfungsi untuk gambar cross-origin di kebanyakan
   // browser (atribut download diabaikan, gambar malah dibuka di tab baru).
   // Solusinya: ambil gambar sebagai blob dulu, baru buat object URL lokal untuk didownload.
-  async function triggerDownload(url, title, imgId) {
+  // Tampilkan/hilangkan spinner + nonaktifkan tombol selama proses download
+  // berjalan (fetch gambar asli + tempel watermark), supaya user tahu ada
+  // proses berjalan di balik jeda tersebut, bukan cuma toast yang gampang
+  // kelewat/hilang duluan sebelum sempat dibaca.
+  function setBtnDownloading(btnEl, isLoading) {
+    if (!btnEl) return;
+    if (isLoading) {
+      if (btnEl.dataset.origHtml == null) btnEl.dataset.origHtml = btnEl.innerHTML;
+      btnEl.classList.add('is-downloading');
+      btnEl.disabled = true;
+      btnEl.setAttribute('aria-busy', 'true');
+      btnEl.innerHTML = '<svg class="btn-spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>';
+    } else {
+      btnEl.classList.remove('is-downloading');
+      btnEl.disabled = false;
+      btnEl.removeAttribute('aria-busy');
+      if (btnEl.dataset.origHtml != null) {
+        btnEl.innerHTML = btnEl.dataset.origHtml;
+        delete btnEl.dataset.origHtml;
+      }
+    }
+  }
+
+  async function triggerDownload(url, title, imgId, btnEl) {
     const filename = `status-${title.toLowerCase().replace(/\s+/g, '-')}.png`;
     showToast('Menyiapkan download...');
+    // Kasih indikator visual (spinner) langsung di tombol yang ditekan,
+    // supaya user tahu proses download lagi berjalan selama jeda
+    // fetch+watermark, bukan cuma toast yang gampang kelewat.
+    if (btnEl) setBtnDownloading(btnEl, true);
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error('Gagal mengambil gambar');
@@ -2848,6 +2876,10 @@ viewBox="0 0 7.14519 2.77802"
       // Fallback: buka di tab baru jika fetch gagal (mis. CORS diblok server)
       showToast('Tidak bisa auto-download, membuka gambar di tab baru', 'error');
       window.open(url, '_blank', 'noopener');
+    } finally {
+      // Selalu kembalikan tombol ke tampilan normal, baik download sukses,
+      // gagal, maupun fallback -- supaya tombol tidak "nyangkut" di kondisi loading.
+      if (btnEl) setBtnDownloading(btnEl, false);
     }
   }
 
