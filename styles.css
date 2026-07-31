@@ -1490,6 +1490,22 @@
 
   .modal-download-btn:hover { background: var(--accent-hover); }
 
+  /* State loading saat proses download berjalan (fetch gambar + watermark).
+     Tombol dibuat sedikit redup + kursor "wait" supaya jelas kalau lagi
+     diproses, bukan macet, sambil spinner muter menggantikan ikon panah. */
+  .modal-download-btn.is-downloading,
+  .state-btn.is-downloading {
+    opacity: 0.75;
+    cursor: wait;
+    pointer-events: none;
+  }
+  .btn-spinner {
+    animation: btn-spinner-spin 0.7s linear infinite;
+  }
+  @keyframes btn-spinner-spin {
+    to { transform: rotate(360deg); }
+  }
+
   .modal-similar {
     margin-top: 20px;
     padding-top: 18px;
