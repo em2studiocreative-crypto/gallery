@@ -2234,53 +2234,60 @@
   }
   ::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
-  /* ===== INSTALL PWA BANNER ===== */
-  .install-banner {
+  /* ===== INSTALL PWA PROMPT (di tengah layar) ===== */
+  .install-prompt-backdrop {
     position: fixed;
-    left: 50%;
-    bottom: calc(var(--bottom-nav-h) + 12px);
-    transform: translateX(-50%) translateY(120%);
-    width: calc(100% - 32px);
-    max-width: 420px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 14px 16px;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 250;
     display: flex;
     align-items: center;
-    gap: 12px;
-    z-index: 150;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    justify-content: center;
+    padding: 20px;
     opacity: 0;
-    pointer-events: none;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
   }
-  .install-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+  .install-prompt-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  .install-prompt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 24px 60px -16px rgba(0,0,0,0.55);
+    transform: scale(0.92);
+    transition: transform 0.25s ease;
+  }
+  .install-prompt-backdrop.show .install-prompt-card {
+    transform: scale(1);
+  }
   .install-banner-icon {
-    width: 40px; height: 40px; border-radius: var(--radius-sm);
-    background: var(--accent-dim); flex-shrink: 0;
+    width: 56px; height: 56px; border-radius: var(--radius-md);
+    background: var(--accent-dim); margin: 0 auto 14px;
     display: flex; align-items: center; justify-content: center;
   }
-  .install-banner-icon img { width: 26px; height: 26px; }
-  .install-banner-text { flex: 1; min-width: 0; }
-  .install-banner-text strong { display: block; font-size: 13px; color: var(--text); }
-  .install-banner-text span { display: block; font-size: 12px; color: var(--text-dim); }
-  .install-banner-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .install-banner-icon img { width: 34px; height: 34px; }
+  .install-banner-text { margin-bottom: 20px; }
+  .install-banner-text strong { display: block; font-size: 16px; color: var(--text); margin-bottom: 6px; }
+  .install-banner-text span { display: block; font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+  .install-banner-actions { display: flex; flex-direction: column; gap: 8px; }
   .install-btn {
     background: var(--accent); color: #0a0a0a; border: none;
-    border-radius: var(--radius-pill); padding: 8px 14px;
-    font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+    border-radius: var(--radius-pill); padding: 12px 16px; width: 100%;
+    font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
   .install-btn:hover { background: var(--accent-hover); }
-  .install-dismiss-btn {
-    background: transparent; border: none; color: var(--text-dimmer);
-    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+  .install-dismiss-text-btn {
+    background: transparent; border: none; color: var(--text-dim);
+    font-size: 13px; font-family: inherit; cursor: pointer; padding: 8px;
   }
-  .install-dismiss-btn:hover { background: var(--card-hover); color: var(--text); }
-  @media (min-width: 769px) {
-    .install-banner { bottom: 20px; }
-  }
+  .install-dismiss-text-btn:hover { color: var(--text); }
 
   /* ===== APP LOADER (splash + progress bar batch pertama) ===== */
   .app-loader {
