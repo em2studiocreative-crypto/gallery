@@ -1244,7 +1244,7 @@
   // Jumlah kartu pertama yang dimuat "eager" (kira-kira yang tampak tanpa
   // scroll) -- dipakai juga oleh splash loader di bawah buat nentuin
   // berapa gambar yang perlu ditunggu sebelum galeri ditampilkan.
-  const EAGER_CARD_COUNT = 6;
+  const EAGER_CARD_COUNT = 10;
   let currentFilteredItems = [];
   let renderedCount = 0;
 
@@ -1600,10 +1600,24 @@
   // kunjungan pertama -- lihat pembahasan sebelumnya soal wsrv.nl): overlay
   // WAJIB hilang setelah batas waktu ini apa pun yang terjadi, supaya user
   // gak pernah kejebak di loading screen selamanya.
-  const APP_LOADER_TIMEOUT_MS = 6000;
+  const APP_LOADER_TIMEOUT_MS = 8000; // dinaikkan dikit karena sekarang nunggu lebih banyak gambar (EAGER_CARD_COUNT)
+  // Durasi MINIMUM loader tetap tampil, walau semua gambar sudah kelar
+  // dimuat lebih cepat dari ini -- supaya logo splash sempat kelihatan utuh
+  // (gak "kedip" sekilas doang di koneksi cepat / gambar dari cache).
+  const APP_LOADER_MIN_MS = 2000;
+  // Dicatat begitu script ini jalan (yaitu begitu overlay-nya sudah muncul
+  // di layar), dipakai buat ngitung berapa lama loader sudah tampil.
+  const appLoaderStartTime = Date.now();
 
   function hideAppLoader() {
     if (appLoaderDone) return;
+    const elapsed = Date.now() - appLoaderStartTime;
+    const remaining = APP_LOADER_MIN_MS - elapsed;
+    if (remaining > 0) {
+      // Belum genap durasi minimum -- tunda dulu, coba lagi nanti.
+      setTimeout(hideAppLoader, remaining);
+      return;
+    }
     appLoaderDone = true;
     const el = document.getElementById('appLoader');
     if (!el) return;
