@@ -2307,13 +2307,21 @@
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(0.97); opacity: 0.92; }
   }
-  /* Kotak kuning #loaderFillRect di index.html naik dari bawah ke atas
-     sesuai persen loading, di-clip mengikuti bentuk logo -- ini yang
-     bikin efek "logo terisi warna" sebagai pengganti bar terpisah.
-     transition di sini bikin naiknya kerasa smooth tiap update persen,
-     bukan lompat-lompat kasar. */
-  #loaderFillRect {
-    transition: y 0.25s ease, height 0.25s ease;
+  /* #loaderWavePath di index.html naik dari bawah ke atas sesuai persen
+     loading (dianimasikan lewat JS/rAF di app.js, bukan CSS transition,
+     karena atribut "d" gak reliable di-transition lewat CSS di semua
+     browser), di-clip mengikuti bentuk logo -- efek "logo terisi warna"
+     sebagai pengganti bar terpisah, tapi sekarang permukaannya bergelombang
+     kayak air, bukan garis rata.
+     #loaderWaveGroup digeser terus-menerus ke kiri supaya gelombangnya
+     kelihatan "mengalir" -- jaraknya (3.58158px) HARUS sama persis dengan
+     LOADER_WAVE_PERIOD di app.js supaya loop-nya mulus/seamless. */
+  #loaderWaveGroup {
+    animation: app-loader-wave-scroll 1.8s linear infinite;
+  }
+  @keyframes app-loader-wave-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-3.58158px); }
   }
   .app-loader-percent {
     font-size: 13px;
