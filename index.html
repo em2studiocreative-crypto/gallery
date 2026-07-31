@@ -83,7 +83,7 @@
     });
   });
 </script>
-<link rel="stylesheet" href="styles.min.css?v=7">
+<link rel="stylesheet" href="styles.min.css?v=8">
 <script defer src="supabase.min.js"></script>
 <script defer src="config.js"></script>
 <script>
@@ -756,18 +756,18 @@ viewBox="0 0 0.16593 0.10268"
   </div>
 </div>
 
-<!-- INSTALL PWA BANNER -->
-<div class="install-banner" id="installBanner">
-  <div class="install-banner-icon"><img src="./icon-192.png" alt=""></div>
-  <div class="install-banner-text">
-    <strong>Pasang Status Gallery</strong>
-    <span>Akses lebih cepat langsung dari layar utama</span>
-  </div>
-  <div class="install-banner-actions">
-    <button class="install-btn" onclick="installPWA()">Pasang</button>
-    <button class="install-dismiss-btn" onclick="dismissInstallBanner()" aria-label="Tutup">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-close"></use></svg>
-    </button>
+<!-- INSTALL PWA PROMPT (di tengah layar, bukan di bawah lagi) -->
+<div class="install-prompt-backdrop" id="installBanner">
+  <div class="install-prompt-card">
+    <div class="install-banner-icon"><img src="./icon-192.png" alt=""></div>
+    <div class="install-banner-text">
+      <strong>Mau lebih cepat?</strong>
+      <span>Kalau ingin bekerja lebih cepat, langsung install aplikasinya dan rasakan perbedaannya!</span>
+    </div>
+    <div class="install-banner-actions">
+      <button class="install-btn" onclick="installPWA()">Instal</button>
+      <button class="install-dismiss-text-btn" onclick="dismissInstallBanner()">Batal</button>
+    </div>
   </div>
 </div>
 
