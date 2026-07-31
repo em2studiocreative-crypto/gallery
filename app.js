@@ -587,77 +587,16 @@
   });
 
   // ===== PWA: SERVICE WORKER + NOTIFIKASI UPDATE =====
-  let updateBannerShown = false;
+  // SW baru sekarang auto-aktif sendiri begitu siap (skipWaiting() otomatis
+  // di sw.js) -- jadi TIDAK ada lagi banner "wajib diklik" atau reload paksa
+  // di sesi yang sedang berjalan. Asset & data terbaru otomatis dipakai
+  // untuk request-request berikutnya (fetch data, thumbnail, dst); halaman
+  // yang lagi dibuka user nggak diganggu sama sekali. User cuma dikasih
+  // toast info ringan (bukan aksi wajib) supaya tau ada pembaruan.
 
-  function showUpdateBanner() {
-    updateBannerShown = true;
-    document.getElementById('updateBanner').classList.add('show');
-  }
-
-  function applyAppUpdate() {
-    if (!updateBannerShown) return;
-
-    // Feedback instan begitu diklik, supaya user tau tombolnya kepencet
-    // dan proses lagi jalan (sebelumnya diam total sampai reload beneran
-    // terjadi -> kerasa kayak "gak ngefek").
-    const btn = document.getElementById('updateBtn');
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = 'Memperbarui...';
-    }
-
-    // Guard supaya reload cuma dieksekusi sekali walau ada 2 jalur yang
-    // bisa memicu (controllerchange ATAU fallback timeout di bawah).
-    let didReload = false;
-    const doReload = () => {
-      if (didReload) return;
-      didReload = true;
-      window.location.reload();
-    };
-
-    // FALLBACK: kalau dalam 3 detik controllerchange gak kepicu (kejadian
-    // nyata di beberapa PWA standalone/WebView Android, atau kalau worker
-    // jadi "redundant" duluan karena OneSignal register() ulang di belakang
-    // layar), tetap paksa reload. Ini yang bikin banner sebelumnya nyangkut
-    // dan baru hilang kalau user refresh manual.
-    const fallbackTimer = setTimeout(doReload, 3000);
-
-    // PENTING: jangan pakai referensi worker lama yang disimpan pas banner
-    // pertama kali muncul. OneSignal SDK bisa diam-diam register() ulang
-    // sw.js di belakang layar, sehingga worker lama itu jadi "redundant"
-    // (digantikan worker menunggu yang baru) dan postMessage ke dia gak
-    // berefek apa-apa -> controllerchange gak pernah kepicu. Makanya di sini
-    // kita selalu ambil reg.waiting yang BENERAN aktif saat tombol diklik.
-    navigator.serviceWorker.getRegistration().then((reg) => {
-      const worker = reg && reg.waiting;
-      if (!worker) {
-        // Udah gak ada yang nunggu (kemungkinan udah keaktivasi diam-diam
-        // sebagai phantom re-check) -> tinggal reload biasa buat masuk versi baru.
-        clearTimeout(fallbackTimer);
-        doReload();
-        return;
-      }
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        clearTimeout(fallbackTimer);
-        doReload();
-      }, { once: true });
-      worker.postMessage({ type: 'SKIP_WAITING' });
-    }).catch(() => {
-      // getRegistration() gagal (jarang terjadi) -> tetap andalkan fallback
-      // timer di atas, jangan biarkan banner nyangkut selamanya.
-    });
-  }
-
-  // Ambil versi SW langsung dari teks sw.js di server (BUKAN lewat
-  // postMessage ke worker). Pendekatan lama (tanya-jawab postMessage) rentan
-  // soal timing: kalau HP lagi sibuk (misal abis proses subscribe OneSignal
-  // yang berat), balasannya bisa telat lewat dari batas waktu yang dikasih,
-  // jadi dianggap "gak jelas versinya" dan tetap nampilin banner padahal
-  // cuma phantom re-check. Fetch teks sw.js gak nunggu balasan worker sama
-  // sekali, jadi gak ada elemen timing/race yang bisa gagal.
+  // Ambil versi SW langsung dari teks sw.js di server (bukan lewat
+  // postMessage ke worker), supaya gak ada elemen timing/race yang bisa gagal.
   function getLiveSwVersion() {
-    // cache: 'no-store' + query cache-buster supaya beneran ambil byte
-    // terbaru dari server, bukan copy lama dari HTTP cache browser.
     return fetch('sw.js?_=' + Date.now(), { cache: 'no-store' })
       .then((res) => (res.ok ? res.text() : null))
       .then((text) => {
@@ -668,53 +607,30 @@
       .catch(() => null);
   }
 
-  // Diproses tiap ada calon worker baru (state 'installed'): cek dulu
-  // versinya beneran beda dari yang terakhir kali ditawarin ke user atau
-  // enggak, baru putuskan nampilin banner atau diam-diam skip.
-  function handleCandidateWorker(worker) {
+  // Cek apakah versi yang barusan take-over ini beneran baru (bukan phantom
+  // re-check, misal dipicu OneSignal subscribe di belakang layar) sebelum
+  // nampilin toast, supaya user gak di-spam notifikasi untuk versi yang sama.
+  function notifyIfNewVersion() {
     getLiveSwVersion().then((version) => {
       const lastNotified = (() => {
         try { return localStorage.getItem('sg_last_notified_sw_version'); } catch (e) { return null; }
       })();
-
-      if (version && version === lastNotified) {
-        // Sama persis versi yang sudah pernah kamu terima/setujui sebelumnya.
-        // Ini phantom re-check (misal dipicu OneSignal subscribe), bukan
-        // update beneran -> aktifkan langsung diam-diam, TANPA banner/reload.
-        try { worker.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
-        return;
-      }
-
-      // Beneran versi baru (atau gak bisa dipastikan) -> tampilkan banner
-      // seperti biasa, dan catat versinya biar gak nge-prompt ulang untuk
-      // versi yang sama di kemudian hari.
-      if (version) {
-        try { localStorage.setItem('sg_last_notified_sw_version', version); } catch (e) {}
-      }
-      showUpdateBanner();
+      if (!version || version === lastNotified) return;
+      try { localStorage.setItem('sg_last_notified_sw_version', version); } catch (e) {}
+      showToast('Konten sudah diperbarui.', 'success');
     });
   }
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').then((reg) => {
-        // Kasus 1: sudah ada SW versi baru yang menunggu saat halaman dibuka.
-        if (reg.waiting) {
-          handleCandidateWorker(reg.waiting);
-        }
+      navigator.serviceWorker.register('sw.js').catch(err => console.error('SW gagal daftar:', err));
 
-        // Kasus 2: SW baru terdeteksi & mulai diinstall saat user sedang di halaman.
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if (!newWorker) return;
-          newWorker.addEventListener('statechange', () => {
-            // "installed" + sudah ada controller aktif = ini update (bukan install pertama kali)
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              handleCandidateWorker(newWorker);
-            }
-          });
-        });
-      }).catch(err => console.error('SW gagal daftar:', err));
+      // SW baru otomatis "claim" halaman begitu aktif (lihat activate
+      // handler di sw.js) -- ini yang memicu event ini. Tidak ada reload
+      // paksa di sini, cukup kasih toast info ke user.
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        notifyIfNewVersion();
+      });
     });
   }
 
