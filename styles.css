@@ -2307,36 +2307,13 @@
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(0.97); opacity: 0.92; }
   }
-  .app-loader-bar {
-    position: relative;
-    width: min(200px, 50vw);
-    height: 6px;
-    border-radius: var(--radius-pill);
-    background: #1c1c1c;
-    overflow: hidden;
-    box-shadow: inset 0 0 0 1px rgba(255, 204, 0, 0.12);
-  }
-  .app-loader-fill {
-    position: relative;
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, #C99900, #FFCC00 60%, #FFE082);
-    border-radius: var(--radius-pill);
-    box-shadow: 0 0 10px rgba(255, 204, 0, 0.65);
-    transition: width 0.3s ease;
-    overflow: hidden;
-  }
-  /* Kilau bergerak di atas fill, biar progress bar kerasa "hidup" bukan statis */
-  .app-loader-fill::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,0.65) 50%, transparent 80%);
-    background-size: 200% 100%;
-    animation: app-loader-shimmer 1.3s linear infinite;
-  }
-  @keyframes app-loader-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -50% 0; }
+  /* Kotak kuning #loaderFillRect di index.html naik dari bawah ke atas
+     sesuai persen loading, di-clip mengikuti bentuk logo -- ini yang
+     bikin efek "logo terisi warna" sebagai pengganti bar terpisah.
+     transition di sini bikin naiknya kerasa smooth tiap update persen,
+     bukan lompat-lompat kasar. */
+  #loaderFillRect {
+    transition: y 0.25s ease, height 0.25s ease;
   }
   .app-loader-percent {
     font-size: 13px;
