@@ -360,14 +360,22 @@
 
   function toggleFavorite(imgId) {
     const wasFavorite = favorites.has(imgId);
+    // Update angka "disukai X orang" secara optimis (langsung di layar),
+    // tanpa nunggu roundtrip ke server. Angka yang SEBENARNYA/final tetap
+    // dijaga oleh trigger database (lihat favorites_count_migration.sql) --
+    // ini cuma supaya terasa instan buat user yang lagi nge-klik.
+    // Sengaja HANYA disentuh untuk user yang login: favorit guest cuma
+    // lokal (localStorage), jadi memang tidak pernah ikut dihitung.
+    const img = IMAGES.find(i => i.id === imgId);
     if (wasFavorite) {
       favorites.delete(imgId);
       showToast('Dihapus dari favorit');
+      if (currentUser && img) img.favorites_count = Math.max((img.favorites_count || 0) - 1, 0);
     } else {
       favorites.add(imgId);
       showToast('Ditambahkan ke favorit', 'success');
-      const img = IMAGES.find(i => i.id === imgId);
       if (img) trackInteraction(img.category, 'favorite');
+      if (currentUser && img) img.favorites_count = (img.favorites_count || 0) + 1;
     }
 
     if (currentUser) {
@@ -1583,6 +1591,7 @@
       url: r.url,
       size: (r.width && r.height) ? `${r.width}×${r.height}` : '',
       downloads: r.downloads,
+      favorites_count: r.favorites_count || 0,
       created_at: r.created_at
     };
   }
@@ -1630,6 +1639,13 @@
         }
         const mapped = mapImageRow(row);
         if (idx !== -1) IMAGES[idx] = mapped; else IMAGES.unshift(mapped);
+        // Kalau gambar yang lagi kebuka di modal ini yang keupdate (mis. ada
+        // orang LAIN like/unlike-nya barusan), ikut refresh angka "disukai
+        // N orang" di modal biar live -- tanpa user perlu tutup-buka lagi.
+        if (currentModalImage && currentModalImage.id === row.id) {
+          currentModalImage = mapped;
+          updateModalFavoriteBtn();
+        }
         scheduleRealtimeRender();
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'images' }, (payload) => {
@@ -1951,7 +1967,7 @@
     try {
       const [{ data: catRows, error: catErr }, { data: imgRows, error: imgErr }] = await Promise.all([
         supabaseClient.from('categories').select('id, label, sort_order').order('sort_order', { ascending: true }),
-        supabaseClient.from('images').select('id, title, category_id, url, width, height, downloads, created_at').eq('is_active', true).order('created_at', { ascending: false })
+        supabaseClient.from('images').select('id, title, category_id, url, width, height, downloads, favorites_count, created_at').eq('is_active', true).order('created_at', { ascending: false })
       ]);
 
       if (catErr) throw catErr;
@@ -2457,6 +2473,14 @@
     modalFavBtnEl.setAttribute('aria-label', favBtnLabel);
     modalFavBtnEl.setAttribute('title', favBtnLabel);
     modalFavBtnEl.style.color = isFav ? '#ef4444' : '';
+
+    // Angka "disukai N orang" -- CUMA tampil di modal, sengaja TIDAK
+    // ditaruh di kartu grid (cardHtml) sesuai permintaan.
+    const countEl = document.getElementById('modalFavCount');
+    if (countEl) {
+      const count = currentModalImage.favorites_count || 0;
+      countEl.textContent = count > 0 ? count.toLocaleString('id-ID') : '';
+    }
   }
 
   function closeModal(e, options = {}) {
