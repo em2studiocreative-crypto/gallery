@@ -1625,12 +1625,25 @@
     setTimeout(() => { el.style.display = 'none'; }, 400); // samain sama durasi transition CSS-nya
   }
 
+  // Tinggi viewBox SVG logo loader (lihat viewBox="0 0 10.74475 4.17754" di
+  // index.html) -- dipakai buat ngitung seberapa tinggi kotak kuning yang
+  // "mengisi" logo dari bawah ke atas sesuai persen loading.
+  const LOADER_LOGO_VB_HEIGHT = 4.17754;
+
   function updateAppLoaderProgress(done, total) {
     const pct = total > 0 ? Math.round((done / total) * 100) : 100;
-    const fill = document.getElementById('appLoaderFill');
     const percent = document.getElementById('appLoaderPercent');
-    if (fill) fill.style.width = pct + '%';
+    const fillRect = document.getElementById('loaderFillRect');
     if (percent) percent.textContent = pct + '%';
+    if (fillRect) {
+      // Kotak kuning di-clip persis mengikuti bentuk logo (lihat clipPath
+      // #loaderFillClip di index.html) -- makin tinggi kotaknya, makin
+      // banyak bagian logo yang "kelihatan" kuning (nutupin putih di
+      // baliknya), naik dari bawah ke atas kayak level air.
+      const filledHeight = LOADER_LOGO_VB_HEIGHT * (pct / 100);
+      fillRect.setAttribute('y', (LOADER_LOGO_VB_HEIGHT - filledHeight).toFixed(5));
+      fillRect.setAttribute('height', filledHeight.toFixed(5));
+    }
   }
 
   function trackFirstBatchAndHideLoader() {
