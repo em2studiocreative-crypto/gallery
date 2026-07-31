@@ -1279,7 +1279,29 @@
   // Jumlah kartu pertama yang dimuat "eager" (kira-kira yang tampak tanpa
   // scroll) -- dipakai juga oleh splash loader di bawah buat nentuin
   // berapa gambar yang perlu ditunggu sebelum galeri ditampilkan.
-  const EAGER_CARD_COUNT = 10;
+  //
+  // CATATAN PERBAIKAN: dulu ini angka tetap (10), padahal jumlah kolom
+  // galeri dinamis mengikuti lebar layar (2 kolom di HP s/d 6 kolom di
+  // layar lebar -- lihat galleryColumnCount()). Di layar lebar, 10 kartu
+  // pertama cuma menutupi ±2 baris, padahal viewport awal biasanya
+  // menampilkan 3+ baris -- sisa kartu yang SEBENARNYA sudah kelihatan di
+  // layar itu kebagian loading="lazy" + fetchpriority="low" dan TIDAK
+  // ditunggu splash loader, jadi begitu splash loader hilang, kartu2
+  // tersebut masih keliatan kosong/tertutup (data-loaded="0" -> opacity:0)
+  // sampai akhirnya nyusul termuat.
+  //
+  // Sekarang dihitung dinamis: kolom aktif x perkiraan baris yang muat di
+  // tinggi layar (pakai perkiraan tinggi kartu 260px, sama seperti
+  // contain-intrinsic-size di CSS .gallery-card), + 1 baris buffer supaya
+  // kartu yang separuh kelihatan di tepi bawah layar tetap kehitung.
+  // Dibatasi maksimum 40 biar splash loader tidak jadi nunggu kelamaan di
+  // layar yang sangat tinggi (mis. monitor ultrawide/vertikal).
+  function computeEagerCardCount() {
+    const cols = galleryColumnCount();
+    const estRows = Math.ceil((window.innerHeight || 800) / 260) + 1;
+    return Math.min(cols * estRows, 40);
+  }
+  const EAGER_CARD_COUNT = computeEagerCardCount();
   let currentFilteredItems = [];
   let renderedCount = 0;
   // Jumlah item ASLI hasil filter (sebelum disambung ulang secara random).
