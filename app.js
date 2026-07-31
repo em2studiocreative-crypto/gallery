@@ -334,28 +334,45 @@
     }
   }
 
-  // ===== BADGE TRENDING =====
-  // Data yang ada cuma total downloads sepanjang masa + tanggal upload, jadi
-  // "trending minggu ini" didekati dengan skor downloads per hari sejak
-  // diupload (bukan total downloads mentah) — biar gambar LAMA dengan
-  // download menumpuk selama bertahun-tahun nggak otomatis menang terus
-  // ngalahin gambar baru yang lagi rame diunduh belakangan ini.
-  const TRENDING_BADGE_COUNT = 6; // maks berapa gambar yang dikasih badge sekaligus
-  const TRENDING_MIN_DOWNLOADS = 5; // gambar baru dgn 1-2 download nggak usah ikut dinilai
+  // ===== BADGE & SECTION TRENDING ("Populer Minggu Ini") =====
+  // Data yang ada cuma total downloads + favorites_count sepanjang masa,
+  // plus tanggal upload -- jadi "trending minggu ini" didekati dengan skor
+  // (downloads + favorit berbobot) PER HARI sejak diupload, bukan angka
+  // mentahnya -- biar gambar LAMA yang cuma menumpuk angka selama
+  // bertahun-tahun nggak otomatis menang terus ngalahin gambar baru yang
+  // lagi rame diminati belakangan ini.
+  const TRENDING_BADGE_COUNT = 6; // maks berapa gambar dikasih badge + tampil di section
+  // Favorit butuh user login & sengaja menekan tombol hati -- sinyal minat
+  // yang lebih "kuat" dibanding download (yang gratis, sekali klik, guest pun
+  // bisa). Makanya tiap 1 favorit dihitung setara 2 download saat menghitung
+  // skor gabungan.
+  const TRENDING_DOWNLOAD_WEIGHT = 1;
+  const TRENDING_FAVORITE_WEIGHT = 2;
+  // Ambang aktivitas GABUNGAN minimum supaya gambar baru dgn 1-2 interaksi
+  // nggak ikut dinilai/ditampilkan sebagai trending.
+  const TRENDING_MIN_ACTIVITY = 5;
   let trendingIds = new Set();
+  // Daftar gambar trending terurut (skor tertinggi dulu) -- dipakai utk
+  // render section "Populer Minggu Ini" (lihat renderTrendingSection()),
+  // sedangkan trendingIds (Set) tetap dipakai utk cek cepat badge per-kartu.
+  let trendingList = [];
 
   function recomputeTrendingIds() {
     const now = Date.now();
     const scored = IMAGES
-      .filter(img => (img.downloads || 0) >= TRENDING_MIN_DOWNLOADS)
       .map(img => {
+        const downloads = img.downloads || 0;
+        const favs = img.favorites_count || 0;
+        const activity = downloads * TRENDING_DOWNLOAD_WEIGHT + favs * TRENDING_FAVORITE_WEIGHT;
         const createdAt = img.created_at ? new Date(img.created_at).getTime() : now;
         const daysSinceUpload = Math.max(1, (now - createdAt) / 86400000);
-        return { id: img.id, score: img.downloads / daysSinceUpload };
+        return { img, activity, score: activity / daysSinceUpload };
       })
+      .filter(s => s.activity >= TRENDING_MIN_ACTIVITY)
       .sort((a, b) => b.score - a.score)
       .slice(0, TRENDING_BADGE_COUNT);
-    trendingIds = new Set(scored.map(s => s.id));
+    trendingList = scored.map(s => s.img);
+    trendingIds = new Set(trendingList.map(img => img.id));
   }
 
   function toggleFavorite(imgId) {
@@ -1258,8 +1275,59 @@
     return scored.map(s => s.img);
   }
 
+  // Kartu kecil khusus section "Populer Minggu Ini" (beda dari cardHtml
+  // galeri utama -- lebih ringkas, tanpa tombol favorit, karena cuma
+  // dipakai untuk baris scroll horizontal 6 item, bukan grid utama).
+  function trendingCardHtml(img) {
+    const [w, h] = (img.size || '').split('×').map(Number);
+    const ratio = (w && h) ? `${w}/${h}` : '1/1';
+    return `
+      <div class="trending-card" role="button" tabindex="0"
+        onclick="openModal(${img.id}, { sourceEl: this })"
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id}, { sourceEl: this });}">
+        <img
+          src="${gridThumb(img.url)}"
+          srcset="${gridThumbSrcset(img.url)}"
+          alt="Status ${escapeHtml(catLabel(img.category))} - ${escapeHtml(img.title)} | Populer minggu ini"
+          style="aspect-ratio:${ratio}"
+          loading="lazy"
+          decoding="async"
+          onerror="handleGridImgError(this, ${img.id})">
+        <span class="trending-card-badge">🔥</span>
+        <div class="trending-card-title">${escapeHtml(img.title)}</div>
+      </div>
+    `;
+  }
+
+  // Section ini sengaja HANYA muncul di feed default ("Semua", tanpa
+  // pencarian/filter favorit aktif) -- sama seperti aturan urutan minat
+  // kategori di filterAndRender(). Alasannya: begitu user lagi nyari atau
+  // sudah masuk 1 kategori spesifik, daftar "populer lintas kategori" ini
+  // jadi kurang relevan/mengganggu, jadi disembunyikan.
+  function renderTrendingSection() {
+    const section = document.getElementById('trendingSection');
+    if (!section) return;
+    const eligible = activeCategory === 'all' && !showFavoritesOnly && !searchQuery;
+    if (!eligible || trendingList.length === 0) {
+      section.classList.add('hidden');
+      section.innerHTML = '';
+      return;
+    }
+    section.classList.remove('hidden');
+    section.innerHTML = `
+      <div class="trending-header">
+        <span class="trending-header-icon">🔥</span>
+        <span class="trending-header-title">Populer Minggu Ini</span>
+      </div>
+      <div class="trending-row">
+        ${trendingList.map(trendingCardHtml).join('')}
+      </div>
+    `;
+  }
+
   function filterAndRender() {
     recomputeTrendingIds();
+    renderTrendingSection();
     let filtered = IMAGES;
     if (showFavoritesOnly) {
       filtered = filtered.filter(img => favorites.has(img.id));
