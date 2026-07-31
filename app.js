@@ -1621,29 +1621,92 @@
     appLoaderDone = true;
     const el = document.getElementById('appLoader');
     if (!el) return;
-    el.classList.add('hide');
-    setTimeout(() => { el.style.display = 'none'; }, 400); // samain sama durasi transition CSS-nya
+    // Pastikan kotak kuning kelihatan penuh (100%) dulu sebelum overlay
+    // mulai memudar -- kalau hideAppLoader ini dipanggil saat progress
+    // masih di tengah jalan (misal kena timeout/gagal load di 70%),
+    // jangan langsung ngilang mendadak, tapi selesaikan dulu animasi
+    // naiknya ke penuh biar user lihat loading-nya "kelar", bukan stuck.
+    updateAppLoaderProgress(1, 1);
+    setTimeout(() => {
+      el.classList.add('hide');
+      setTimeout(() => { el.style.display = 'none'; }, 400); // samain sama durasi transition opacity CSS-nya
+    }, 260); // dikit lebih lama dari transition y/height 0.25s di CSS #loaderFillRect, biar sempat kelihatan penuh dulu
   }
 
-  // Tinggi viewBox SVG logo loader (lihat viewBox="0 0 10.74475 4.17754" di
-  // index.html) -- dipakai buat ngitung seberapa tinggi kotak kuning yang
-  // "mengisi" logo dari bawah ke atas sesuai persen loading.
+  // Tinggi & lebar viewBox SVG logo loader (lihat viewBox="0 0 10.74475
+  // 4.17754" di index.html) -- dipakai buat ngitung seberapa tinggi "air"
+  // kuning yang mengisi logo dari bawah ke atas sesuai persen loading,
+  // dan seberapa lebar satu periode gelombangnya.
   const LOADER_LOGO_VB_HEIGHT = 4.17754;
+  const LOADER_LOGO_VB_WIDTH = 10.74475;
+  // Satu periode gelombang -- HARUS sama persis dengan jarak translateX
+  // di keyframe #app-loader-wave-scroll pada styles.css, supaya animasi
+  // geser horizontalnya keliatan looping mulus (seamless), gak "patah".
+  const LOADER_WAVE_PERIOD = LOADER_LOGO_VB_WIDTH / 3; // ~3.58158
+  const LOADER_WAVE_AMPLITUDE = 0.11;
+
+  // Bikin path SVG berbentuk gelombang (bukan garis rata) pada ketinggian
+  // (level) tertentu, lalu ditutup ke bawah sampai dasar viewBox -- jadi
+  // kelihatan seperti permukaan air yang beriak, bukan kotak flat.
+  // Digambar melebar ke kiri & kanan (lebih lebar dari viewBox) supaya pas
+  // di-geser (scroll) oleh animasi CSS, gak pernah kelihatan area kosong.
+  function buildLoaderWavePath(levelY) {
+    const amp = LOADER_WAVE_AMPLITUDE;
+    const period = LOADER_WAVE_PERIOD;
+    const startX = -period;
+    const endX = LOADER_LOGO_VB_WIDTH + period;
+    let d = `M ${startX.toFixed(5)} ${levelY.toFixed(5)}`;
+    let x = startX;
+    let crestUp = true;
+    while (x < endX - 1e-6) {
+      const midX = x + period / 4;
+      const nextX = x + period / 2;
+      const cy = levelY + (crestUp ? -amp : amp);
+      d += ` Q ${midX.toFixed(5)} ${cy.toFixed(5)} ${nextX.toFixed(5)} ${levelY.toFixed(5)}`;
+      crestUp = !crestUp;
+      x = nextX;
+    }
+    d += ` L ${endX.toFixed(5)} ${LOADER_LOGO_VB_HEIGHT.toFixed(5)} L ${startX.toFixed(5)} ${LOADER_LOGO_VB_HEIGHT.toFixed(5)} Z`;
+    return d;
+  }
+
+  // Level air saat ini (posisi y permukaan gelombang) -- dipakai sebagai
+  // titik awal tiap kali level berpindah, biar animasinya nyambung mulus
+  // dari posisi terakhir, bukan lompat dari 0 tiap update persen.
+  let loaderCurrentLevelY = LOADER_LOGO_VB_HEIGHT; // mulai kosong (permukaan di dasar)
+  let loaderLevelAnimId = null;
+
+  // Animasikan naiknya permukaan air dari level sekarang ke level target
+  // pakai requestAnimationFrame -- dipilih ketimbang CSS transition biasa
+  // karena atribut "d" pada <path> gak reliable dianimasikan lewat CSS
+  // transition di semua browser.
+  function animateLoaderLevelTo(targetLevelY, durationMs) {
+    const wavePath = document.getElementById('loaderWavePath');
+    if (!wavePath) { loaderCurrentLevelY = targetLevelY; return; }
+    if (loaderLevelAnimId) cancelAnimationFrame(loaderLevelAnimId);
+    const startLevelY = loaderCurrentLevelY;
+    const startTime = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out, senada sama transition CSS sebelumnya
+      const levelY = startLevelY + (targetLevelY - startLevelY) * eased;
+      loaderCurrentLevelY = levelY;
+      wavePath.setAttribute('d', buildLoaderWavePath(levelY));
+      loaderLevelAnimId = (t < 1) ? requestAnimationFrame(step) : null;
+    }
+    loaderLevelAnimId = requestAnimationFrame(step);
+  }
 
   function updateAppLoaderProgress(done, total) {
     const pct = total > 0 ? Math.round((done / total) * 100) : 100;
     const percent = document.getElementById('appLoaderPercent');
-    const fillRect = document.getElementById('loaderFillRect');
     if (percent) percent.textContent = pct + '%';
-    if (fillRect) {
-      // Kotak kuning di-clip persis mengikuti bentuk logo (lihat clipPath
-      // #loaderFillClip di index.html) -- makin tinggi kotaknya, makin
-      // banyak bagian logo yang "kelihatan" kuning (nutupin putih di
-      // baliknya), naik dari bawah ke atas kayak level air.
-      const filledHeight = LOADER_LOGO_VB_HEIGHT * (pct / 100);
-      fillRect.setAttribute('y', (LOADER_LOGO_VB_HEIGHT - filledHeight).toFixed(5));
-      fillRect.setAttribute('height', filledHeight.toFixed(5));
-    }
+    // Level air naik dari bawah (levelY = tinggi viewBox, kosong) ke atas
+    // (levelY = 0, penuh) sesuai persen -- di-clip persis mengikuti bentuk
+    // logo (lihat clipPath #loaderFillClip di index.html).
+    const filledHeight = LOADER_LOGO_VB_HEIGHT * (pct / 100);
+    const targetLevelY = LOADER_LOGO_VB_HEIGHT - filledHeight;
+    animateLoaderLevelTo(targetLevelY, 250);
   }
 
   function trackFirstBatchAndHideLoader() {
