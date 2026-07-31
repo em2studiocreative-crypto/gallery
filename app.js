@@ -1254,7 +1254,7 @@
     // Kartu pertama (kira-kira yang tampak tanpa scroll) dimuat lebih prioritas
     const eager = idx < EAGER_CARD_COUNT;
     return `
-      <div class="gallery-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id});}">
+      <div class="gallery-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id}, { sourceEl: this });}">
         <img
           src="${gridThumb(img.url)}"
           srcset="${gridThumbSrcset(img.url)}"
@@ -2050,7 +2050,7 @@
   });
 
   function openModal(imgId, options = {}) {
-    const { pushHistory = true } = options;
+    const { pushHistory = true, sourceEl = null } = options;
     const img = IMAGES.find(i => i.id === imgId);
     if (!img) return;
     // Dicek SEBELUM currentModalImage/class 'open' di-set: kalau modal
@@ -2088,7 +2088,26 @@
     modalImg.classList.remove('loaded');
     modalImg.removeAttribute('src');
     void modalImg.offsetWidth;
-    modalImg.src = gridThumb(img.url);
+    // Cari <img> thumbnail yang KELIHATAN SEKARANG di kartu yang diklik
+    // (galeri utama / "Gambar Serupa"), lalu pakai persis URL yang browser
+    // sudah render (currentSrc) -- BUKAN dihitung ulang lewat gridThumb().
+    // Alasannya: kartu grid punya srcset (480w/70q vs 960w@2x/65q), jadi di
+    // layar HiDPI (kebanyakan HP Android) browser sebenarnya me-load versi
+    // 960w, sementara gridThumb(url) selalu ngembaliin URL 480w -- beda URL
+    // = beda entri cache = modal kepaksa download ulang dari nol tiap buka,
+    // walau gambarnya "sudah kelihatan" barusan di grid. Ini penyebab utama
+    // modal kerasa lambat kebuka. Pakai currentSrc dari elemen yang sama
+    // persis yang sudah ke-decode di layar -> muncul instan dari cache.
+    let step1Src = gridThumb(img.url); // fallback: gak ada sourceEl / belum kelar dimuat
+    const sourceImgEl = sourceEl
+      ? (sourceEl.tagName === 'IMG'
+          ? sourceEl
+          : (sourceEl.querySelector('img') || sourceEl.closest('.gallery-card, .modal-similar-item')?.querySelector('img')))
+      : null;
+    if (sourceImgEl && sourceImgEl.currentSrc && sourceImgEl.complete && sourceImgEl.naturalWidth > 0) {
+      step1Src = sourceImgEl.currentSrc;
+    }
+    modalImg.src = step1Src;
     modalImg.addEventListener('load', () => {
       modalImg.dataset.loaded = '1';
       // Pastikan modal belum keburu ganti ke gambar lain lagi sebelum ini
@@ -2165,6 +2184,24 @@
     );
   }
 
+  // Cache hasil tokenize judul PER OBJEK gambar -- dipakai supaya
+  // getSimilarImages() gak perlu tokenize ulang judul SEMUA gambar dari nol
+  // tiap kali modal dibuka (dulu ini jalan penuh tiap buka gambar, bikin
+  // modal kerasa lambat kebuka terutama kalau jumlah gambarnya banyak).
+  // Pakai WeakMap yang di-key dari objek img itu sendiri (bukan img.id) --
+  // otomatis "basi" dengan sendirinya kalau IMAGES di-fetch ulang dari
+  // Supabase (objeknya jadi baru), jadi judul yang berubah tetap ke-refresh
+  // tanpa perlu logic invalidasi cache manual.
+  const titleTokensCache = new WeakMap();
+  function titleTokensCached(img) {
+    let toks = titleTokensCache.get(img);
+    if (!toks) {
+      toks = titleTokens(img.title);
+      titleTokensCache.set(img, toks);
+    }
+    return toks;
+  }
+
   function jaccardSimilarity(setA, setB) {
     if (setA.size === 0 || setB.size === 0) return 0;
     let intersection = 0;
@@ -2177,7 +2214,7 @@
   // Kategori jadi sinyal utama (karena judul biasanya pendek), kemiripan kata
   // jadi pembeda urutan di dalam kategori yang sama / lintas kategori.
   function getSimilarImages(img) {
-    const tokens = titleTokens(img.title);
+    const tokens = titleTokensCached(img);
     // Tidak lagi dipotong ke topN -> seluruh gambar lain diikutkan (terurut
     // dari yang paling mirip ke paling kurang mirip) supaya section "Gambar
     // Serupa" punya stok gambar yang cukup untuk infinite scroll ala
@@ -2186,7 +2223,7 @@
       .filter(other => other.id !== img.id)
       .map(other => {
         const categoryBonus = other.category === img.category ? 2 : 0;
-        const wordScore = jaccardSimilarity(tokens, titleTokens(other.title)) * 3;
+        const wordScore = jaccardSimilarity(tokens, titleTokensCached(other)) * 3;
         return { img: other, score: categoryBonus + wordScore };
       })
       .sort((a, b) => b.score - a.score)
@@ -2205,7 +2242,7 @@
     const [w, h] = s.size.split('×').map(Number);
     const ratio = (w && h) ? `${w}/${h}` : '1/1';
     return `
-      <button class="modal-similar-item" onclick="openModal(${s.id})" aria-label="Buka ${escapeHtml(s.title)}">
+      <button class="modal-similar-item" onclick="openModal(${s.id}, { sourceEl: this })" aria-label="Buka ${escapeHtml(s.title)}">
         <img src="${gridThumb(s.url)}" srcset="${gridThumbSrcset(s.url)}" alt="Status ${escapeHtml(catLabel(s.category))} - ${escapeHtml(s.title)}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
         <span class="modal-similar-item-label">${escapeHtml(s.title)}</span>
       </button>
@@ -2893,7 +2930,7 @@ viewBox="0 0 7.14519 2.77802"
         // kepanggil lagi buat tap yang sama, bikin openModal() jalan 2x.
         e.preventDefault();
         const imgId = Number(catcher.dataset.imgId);
-        handleCatcherEnd(e, imgId, () => openModal(imgId));
+        handleCatcherEnd(e, imgId, () => openModal(imgId, { sourceEl: catcher }));
       });
 
       // Desktop: klik biasa tetap buka modal, klik-kanan tetap dimatikan
@@ -2901,7 +2938,7 @@ viewBox="0 0 7.14519 2.77802"
       gallery.addEventListener('click', (e) => {
         const catcher = e.target.closest('.img-touch-catcher');
         if (!catcher) return;
-        openModal(Number(catcher.dataset.imgId));
+        openModal(Number(catcher.dataset.imgId), { sourceEl: catcher });
       });
       gallery.addEventListener('contextmenu', (e) => {
         if (e.target.closest('.img-touch-catcher')) e.preventDefault();
