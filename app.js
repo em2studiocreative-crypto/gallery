@@ -1621,16 +1621,15 @@
     appLoaderDone = true;
     const el = document.getElementById('appLoader');
     if (!el) return;
-    // Pastikan kotak kuning kelihatan penuh (100%) dulu sebelum overlay
-    // mulai memudar -- kalau hideAppLoader ini dipanggil saat progress
-    // masih di tengah jalan (misal kena timeout/gagal load di 70%),
-    // jangan langsung ngilang mendadak, tapi selesaikan dulu animasi
-    // naiknya ke penuh biar user lihat loading-nya "kelar", bukan stuck.
-    updateAppLoaderProgress(1, 1);
-    setTimeout(() => {
+    // Jangan langsung sembunyikan overlay -- suruh loop animasi (lihat
+    // loaderTick di bawah) nuntasin dulu jalan mulus ke 100%, baru abis
+    // itu overlay-nya mulai memudar. Ini yang bikin loading kelar "kelihatan
+    // selesai" walau dipanggil dari timeout/error saat progress asli masih
+    // di tengah jalan (misal baru 70%).
+    loaderFinishAndThen(() => {
       el.classList.add('hide');
       setTimeout(() => { el.style.display = 'none'; }, 400); // samain sama durasi transition opacity CSS-nya
-    }, 260); // dikit lebih lama dari transition y/height 0.25s di CSS #loaderFillRect, biar sempat kelihatan penuh dulu
+    });
   }
 
   // Tinggi & lebar viewBox SVG logo loader (lihat viewBox="0 0 10.74475
@@ -1670,43 +1669,76 @@
     return d;
   }
 
-  // Level air saat ini (posisi y permukaan gelombang) -- dipakai sebagai
-  // titik awal tiap kali level berpindah, biar animasinya nyambung mulus
-  // dari posisi terakhir, bukan lompat dari 0 tiap update persen.
-  let loaderCurrentLevelY = LOADER_LOGO_VB_HEIGHT; // mulai kosong (permukaan di dasar)
-  let loaderLevelAnimId = null;
+  // ==== Animasi persen yang dihaluskan (biar kerasa jalan mulus 0% -> 100%,
+  // bukan lompat-lompat ngikutin tiap gambar yang kelar dimuat) ====
+  // loaderRealPct  : persen ASLI berdasarkan berapa gambar yang beneran
+  //                  udah kelar dimuat (naik gak beraturan / lompat2,
+  //                  soalnya nunggu network).
+  // loaderShownPct : persen yang DITAMPILKAN ke user -- tiap frame dikejar
+  //                  pelan-pelan ke arah loaderRealPct, dan kalau udah
+  //                  nyusul tapi gambar asli belum kelar semua, tetap
+  //                  "merayap" pelan sendiri (di-cap di bawah 100%) biar
+  //                  gak pernah kelihatan diem/macet nunggu.
+  let loaderRealPct = 0;
+  let loaderShownPct = 0;
+  let loaderFinishing = false; // true kalau udah waktunya nuntasin ke 100% & tutup overlay
+  let loaderFinishCb = null;
+  let loaderTickId = null;
 
-  // Animasikan naiknya permukaan air dari level sekarang ke level target
-  // pakai requestAnimationFrame -- dipilih ketimbang CSS transition biasa
-  // karena atribut "d" pada <path> gak reliable dianimasikan lewat CSS
-  // transition di semua browser.
-  function animateLoaderLevelTo(targetLevelY, durationMs) {
+  function renderLoaderPct(pct) {
+    const percent = document.getElementById('appLoaderPercent');
     const wavePath = document.getElementById('loaderWavePath');
-    if (!wavePath) { loaderCurrentLevelY = targetLevelY; return; }
-    if (loaderLevelAnimId) cancelAnimationFrame(loaderLevelAnimId);
-    const startLevelY = loaderCurrentLevelY;
-    const startTime = performance.now();
-    function step(now) {
-      const t = Math.min(1, (now - startTime) / durationMs);
-      const eased = 1 - Math.pow(1 - t, 3); // ease-out, senada sama transition CSS sebelumnya
-      const levelY = startLevelY + (targetLevelY - startLevelY) * eased;
-      loaderCurrentLevelY = levelY;
-      wavePath.setAttribute('d', buildLoaderWavePath(levelY));
-      loaderLevelAnimId = (t < 1) ? requestAnimationFrame(step) : null;
+    if (percent) percent.textContent = Math.round(pct) + '%';
+    if (wavePath) {
+      const filledHeight = LOADER_LOGO_VB_HEIGHT * (pct / 100);
+      wavePath.setAttribute('d', buildLoaderWavePath(LOADER_LOGO_VB_HEIGHT - filledHeight));
     }
-    loaderLevelAnimId = requestAnimationFrame(step);
+  }
+
+  function loaderTick() {
+    const target = loaderFinishing ? 100 : loaderRealPct;
+    if (loaderShownPct < target) {
+      // Ngejar progress asli (atau ngejar ke 100% pas lagi nuntasin) --
+      // makin deket, makin pelan (ease-out), tapi dikasih laju minimum
+      // biar gak berasa "nempel" pas selisihnya kecil.
+      const diff = target - loaderShownPct;
+      const step = Math.max(diff * 0.09, loaderFinishing ? 0.6 : 0.25);
+      loaderShownPct = Math.min(target, loaderShownPct + step);
+    } else if (!loaderFinishing && loaderShownPct < 92) {
+      // Udah nyusul progress asli tapi gambar aslinya belum semua kelar --
+      // tetap merayap pelan sendiri (di-cap 92%) biar kelihatan terus
+      // "jalan", gak nunggu diem nunggu network.
+      loaderShownPct = Math.min(92, loaderShownPct + 0.12);
+    }
+    renderLoaderPct(loaderShownPct);
+    if (loaderFinishing && loaderShownPct >= 99.9) {
+      loaderShownPct = 100;
+      renderLoaderPct(100);
+      loaderTickId = null;
+      const cb = loaderFinishCb;
+      loaderFinishCb = null;
+      if (cb) cb();
+      return;
+    }
+    loaderTickId = requestAnimationFrame(loaderTick);
+  }
+
+  function ensureLoaderTickRunning() {
+    if (loaderTickId == null) loaderTickId = requestAnimationFrame(loaderTick);
+  }
+
+  // Dipanggil pas beneran mau nutup overlay -- nyuruh loop di atas
+  // nuntasin dulu ke 100% (dari posisi berapa pun sekarang), baru abis
+  // itu callback-nya (nyembunyiin overlay) dijalankan.
+  function loaderFinishAndThen(cb) {
+    loaderFinishing = true;
+    loaderFinishCb = cb;
+    ensureLoaderTickRunning();
   }
 
   function updateAppLoaderProgress(done, total) {
-    const pct = total > 0 ? Math.round((done / total) * 100) : 100;
-    const percent = document.getElementById('appLoaderPercent');
-    if (percent) percent.textContent = pct + '%';
-    // Level air naik dari bawah (levelY = tinggi viewBox, kosong) ke atas
-    // (levelY = 0, penuh) sesuai persen -- di-clip persis mengikuti bentuk
-    // logo (lihat clipPath #loaderFillClip di index.html).
-    const filledHeight = LOADER_LOGO_VB_HEIGHT * (pct / 100);
-    const targetLevelY = LOADER_LOGO_VB_HEIGHT - filledHeight;
-    animateLoaderLevelTo(targetLevelY, 250);
+    loaderRealPct = total > 0 ? (done / total) * 100 : 100;
+    ensureLoaderTickRunning();
   }
 
   function trackFirstBatchAndHideLoader() {
