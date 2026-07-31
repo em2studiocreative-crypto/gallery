@@ -1241,14 +1241,18 @@
   // bersamaan ke server), render 1 batch dulu, sisanya nyusul otomatis
   // pas user scroll ke bawah.
   const GALLERY_BATCH_SIZE = 20;
+  // Jumlah kartu pertama yang dimuat "eager" (kira-kira yang tampak tanpa
+  // scroll) -- dipakai juga oleh splash loader di bawah buat nentuin
+  // berapa gambar yang perlu ditunggu sebelum galeri ditampilkan.
+  const EAGER_CARD_COUNT = 6;
   let currentFilteredItems = [];
   let renderedCount = 0;
 
   function cardHtml(img, idx) {
     const [w, h] = img.size.split('×').map(Number);
     const ratio = (w && h) ? `${w}/${h}` : '1/1';
-    // 6 kartu pertama (kira-kira yang tampak tanpa scroll) dimuat lebih prioritas
-    const eager = idx < 6;
+    // Kartu pertama (kira-kira yang tampak tanpa scroll) dimuat lebih prioritas
+    const eager = idx < EAGER_CARD_COUNT;
     return `
       <div class="gallery-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id});}">
         <img
@@ -1582,6 +1586,123 @@
       .subscribe();
   }
 
+  // ===== SPLASH LOADER: tunggu batch gambar pertama sebelum masuk menu utama =====
+  // Nunggu N gambar pertama (yang eager-load, keliatan tanpa scroll) selesai
+  // dimuat sebelum overlay ini disembunyikan -- supaya begitu user lihat
+  // galeri, gambarnya udah utuh, bukan kotak kosong yang lagi loading.
+  // Sisa gambar lain (di luar N ini) TETAP lazy-load seperti biasa saat
+  // discroll -- bukan ditunggu semua, supaya loading awal tetap cepat walau
+  // total gambar di galeri ada ratusan.
+  // Jalan cuma SEKALI per kunjungan (initial load), bukan tiap ganti
+  // kategori/pencarian/realtime update.
+  let appLoaderDone = false;
+  // Jaga-jaga kalau gambar lambat/gagal dimuat (misal cold cache CDN di
+  // kunjungan pertama -- lihat pembahasan sebelumnya soal wsrv.nl): overlay
+  // WAJIB hilang setelah batas waktu ini apa pun yang terjadi, supaya user
+  // gak pernah kejebak di loading screen selamanya.
+  const APP_LOADER_TIMEOUT_MS = 6000;
+
+  function hideAppLoader() {
+    if (appLoaderDone) return;
+    appLoaderDone = true;
+    const el = document.getElementById('appLoader');
+    if (!el) return;
+    el.classList.add('hide');
+    setTimeout(() => { el.style.display = 'none'; }, 400); // samain sama durasi transition CSS-nya
+  }
+
+  function updateAppLoaderProgress(done, total) {
+    const pct = total > 0 ? Math.round((done / total) * 100) : 100;
+    const fill = document.getElementById('appLoaderFill');
+    const percent = document.getElementById('appLoaderPercent');
+    if (fill) fill.style.width = pct + '%';
+    if (percent) percent.textContent = pct + '%';
+  }
+
+  function trackFirstBatchAndHideLoader() {
+    if (appLoaderDone) return;
+    const gallery = document.getElementById('gallery');
+    const imgs = gallery ? Array.from(gallery.querySelectorAll('img')).slice(0, EAGER_CARD_COUNT) : [];
+
+    if (imgs.length === 0) {
+      // Kategori kosong / gak ada gambar sama sekali -> gak ada yg perlu ditunggu.
+      updateAppLoaderProgress(1, 1);
+      hideAppLoader();
+      return;
+    }
+
+    let done = 0;
+    updateAppLoaderProgress(0, imgs.length);
+
+    const markOneDone = () => {
+      done++;
+      updateAppLoaderProgress(done, imgs.length);
+      if (done >= imgs.length) hideAppLoader();
+    };
+
+    imgs.forEach((img) => {
+      if (img.complete && img.naturalWidth > 0) {
+        // Udah selesai duluan (misal dari cache) sebelum listener dipasang.
+        markOneDone();
+      } else {
+        img.addEventListener('load', markOneDone, { once: true });
+        // Gagal load pun dihitung "selesai dicoba" -- biar 1 gambar rusak
+        // gak bikin overlay nyangkut nunggu selamanya.
+        img.addEventListener('error', markOneDone, { once: true });
+      }
+    });
+
+    setTimeout(hideAppLoader, APP_LOADER_TIMEOUT_MS);
+  }
+
+  // ===== PREFETCH BACKGROUND: cache-in-diam2 sisa gambar saat browser idle =====
+  // Supaya kunjungan BERIKUTNYA kerasa "instan semua" tanpa perlu nunggu
+  // loading di depan, sisa thumbnail (di luar batch pertama) di-fetch
+  // diam-diam satu-satu saat browser lagi idle. Request ini otomatis kena
+  // tangkap oleh sw.js (strategi cache-first utk wsrv.nl) dan tersimpan ke
+  // Cache Storage -- BUKAN localStorage, jadi gak ada batas ukuran ketat.
+  // Konkurensi dibatasi kecil (2 sekaligus) biar gak rebutan bandwidth sama
+  // request lain yang user lagi lakuin (misal buka modal gambar).
+  const PREFETCH_IDLE_CONCURRENCY = 2;
+
+  function idlePrefetchRemainingThumbs() {
+    if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+
+    const queue = IMAGES.slice(EAGER_CARD_COUNT).map(img => gridThumb(img.url));
+    if (queue.length === 0) return;
+
+    let idx = 0;
+    let active = 0;
+
+    function runNext(deadline) {
+      while (
+        idx < queue.length &&
+        active < PREFETCH_IDLE_CONCURRENCY &&
+        (!deadline || deadline.timeRemaining() > 0 || deadline.didTimeout)
+      ) {
+        const url = queue[idx++];
+        active++;
+        fetch(url, { mode: 'no-cors' })
+          .catch(() => {}) // diam-diam aja, ini cuma prefetch best-effort
+          .finally(() => {
+            active--;
+            scheduleNext();
+          });
+      }
+    }
+
+    function scheduleNext() {
+      if (idx >= queue.length) return;
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(runNext, { timeout: 2000 });
+      } else {
+        setTimeout(() => runNext(null), 300); // fallback browser lama (Safari/iOS)
+      }
+    }
+
+    scheduleNext();
+  }
+
   async function loadData() {
     const loading = document.getElementById('loadingState');
     const empty = document.getElementById('emptyState');
@@ -1621,6 +1742,8 @@
 
       renderCategories();
       filterAndRender();
+      trackFirstBatchAndHideLoader();
+      idlePrefetchRemainingThumbs();
       checkForNewNotifications();
       const openedFromUrl = openInitialImageFromUrl();
       if (!openedFromUrl) maybeShowOnboarding();
@@ -1629,6 +1752,7 @@
       loading.classList.add('hidden');
       error.classList.remove('hidden');
       showToast('Gagal memuat data', 'error');
+      hideAppLoader(); // jangan biarkan user nyangkut di splash loader kalau data gagal dimuat
     }
   }
 
