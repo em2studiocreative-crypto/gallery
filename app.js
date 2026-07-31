@@ -269,7 +269,9 @@
   }
 
   function finishOnboarding(skip) {
-    if (!skip && onboardingSelectedCats.size > 0) {
+    const hasSelection = !skip && onboardingSelectedCats.size > 0;
+
+    if (hasSelection) {
       onboardingSelectedCats.forEach(catId => {
         const current = categoryAffinity[catId] || 0;
         categoryAffinity[catId] = Math.min(AFFINITY_CAP, current + ONBOARDING_AFFINITY_BOOST);
@@ -292,12 +294,42 @@
     document.body.style.overflow = '';
 
     // Kalau lagi di feed "Semua" tanpa filter/search aktif, susun ulang feed
-    // supaya kategori yang barusan dipilih langsung kelihatan lebih dominan.
+    // supaya kategori yang barusan dipilih langsung kelihatan.
     if (activeCategory === 'all' && !showFavoritesOnly && !searchQuery) {
-      // Reset cache urutan affinity dulu -> skor affinity baru saja berubah
-      // SENGAJA (user pilih minat), jadi resort kali ini memang harus kepakai,
-      // bukan dipertahankan ke urutan lama.
-      resetAffinityOrderCache();
+      if (hasSelection) {
+        // PENTING: bukan cuma resetAffinityOrderCache() lalu andalkan
+        // weightedInterleave (algoritma affinity biasa) -- itu cuma bikin
+        // kategori pilihan user "lebih SERING nongol" tapi tetap diselang-
+        // seling dengan kategori lain, jadi di baris paling awal cuma
+        // keliatan SEBAGIAN gambar yang sesuai pilihan.
+        //
+        // Di momen pertama kali user pilih minat, kita mau efeknya tegas:
+        // SEMUA gambar dari kategori yang dipilih tampil dulu secara utuh
+        // di baris teratas (urutan asli, terbaru dulu), baru disusul
+        // kategori lain di bawahnya. Jadi hasil sortir ini "dipaksa" masuk
+        // sebagai cache urutan affinity, supaya filterAndRender() di bawah
+        // langsung memakainya alih-alih menghitung ulang pakai interleave.
+        const selectedCats = new Set(onboardingSelectedCats);
+        const preferred = [];
+        const rest = [];
+        IMAGES.forEach(img => {
+          if (selectedCats.has(img.category)) preferred.push(img);
+          else rest.push(img);
+        });
+        // Kalau user pilih lebih dari 1 kategori, gambar dari kategori2
+        // tersebut diacak CAMPUR jadi satu (bukan ditampilkan berurutan per
+        // kategori -- semua kategori A dulu baru semua kategori B) supaya
+        // hasilnya kerasa seperti feed yang benar2 sesuai selera user, baru
+        // di baris berikutnya (setelah semua gambar pilihan habis) disusul
+        // gambar rekomendasi/kategori lain.
+        const priorityOrder = shuffleArray(preferred).concat(rest);
+        cachedAffinityOrder = priorityOrder;
+        cachedAffinityIds = new Set(priorityOrder.map(img => img.id));
+      } else {
+        // User skip / tidak pilih apa-apa -> tidak ada yang perlu
+        // diprioritaskan, biarkan urutan affinity normal (kalau ada) yang jalan.
+        resetAffinityOrderCache();
+      }
       filterAndRender();
     }
   }
