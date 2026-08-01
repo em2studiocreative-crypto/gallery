@@ -44,38 +44,70 @@ function xmlEscape(str) {
   }[c]));
 }
 
-function urlEntry(loc, lastmod, changefreq, priority) {
-  return `  <url>\n    <loc>${xmlEscape(loc)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+// urlEntry sekarang opsional menerima blok <image:image> (imageBlock),
+// dipakai supaya Google Images bisa mengindeks tiap gambar sebagai hasil
+// pencarian gambar, bukan cuma URL halamannya di pencarian teks biasa.
+function urlEntry(loc, lastmod, changefreq, priority, imageBlock) {
+  return `  <url>\n    <loc>${xmlEscape(loc)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n${imageBlock ? imageBlock + '\n' : ''}  </url>`;
+}
+
+// <image:image> per gambar. title & caption dibuat konsisten dengan pola
+// SEO yang sama dipakai di updateImageSEO()/updateImageStructuredData() di
+// app.js, supaya sinyal yang diterima Google seragam di semua tempat.
+function imageBlockFor(img, catLabel) {
+  if (!img.url) return '';
+  const title = catLabel ? `${img.title} — ${catLabel}` : img.title;
+  const caption = `Download gambar status WhatsApp "${img.title}"${catLabel ? ` kategori ${catLabel}` : ''} gratis dalam kualitas HD di Status Gallery.`;
+  return `    <image:image>\n      <image:loc>${xmlEscape(img.url)}</image:loc>\n      <image:title>${xmlEscape(title)}</image:title>\n      <image:caption>${xmlEscape(caption)}</image:caption>\n    </image:image>`;
 }
 
 async function main() {
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const { data: images, error } = await supabase
-    .from('images')
-    .select('id, title, created_at')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
+  const [{ data: images, error: imagesError }, { data: categories, error: catError }] = await Promise.all([
+    supabase
+      .from('images')
+      .select('id, title, category_id, url, created_at')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false }),
+    supabase.from('categories').select('id, label')
+  ]);
 
-  if (error) {
-    console.error('Gagal ambil data gambar dari Supabase:', error.message);
+  if (imagesError) {
+    console.error('Gagal ambil data gambar dari Supabase:', imagesError.message);
+    process.exit(1);
+  }
+  if (catError) {
+    console.error('Gagal ambil data kategori dari Supabase:', catError.message);
     process.exit(1);
   }
 
+  const labelById = new Map((categories || []).map(c => [c.id, c.label]));
+
   const today = new Date().toISOString().slice(0, 10);
   const urls = [urlEntry(`${SITE_URL}/`, today, 'daily', '1.0')];
+
+  // Halaman kategori (?kategori=<id>) -- konsisten dengan categoryUrlPath()
+  // di app.js. id kategori sudah berupa slug manusiawi yang diisi admin
+  // sendiri, jadi dipakai langsung tanpa slugify tambahan.
+  for (const cat of categories || []) {
+    if (!cat.id || cat.id === 'all') continue;
+    urls.push(urlEntry(`${SITE_URL}/?kategori=${encodeURIComponent(cat.id)}`, today, 'weekly', '0.8'));
+  }
 
   for (const img of images) {
     const slug = slugify(img.title);
     const loc = `${SITE_URL}/?img=${img.id}${slug ? '-' + slug : ''}`;
     const lastmod = (img.created_at ? String(img.created_at) : today).slice(0, 10);
-    urls.push(urlEntry(loc, lastmod, 'monthly', '0.7'));
+    const catLabel = labelById.get(img.category_id) || '';
+    urls.push(urlEntry(loc, lastmod, 'monthly', '0.7', imageBlockFor(img, catLabel)));
   }
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urls.join('\n')}\n</urlset>\n`;
 
   fs.writeFileSync('sitemap.xml', xml, 'utf8');
-  console.log(`sitemap.xml dibuat: ${images.length} gambar + 1 homepage.`);
+  const withImages = images.filter(i => i.url).length;
+  console.log(`sitemap.xml dibuat: ${images.length} gambar (${withImages} dgn <image:image>) + 1 homepage.`);
 }
 
 main();
