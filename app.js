@@ -1977,6 +1977,12 @@
         created_at: r.created_at
       }));
 
+      // JSON-LD homepage (fallback statis di index.html) ditimpa di sini
+      // dengan ItemList isi galeri yang sebenarnya. Kalau URL bawa
+      // ?kategori=/?img=, ini akan ditimpa lagi oleh SEO khusus
+      // kategori/gambar tersebut di bawah -- baseline dulu, baru override.
+      updateHomeCollectionStructuredData();
+
       openInitialCategoryFromUrl();
       renderCategories();
       filterAndRender();
@@ -2096,6 +2102,12 @@
     // ImageObject gambar yang mungkin masih nyangkut dari modal sebelumnya
     // juga dibuang, biar tidak salah asosiasi ke kategori ini.
     removeImageStructuredData();
+    updateCollectionStructuredData({
+      name: title,
+      description,
+      url: pageUrl,
+      images: IMAGES.filter(img => img.category === cat.id)
+    });
   }
 
   // Dipanggil tiap kali kategori aktif berubah (klik chip / modal "Semua
@@ -2154,6 +2166,7 @@
     const canonicalEl = document.querySelector('link[rel="canonical"]');
     if (canonicalEl) canonicalEl.href = DEFAULT_SEO.canonical;
     removeImageStructuredData();
+    updateHomeCollectionStructuredData();
   }
 
   // JSON-LD ImageObject: sinyal terstruktur tambahan (di luar meta tag) yang
@@ -2182,6 +2195,63 @@
   function removeImageStructuredData() {
     const script = document.getElementById('imageStructuredData');
     if (script) script.remove();
+  }
+
+  // ===== SEO: JSON-LD ItemList/CollectionPage (homepage & per kategori) =====
+  // Blok statis di index.html cuma fallback generik (ImageGallery tanpa
+  // daftar isi) buat crawler yang gak jalanin JS. Begitu data Supabase siap,
+  // fungsi ini menimpanya dengan CollectionPage + ItemList berisi gambar
+  // yang benar-benar sedang ditampilkan -- lebih deskriptif buat Google
+  // soal isi galeri/kategori ini, bukan cuma "ada galeri gambar di sini".
+  // Dibatasi COLLECTION_JSONLD_MAX_ITEMS biar payload JSON-nya gak
+  // membengkak percuma untuk galeri yang isinya ratusan/ribuan gambar.
+  const COLLECTION_JSONLD_MAX_ITEMS = 30;
+
+  function buildItemListElements(images) {
+    return images.slice(0, COLLECTION_JSONLD_MAX_ITEMS).map((img, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: window.location.origin + imageUrlPath(img),
+      item: {
+        '@type': 'ImageObject',
+        contentUrl: img.url,
+        name: img.title
+      }
+    }));
+  }
+
+  function updateCollectionStructuredData({ name, description, url, images }) {
+    let script = document.getElementById('collectionStructuredData');
+    if (!script) {
+      script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.id = 'collectionStructuredData';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name,
+      description,
+      url,
+      inLanguage: 'id',
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: images.length,
+        itemListElement: buildItemListElements(images)
+      }
+    });
+  }
+
+  // Dipanggil tiap kali tampilan kembali ke "Beranda" (semua kategori):
+  // load awal, reset filter, keluar dari kategori/mode favorit.
+  function updateHomeCollectionStructuredData() {
+    updateCollectionStructuredData({
+      name: DEFAULT_SEO.title,
+      description: DEFAULT_SEO.description,
+      url: window.location.origin + '/',
+      images: IMAGES
+    });
   }
 
   // Dipanggil sekali di akhir loadData() (setelah IMAGES siap): kalau URL
