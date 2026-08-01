@@ -546,11 +546,7 @@
   // login sama sekali. Sekarang upload lewat Edge Function
   // `cloudinary-sign-upload`, yang generate signature di server SETELAH cek
   // is_admin() -- lihat getCloudinaryUploadSignature() di bawah.
-  //
-  // TODO (sekali saja): preset lama "admin_unsigned" di Cloudinary sudah
-  // tidak dipakai kode ini lagi -- sebaiknya dihapus/di-nonaktifkan dari
-  // Cloudinary Console (Settings -> Upload -> Upload Presets) supaya tidak
-  // ada jalur unsigned yang masih hidup.
+  // (Preset unsigned lama "admin_unsigned" sudah dihapus dari Cloudinary Console.)
   const CLOUDINARY_CLOUD_NAME = 'phgdb2st';
 
   let CATEGORIES = [];
