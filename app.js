@@ -939,6 +939,7 @@
       searchQuery = '';
       document.getElementById('searchInput').value = '';
       renderCategories();
+      syncCategoryUrl('all');
     }
     highlightNav(showFavoritesOnly ? 'Favorit' : 'Beranda');
     filterAndRender();
@@ -961,7 +962,8 @@
     ).join('');
   }
 
-  function selectCategory(catId) {
+  function selectCategory(catId, options = {}) {
+    const { syncUrl = true } = options;
     activeCategory = catId;
     showFavoritesOnly = false;
     highlightNav('Beranda');
@@ -971,6 +973,9 @@
     if (activeChip) {
       activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
+    // syncUrl=false dipakai oleh popstate handler (URL sudah berubah lewat
+    // Back/Forward browser, tinggal ikuti -- jangan pushState lagi).
+    if (syncUrl) syncCategoryUrl(catId);
   }
 
   // ===== MODAL "SEMUA KATEGORI" =====
@@ -1972,6 +1977,7 @@
         created_at: r.created_at
       }));
 
+      openInitialCategoryFromUrl();
       renderCategories();
       filterAndRender();
       trackFirstBatchAndHideLoader();
@@ -1996,6 +2002,7 @@
     highlightNav('Beranda');
     renderCategories();
     filterAndRender();
+    syncCategoryUrl('all');
   }
 
   // ===== MODAL =====
@@ -2056,6 +2063,56 @@
   function setMetaContent(selector, value) {
     const el = document.querySelector(selector);
     if (el) el.setAttribute('content', value);
+  }
+
+  // ===== SEO: URL & META PER KATEGORI (?kategori=<id>) =====
+  // Pola yang sama dengan ?img=<id> di atas, tapi untuk halaman kategori.
+  // category_id sudah berupa slug manusiawi yang diisi admin sendiri (lihat
+  // placeholder "contoh: motivasi" di admin.html), jadi dipakai langsung
+  // sebagai bagian URL tanpa perlu slugify tambahan.
+  function categoryUrlPath(catId) {
+    const basePath = window.location.pathname;
+    return (catId && catId !== 'all')
+      ? basePath + `?kategori=${encodeURIComponent(catId)}`
+      : basePath;
+  }
+
+  function updateCategorySEO(cat) {
+    const title = `${cat.label} — Status Gallery by EM2STUDIO`;
+    const description = `Kumpulan gambar status WhatsApp kategori ${cat.label}, download gratis kualitas HD di Status Gallery.`;
+    const pageUrl = window.location.origin + categoryUrlPath(cat.id);
+
+    document.title = title;
+    setMetaContent('meta[name="description"]', description);
+    setMetaContent('meta[property="og:title"]', title);
+    setMetaContent('meta[property="og:description"]', description);
+    setMetaContent('meta[property="og:url"]', pageUrl);
+    setMetaContent('meta[name="twitter:title"]', title);
+    setMetaContent('meta[name="twitter:description"]', description);
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) canonicalEl.href = pageUrl;
+    // og:image/twitter:image sengaja dibiarkan (default og-image.png) --
+    // kategori tidak punya 1 gambar representatif tunggal. JSON-LD
+    // ImageObject gambar yang mungkin masih nyangkut dari modal sebelumnya
+    // juga dibuang, biar tidak salah asosiasi ke kategori ini.
+    removeImageStructuredData();
+  }
+
+  // Dipanggil tiap kali kategori aktif berubah (klik chip / modal "Semua
+  // Kategori" / reset ke Beranda) supaya address bar & meta tag selalu
+  // sinkron sama apa yang sedang ditampilkan. Menghindari push history
+  // duplikat kalau URL yang dituju sama persis dengan yang sekarang.
+  function syncCategoryUrl(catId) {
+    const cat = CATEGORIES.find(c => c.id === catId);
+    const isAll = catId === 'all' || !cat;
+    const path = categoryUrlPath(isAll ? 'all' : cat.id);
+
+    if (isAll) restoreDefaultSEO(); else updateCategorySEO(cat);
+
+    const currentPath = window.location.pathname + window.location.search;
+    if (currentPath !== path) {
+      history.pushState({ catId: isAll ? null : cat.id }, '', path);
+    }
   }
 
   function updateImageSEO(img) {
@@ -2132,6 +2189,27 @@
   // link), langsung buka modal gambar itu tanpa perlu klik apa pun. History
   // disusun 2 lapis (galeri di bawah, gambar di atas) supaya tombol Back
   // browser menutup modal dulu, baru keluar situs — bukan langsung keluar.
+  // Dipanggil sekali di loadData() SEBELUM renderCategories()/filterAndRender()
+  // pertama, supaya kalau URL yang dibuka user sudah membawa ?kategori=<id>
+  // (mis. dari sitemap/hasil Google), galeri langsung tampil terfilter tanpa
+  // kedip/render ganda. History disusun 2 lapis sama seperti openInitial-
+  // ImageFromUrl(): bawah = Beranda (semua kategori), atas = kategori ini --
+  // supaya tombol Back browser balik ke Beranda dulu, bukan langsung keluar
+  // situs.
+  function openInitialCategoryFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const catParam = params.get('kategori');
+    if (!catParam) return false;
+    const cat = CATEGORIES.find(c => c.id === catParam);
+    if (!cat || cat.id === 'all') return false; // kategori tidak dikenal/sudah dihapus admin -> tampilkan galeri biasa
+
+    activeCategory = cat.id;
+    updateCategorySEO(cat);
+    history.replaceState({ catId: null }, '', window.location.pathname);
+    history.pushState({ catId: cat.id }, '', categoryUrlPath(cat.id));
+    return true;
+  }
+
   function openInitialImageFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const imgParam = params.get('img');
@@ -2147,15 +2225,33 @@
     return true;
   }
 
-  // Sinkronkan modal dengan tombol Back/Forward browser.
+  // Sinkronkan modal & kategori aktif dengan tombol Back/Forward browser.
   window.addEventListener('popstate', () => {
     const params = new URLSearchParams(window.location.search);
     const imgParam = params.get('img');
     const id = imgParam ? parseInt(imgParam, 10) : NaN;
     if (!Number.isNaN(id) && IMAGES.some(i => i.id === id)) {
       openModal(id, { pushHistory: false });
-    } else if (currentModalImage) {
+      return; // modal gambar prioritas di atas kategori, jangan sentuh kategori dulu
+    }
+    if (currentModalImage) {
       closeModal(null, { fromPopState: true });
+    }
+
+    // closeModal() di atas (kalau kepanggil) sempat menimpa title/meta ke
+    // default homepage lewat restoreDefaultSEO() -- kalau URL yang aktif
+    // sekarang sebenarnya masih ?kategori=..., itu perlu dikembalikan lagi
+    // di sini supaya title/meta cocok sama apa yang ditampilkan di layar.
+    // Makanya blok ini SELALU dijalankan, bukan cuma waktu kategori "beda".
+    const catParam = params.get('kategori');
+    const cat = catParam ? CATEGORIES.find(c => c.id === catParam) : null;
+    const targetCat = cat ? cat.id : 'all';
+    if (activeCategory !== targetCat) {
+      selectCategory(targetCat, { syncUrl: false });
+    } else if (cat) {
+      updateCategorySEO(cat);
+    } else {
+      restoreDefaultSEO();
     }
   });
 
