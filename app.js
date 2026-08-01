@@ -341,6 +341,23 @@
     }
   }
 
+  // Update tombol hati di kartu grid SECARA LANGSUNG (tanpa render ulang
+  // grid sama sekali). Dipakai oleh toggleFavorite() supaya klik love tidak
+  // memicu setupGalleryColumns() -> gallery.innerHTML='' -> semua <img> yang
+  // sudah termuat dibongkar-pasang ulang, yang keliatan sebagai "layar
+  // berkedip". Pakai querySelectorAll (bukan querySelector) karena galeri
+  // bisa nyambung berulang (extendGalleryLoop) -- gambar yang sama bisa
+  // muncul di lebih dari satu kartu sekaligus di grid.
+  function updateCardFavoriteButton(imgId) {
+    const isFav = favorites.has(imgId);
+    document.querySelectorAll(`.gallery-card[data-img-id="${imgId}"] .card-fav-btn`).forEach(btn => {
+      btn.classList.toggle('active', isFav);
+      btn.setAttribute('aria-label', isFav ? 'Hapus dari favorit' : 'Tambah ke favorit');
+      const svg = btn.querySelector('svg');
+      if (svg) svg.setAttribute('fill', isFav ? 'currentColor' : 'none');
+    });
+  }
+
   function toggleFavorite(imgId) {
     const wasFavorite = favorites.has(imgId);
     // Update angka "disukai X orang" secara optimis (langsung di layar),
@@ -376,7 +393,17 @@
       saveFavorites();
     }
 
-    filterAndRender();
+    // Grid TIDAK perlu dirender ulang penuh kecuali sedang di mode
+    // Favorit-only (di situ, gambar ini benar2 harus masuk/keluar dari
+    // daftar yang tampil). Di mode biasa, cukup update tombol hati di
+    // kartu yang relevan -- render ulang penuh di sini yang tadinya bikin
+    // layar "berkedip" tiap klik love (grid dibongkar & dipasang ulang dari
+    // nol walau isinya sebenarnya sama persis).
+    if (showFavoritesOnly) {
+      filterAndRender();
+    } else {
+      updateCardFavoriteButton(imgId);
+    }
     if (currentModalImage && currentModalImage.id === imgId) {
       updateModalFavoriteBtn();
     }
@@ -1321,7 +1348,7 @@
     // Kartu pertama (kira-kira yang tampak tanpa scroll) dimuat lebih prioritas
     const eager = idx < EAGER_CARD_COUNT;
     return `
-      <div class="gallery-card" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id}, { sourceEl: this });}">
+      <div class="gallery-card" data-img-id="${img.id}" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${img.id}, { sourceEl: this });}">
         <img
           src="${gridThumb(img.url)}"
           srcset="${gridThumbSrcset(img.url)}"
