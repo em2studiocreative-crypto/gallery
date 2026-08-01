@@ -353,7 +353,7 @@
         <h2>Semua Gambar</h2>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn btn-ghost" style="width:auto;" id="cleanupBtn" onclick="cleanupOrphanFiles()">Bersihkan File Tak Terpakai</button>
-          <button class="btn btn-ghost" style="width:auto;" id="migrateAllBtn" onclick="migrateAllImages()">Pindahkan Semua ke Storage</button>
+          <button class="btn btn-ghost" style="width:auto;" id="migrateAllBtn" onclick="migrateAllImages()">Pindahkan Semua ke Cloudinary</button>
           <button class="btn btn-ghost" style="width:auto;" id="reoptimizeAllBtn" onclick="reoptimizeAllImages()">Kompres Ulang Gambar Besar</button>
           <button class="btn btn-primary" style="width:auto;" onclick="openImageModal()">+ Tambah Gambar</button>
         </div>
@@ -535,6 +535,21 @@
 <script src="config.js"></script>
 <script>
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ===== CLOUDINARY CONFIG =====
+  // Ganti dua nilai ini sesuai akun Cloudinary kamu:
+  // - CLOUDINARY_CLOUD_NAME: terlihat di Dashboard Cloudinary (kanan atas / URL API).
+  // - CLOUDINARY_UPLOAD_PRESET: dibuat di Settings -> Upload -> Upload presets,
+  //   mode HARUS "Unsigned" (karena upload dilakukan langsung dari browser admin,
+  //   tanpa backend -- sama seperti pola Supabase anon key sebelumnya).
+  //   Di preset itu sebaiknya di-set "Incoming Transformation":
+  //     - Limit ukuran maksimum ke 2000x2000 (crop: limit)
+  //     - Quality: auto, Format: auto
+  //   supaya SEMUA gambar (baik upload file maupun ambil dari URL luar)
+  //   otomatis dikompres di sisi Cloudinary tanpa perlu logic resize manual
+  //   di browser lagi.
+  const CLOUDINARY_CLOUD_NAME = 'phgdb2st';
+  const CLOUDINARY_UPLOAD_PRESET = 'admin_unsigned';
 
   let CATEGORIES = [];
   let IMAGES = [];
@@ -806,7 +821,7 @@
           </button>
         </td>
         <td class="actions">
-          ${isStorageUrl(img.url) ? '' : `<button class="btn btn-ghost btn-sm" onclick="migrateImageToStorage(${img.id})" title="Pindahkan ke Storage permanen">Storage</button>`}
+          ${isStorageUrl(img.url) ? '' : `<button class="btn btn-ghost btn-sm" onclick="migrateImageToStorage(${img.id})" title="Pindahkan ke Cloudinary permanen">Cloudinary</button>`}
           <button class="btn btn-ghost btn-sm" onclick="openImageModal(${img.id})">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteImage(${img.id})">Hapus</button>
         </td>
@@ -824,6 +839,35 @@
     showToast(newVal ? 'Gambar ditampilkan' : 'Gambar disembunyikan', 'success');
   }
 
+  // Hapus file fisik di Cloudinary lewat Edge Function 'delete-cloudinary-image'.
+  // Edge Function itu yang menyimpan CLOUDINARY_API_SECRET & membuat signature
+  // di sisi server (secret TIDAK BOLEH ada di kode frontend ini). Edge Function
+  // juga mengecek is_admin() sendiri, jadi hanya admin yang login yang bisa
+  // memicu penghapusan.
+  async function deleteCloudinaryAsset(url) {
+    const publicId = cloudinaryPublicIdFromUrl(url);
+    if (!publicId) {
+      console.warn('Tidak bisa mengambil public_id dari URL, dilewati:', url);
+      return;
+    }
+    try {
+      const { data, error } = await supabaseClient.functions.invoke('delete-cloudinary-image', {
+        body: { publicId },
+      });
+      if (error) {
+        console.warn('Gagal menghapus file di Cloudinary:', error.message || error);
+        return;
+      }
+      if (!data?.success) {
+        console.warn('Cloudinary tidak mengonfirmasi sukses:', data);
+      }
+    } catch (err) {
+      // Baris DB sudah terhapus lebih dulu -- kalau ini gagal, cuma file
+      // fisiknya yang menggantung di Cloudinary, tidak fatal buat user.
+      console.warn('Gagal memanggil Edge Function hapus Cloudinary:', err);
+    }
+  }
+
   async function deleteImage(id) {
     const img = IMAGES.find(i => i.id === id);
     if (!confirm('Hapus gambar ini? Tindakan tidak bisa dibatalkan.')) return;
@@ -831,12 +875,8 @@
     const { error } = await supabaseClient.from('images').delete().eq('id', id);
     if (error) { showToast('Gagal menghapus gambar', 'error'); return; }
 
-    // Kalau file-nya ada di Storage kita sendiri, hapus juga file fisiknya
-    // supaya tidak numpuk dan makan kuota percuma.
     if (img && isStorageUrl(img.url)) {
-      const path = img.url.slice(storagePublicPrefix().length);
-      supabaseClient.storage.from('images').remove([path])
-        .then(({ error: rmErr }) => { if (rmErr) console.error('Gagal menghapus file storage:', rmErr); });
+      await deleteCloudinaryAsset(img.url);
     }
 
     IMAGES = IMAGES.filter(i => i.id !== id);
@@ -957,9 +997,7 @@
     if (error) { showToast('Gagal menghapus gambar', 'error'); return; }
 
     if (img && isStorageUrl(img.url)) {
-      const path = img.url.slice(storagePublicPrefix().length);
-      supabaseClient.storage.from('images').remove([path])
-        .then(({ error: rmErr }) => { if (rmErr) console.error('Gagal menghapus file storage:', rmErr); });
+      await deleteCloudinaryAsset(img.url);
     }
 
     IMAGES = IMAGES.filter(i => i.id !== imageId);
@@ -1040,19 +1078,18 @@
     pagination.innerHTML = buildPaginationHTML(filtered.length, usersPage, usersPageSize, 'goToUsersPage', 'setUsersPageSize');
   }
 
-  // ===== MIGRASI KE STORAGE =====
-  // Ambil gambar dari URL luar (mis. image.qwenlm.ai) lalu upload ulang ke
-  // Supabase Storage supaya permanen. Fetch dijalankan di browser admin,
-  // bukan di server, jadi tetap butuh koneksi ke domain asalnya saat migrasi.
+  // ===== MIGRASI KE CLOUDINARY =====
+  // Ambil gambar dari URL manapun (Supabase Storage lama, image.qwenlm.ai,
+  // dll) lalu simpan permanen ke Cloudinary. BEDA dari versi Supabase Storage
+  // sebelumnya: di sini kita TIDAK fetch dari browser -- URL sumbernya
+  // langsung dikirim ke Cloudinary dan Cloudinary yang mengambilnya di sisi
+  // server mereka, jadi migrasi ini tidak lagi bisa gagal karena CORS.
   async function doMigrateOne(id) {
     const img = IMAGES.find(i => i.id === id);
     if (!img) throw new Error('Gambar tidak ditemukan');
-    if (isStorageUrl(img.url)) return img.url; // sudah di storage, skip
+    if (isStorageUrl(img.url)) return img.url; // sudah di Cloudinary, skip
 
-    const res = await fetch(img.url);
-    if (!res.ok) throw new Error('Gagal mengunduh dari sumber asli');
-    const blob = await res.blob();
-    const { url: newUrl } = await uploadFileToStorage(blob, img.url);
+    const { url: newUrl } = await fetchUrlAndUploadToStorage(img.url);
 
     const { error } = await supabaseClient.from('images').update({ url: newUrl }).eq('id', id);
     if (error) throw error;
@@ -1064,13 +1101,13 @@
   async function migrateImageToStorage(id) {
     const img = IMAGES.find(i => i.id === id);
     if (!img) return;
-    if (!confirm(`Pindahkan "${img.title}" ke Supabase Storage? URL lama akan diganti otomatis.`)) return;
+    if (!confirm(`Pindahkan "${img.title}" ke Cloudinary? URL lama akan diganti otomatis.`)) return;
 
     showToast('Memindahkan gambar...');
     try {
       await doMigrateOne(id);
       renderImagesTable();
-      showToast('Gambar berhasil dipindahkan ke Storage', 'success');
+      showToast('Gambar berhasil dipindahkan ke Cloudinary', 'success');
     } catch (err) {
       showToast('Gagal memindahkan: ' + err.message, 'error');
     }
@@ -1079,10 +1116,10 @@
   async function migrateAllImages() {
     const targets = IMAGES.filter(i => !isStorageUrl(i.url));
     if (targets.length === 0) {
-      showToast('Semua gambar sudah tersimpan permanen di Storage', 'success');
+      showToast('Semua gambar sudah tersimpan permanen di Cloudinary', 'success');
       return;
     }
-    if (!confirm(`Pindahkan ${targets.length} gambar ke Supabase Storage sekarang? Ini bisa memakan waktu beberapa menit, jangan tutup halaman ini.`)) return;
+    if (!confirm(`Pindahkan ${targets.length} gambar ke Cloudinary sekarang? Ini bisa memakan waktu beberapa menit, jangan tutup halaman ini.`)) return;
 
     const btn = document.getElementById('migrateAllBtn');
     btn.disabled = true;
@@ -1099,111 +1136,71 @@
       renderImagesTable();
     }
     btn.disabled = false;
-    btn.textContent = 'Pindahkan Semua ke Storage';
+    btn.textContent = 'Pindahkan Semua ke Cloudinary';
     showToast(`Migrasi selesai: ${ok} berhasil${fail ? `, ${fail} gagal (lihat console)` : ''}`, fail ? 'error' : 'success');
   }
 
   // ===== KOMPRES ULANG GAMBAR BESAR =====
-  // Untuk gambar yang sudah terlanjur terupload dengan file mentah (besar)
-  // sebelum resizeImageForUpload() ada. Download dari Storage, kompres ulang
-  // di browser, upload versi barunya, update url+width+height di DB, lalu
-  // hapus file lama supaya tidak menumpuk sampah di bucket.
-  async function doReoptimizeOne(id) {
-    const img = IMAGES.find(i => i.id === id);
-    if (!img) throw new Error('Gambar tidak ditemukan');
-    if (!isStorageUrl(img.url)) throw new Error('Gambar belum ada di Storage, migrasi dulu');
-
-    const res = await fetch(img.url);
-    if (!res.ok) throw new Error('Gagal mengunduh gambar dari Storage');
-    const blob = await res.blob();
-
-    const resized = await resizeImageForUpload(blob);
-    if (resized.blob === blob) {
-      // Tidak ada perubahan berarti (SVG/GIF, sudah kecil, atau kompresi gagal)
-      return { skipped: true };
-    }
-
-    const oldUrl = img.url;
-    const { url: newUrl } = await uploadFileToStorage(resized.blob, img.url);
-
-    const updatePayload = { url: newUrl };
-    if (resized.width && resized.height) {
-      updatePayload.width = resized.width;
-      updatePayload.height = resized.height;
-    }
-    const { error } = await supabaseClient.from('images').update(updatePayload).eq('id', id);
-    if (error) throw error;
-
-    // Hapus file lama dari storage supaya tidak jadi sampah
-    const oldPath = oldUrl.slice(storagePublicPrefix().length);
-    await supabaseClient.storage.from('images').remove([oldPath]).catch(err => {
-      console.warn('Gagal hapus file lama dari storage:', err);
-    });
-
-    img.url = newUrl;
-    if (resized.width && resized.height) {
-      img.width = resized.width;
-      img.height = resized.height;
-    }
-    return { skipped: false };
-  }
-
+  // Fitur "kompres ulang gambar besar" ini SENGAJA dikosongkan setelah
+  // migrasi ke Cloudinary: kalau Upload Preset kamu sudah di-set dengan
+  // Incoming Transformation (limit 2000x2000 + quality/format auto — lihat
+  // catatan di CLOUDINARY_UPLOAD_PRESET di atas), SEMUA gambar baru (baik
+  // upload file maupun migrasi dari URL) otomatis dikompres saat masuk,
+  // dan thumbUrl() di app.js juga sudah mengompres ulang secara dinamis
+  // tiap ukuran (grid/preview) saat ditampilkan. Jadi tidak perlu lagi
+  // proses "kompres ulang" manual seperti versi Supabase Storage dulu.
   async function reoptimizeAllImages() {
-    const targets = IMAGES.filter(i => isStorageUrl(i.url) &&
-      (!i.width || !i.height || i.width > MAX_UPLOAD_DIMENSION || i.height > MAX_UPLOAD_DIMENSION));
-    if (targets.length === 0) {
-      showToast('Semua gambar di Storage sudah teroptimasi', 'success');
-      return;
-    }
-    if (!confirm(`Kompres ulang ${targets.length} gambar berukuran besar di Storage? File lama otomatis diganti versi terkompresi. Ini bisa memakan waktu beberapa menit, jangan tutup halaman ini.`)) return;
-
-    const btn = document.getElementById('reoptimizeAllBtn');
-    btn.disabled = true;
-    let ok = 0, skip = 0, fail = 0;
-    for (const img of targets) {
-      btn.textContent = `Mengompres... (${ok + skip + fail + 1}/${targets.length})`;
-      try {
-        const result = await doReoptimizeOne(img.id);
-        if (result.skipped) skip++; else ok++;
-      } catch (err) {
-        fail++;
-        console.error(`Gagal kompres ulang gambar "${img.title}":`, err);
-      }
-      renderImagesTable();
-    }
-    btn.disabled = false;
-    btn.textContent = 'Kompres Ulang Gambar Besar';
-    showToast(`Kompres ulang selesai: ${ok} berhasil${skip ? `, ${skip} dilewati (sudah kecil)` : ''}${fail ? `, ${fail} gagal (lihat console)` : ''}`, fail ? 'error' : 'success');
+    showToast('Tidak diperlukan lagi -- Cloudinary otomatis mengompres gambar lewat Upload Preset & transformasi tampilan.', 'success');
   }
 
   // ===== BERSIHKAN FILE TAK TERPAKAI =====
-  // Mencari file di bucket Storage 'images' yang tidak dirujuk oleh baris
-  // manapun di tabel images (misal sisa dari penghapusan sebelum fitur ini
-  // ada, atau upload yang gagal disimpan ke DB), lalu hapus.
+  // Cari file di Cloudinary yang sudah tidak ada row-nya di tabel `images`
+  // (misal: gambar lama yang dihapus manual dari Cloudinary dashboard tanpa
+  // lewat admin panel, atau proses upload yang gagal di tengah jalan), lalu
+  // tawarkan untuk dihapus permanen. Edge Function 'cleanup-orphan-files'
+  // yang menyimpan CLOUDINARY_API_SECRET & memanggil Cloudinary Admin API
+  // di sisi server (lihat catatan di deleteCloudinaryAsset() untuk kenapa
+  // ini tidak bisa langsung dari browser). File yang baru diupload < 1 jam
+  // otomatis dilewati oleh Edge Function-nya sebagai pengaman.
   async function cleanupOrphanFiles() {
     const btn = document.getElementById('cleanupBtn');
     btn.disabled = true;
     btn.textContent = 'Mengecek...';
     try {
-      const { data: files, error: listErr } = await supabaseClient
-        .storage.from('images')
-        .list('', { limit: 1000, sortBy: { column: 'name', order: 'asc' } });
-      if (listErr) throw listErr;
+      const { data: listData, error: listErr } = await supabaseClient.functions.invoke('cleanup-orphan-files', {
+        body: { action: 'list' },
+      });
+      if (listErr) throw new Error(listErr.message || 'Gagal mengecek file Cloudinary');
+      if (listData?.error) throw new Error(listData.error);
 
-      const usedPaths = new Set(
-        IMAGES.filter(i => isStorageUrl(i.url)).map(i => i.url.slice(storagePublicPrefix().length))
-      );
-      const orphans = (files || []).filter(f => f.name && !usedPaths.has(f.name));
-
+      const orphans = listData?.orphans ?? [];
       if (orphans.length === 0) {
-        showToast('Tidak ada file tak terpakai di Storage', 'success');
+        showToast('Tidak ada file yang menggantung di Cloudinary. Semua aman.', 'success');
         return;
       }
-      if (!confirm(`Ditemukan ${orphans.length} file tak terpakai di Storage (tidak dirujuk gambar manapun). Hapus semua sekarang?`)) return;
 
-      const { error: rmErr } = await supabaseClient.storage.from('images').remove(orphans.map(f => f.name));
-      if (rmErr) throw rmErr;
-      showToast(`${orphans.length} file tak terpakai berhasil dihapus`, 'success');
+      const totalMb = ((listData.totalOrphanBytes || 0) / (1024 * 1024)).toFixed(1);
+      const confirmed = confirm(
+        `Ditemukan ${orphans.length} file di Cloudinary (total ~${totalMb} MB) yang tidak lagi dipakai di galeri.\n\n` +
+        `Hapus semua file ini secara permanen? Tindakan tidak bisa dibatalkan.`
+      );
+      if (!confirmed) return;
+
+      btn.textContent = 'Menghapus...';
+      const publicIds = orphans.map(o => o.publicId);
+      const { data: delData, error: delErr } = await supabaseClient.functions.invoke('cleanup-orphan-files', {
+        body: { action: 'delete', publicIds },
+      });
+      if (delErr) throw new Error(delErr.message || 'Gagal menghapus file');
+      if (delData?.error) throw new Error(delData.error);
+
+      const failedCount = delData?.failed?.length || 0;
+      if (failedCount > 0) {
+        showToast(`${delData.deletedCount} file terhapus, ${failedCount} gagal (lihat console).`, 'error');
+        console.warn('File gagal dihapus:', delData.failed);
+      } else {
+        showToast(`${delData.deletedCount} file tak terpakai berhasil dihapus.`, 'success');
+      }
     } catch (err) {
       showToast('Gagal membersihkan: ' + err.message, 'error');
     } finally {
@@ -1268,13 +1265,16 @@
     probe.src = objectUrl;
   }
 
-  // Prefix publik bucket storage 'images', dipakai untuk deteksi "sudah dimigrasi atau belum"
-  function storagePublicPrefix() {
-    return `${SUPABASE_URL}/storage/v1/object/public/images/`;
+  // Dipakai untuk deteksi "URL ini sudah di Cloudinary (permanen) atau belum".
+  function isStorageUrl(url) {
+    return typeof url === 'string' && url.includes(`res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/`);
   }
 
-  function isStorageUrl(url) {
-    return typeof url === 'string' && url.startsWith(storagePublicPrefix());
+  // Ambil "public_id" dari URL Cloudinary (dibutuhkan untuk operasi hapus
+  // lewat Admin API bertanda tangan -- lihat catatan di deleteImage()).
+  function cloudinaryPublicIdFromUrl(url) {
+    const m = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/);
+    return m ? m[1] : null;
   }
 
   // Foto mentah (mis. langsung dari HP) bisa berdimensi 4000px+ & berukuran
@@ -1351,38 +1351,43 @@
     }
   }
 
-  // Upload File object ke bucket storage 'images', kembalikan { url }
-  async function uploadFileToStorage(fileOrBlob, hintName) {
-    const rawExt = (hintName || fileOrBlob.name || '').split('.').pop() || '';
-    const typeExt = (fileOrBlob.type || '').split('/')[1] || '';
-    let ext = (/^[a-z0-9]{2,5}$/i.test(rawExt) ? rawExt : typeExt || 'png').toLowerCase().split('+')[0];
+  // Upload File/Blob langsung ke Cloudinary (unsigned upload), kembalikan
+  // { url, width, height }. width/height diambil dari respons Cloudinary
+  // sendiri (lebih akurat, tidak perlu probe manual lewat <img> lagi).
+  async function uploadFileToCloudinary(fileOrBlob, hintName) {
+    const form = new FormData();
+    form.append('file', fileOrBlob, hintName || 'upload');
+    form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    form.append('folder', 'images'); // opsional, biar rapi di Media Library
 
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-
-    const { error: upErr } = await supabaseClient.storage
-      .from('images')
-      .upload(path, fileOrBlob, {
-        cacheControl: '31536000',
-        upsert: false,
-        contentType: fileOrBlob.type || 'image/png'
-      });
-    if (upErr) throw upErr;
-
-    const { data } = supabaseClient.storage.from('images').getPublicUrl(path);
-    return { url: data.publicUrl };
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: form
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Upload ke Cloudinary gagal');
+    return { url: data.secure_url, width: data.width, height: data.height };
   }
 
   // Ambil gambar dari URL eksternal (mis. di-paste manual, bukan upload file),
-  // lalu upload ke storage kita sendiri supaya permanen. Melempar error kalau
-  // fetch gagal (mis. CORS diblok host sumber) supaya pemanggil bisa kasih
-  // tahu adminnya.
+  // lalu simpan permanen ke Cloudinary. BEDA dari versi Supabase Storage
+  // sebelumnya: di sini kita TIDAK fetch dari browser sama sekali -- URL-nya
+  // langsung dikirim ke Cloudinary, dan Cloudinary-lah yang mengambil gambar
+  // itu di sisi server mereka. Ini otomatis menghilangkan masalah CORS yang
+  // dulu sering gagal kalau host sumber gambar memblokir fetch dari browser.
   async function fetchUrlAndUploadToStorage(sourceUrl) {
-    const res = await fetch(sourceUrl);
-    if (!res.ok) throw new Error('Gagal mengambil gambar dari URL');
-    const blob = await res.blob();
-    const resized = await resizeImageForUpload(blob);
-    const { url } = await uploadFileToStorage(resized.blob, sourceUrl);
-    return { url, width: resized.width, height: resized.height };
+    const form = new FormData();
+    form.append('file', sourceUrl);
+    form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    form.append('folder', 'images');
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: form
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Gagal mengambil gambar dari URL');
+    return { url: data.secure_url, width: data.width, height: data.height };
   }
 
   async function saveImage() {
@@ -1413,7 +1418,7 @@
     if (file) {
       try {
         const resized = await resizeImageForUpload(file);
-        ({ url } = await uploadFileToStorage(resized.blob, file.name));
+        ({ url } = await uploadFileToCloudinary(resized.blob, file.name));
         if (resized.width && resized.height) {
           width = resized.width;
           height = resized.height;
