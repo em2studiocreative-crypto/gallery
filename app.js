@@ -36,14 +36,21 @@
   // TANPA menyentuh file aslinya. File asli (img.url) tetap dipakai saat
   // download supaya hasilnya tetap full resolusi/HD.
   function thumbUrl(url, width, quality = 75) {
+    // Kalau gambar sudah dimigrasi ke Cloudinary, pakai transformasi bawaan
+    // Cloudinary (disisipkan setelah '/upload/' di URL) -- lebih cepat &
+    // tidak bergantung proxy pihak ketiga, dan otomatis pilih format paling
+    // ringan yang didukung browser (f_auto = AVIF/WebP/JPEG) + kompres
+    // otomatis (q_auto kalau quality tidak dipaksa manual).
+    if (typeof url === 'string' && url.includes('res.cloudinary.com/')) {
+      return url.replace('/upload/', `/upload/w_${width},q_${quality},f_auto,c_limit/`);
+    }
+    // Fallback untuk gambar lama yang belum sempat dimigrasi (masih di
+    // Supabase Storage / URL eksternal lain) -- tetap lewat proxy wsrv.nl
+    // seperti sebelumnya, supaya tidak ada yang rusak selama masa transisi.
     const params = new URLSearchParams({
       url,
       w: String(width),
       q: String(quality),
-      // 'output' sengaja TIDAK di-set: wsrv.nl otomatis pilih format
-      // paling ringan yang didukung browser (AVIF > WebP > JPEG) lewat
-      // content negotiation, jadi ukuran file makin kecil di browser modern
-      // tanpa perlu kode tambahan atau merusak kompatibilitas di browser lama.
       we: '' // strip metadata (we = "without exif") utk ukuran lebih kecil
     });
     return `https://wsrv.nl/?${params.toString()}`;
