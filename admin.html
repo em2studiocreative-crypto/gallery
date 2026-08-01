@@ -539,19 +539,19 @@
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // ===== CLOUDINARY CONFIG =====
-  // Ganti dua nilai ini sesuai akun Cloudinary kamu:
-  // - CLOUDINARY_CLOUD_NAME: terlihat di Dashboard Cloudinary (kanan atas / URL API).
-  // - CLOUDINARY_UPLOAD_PRESET: dibuat di Settings -> Upload -> Upload presets,
-  //   mode HARUS "Unsigned" (karena upload dilakukan langsung dari browser admin,
-  //   tanpa backend -- sama seperti pola Supabase anon key sebelumnya).
-  //   Di preset itu sebaiknya di-set "Incoming Transformation":
-  //     - Limit ukuran maksimum ke 2000x2000 (crop: limit)
-  //     - Quality: auto, Format: auto
-  //   supaya SEMUA gambar (baik upload file maupun ambil dari URL luar)
-  //   otomatis dikompres di sisi Cloudinary tanpa perlu logic resize manual
-  //   di browser lagi.
+  // CLOUDINARY_CLOUD_NAME: terlihat di Dashboard Cloudinary (kanan atas / URL API).
+  // Dulu di sini juga ada CLOUDINARY_UPLOAD_PRESET (unsigned) yang dipakai
+  // upload langsung dari browser -- tapi itu berarti siapa pun yang buka
+  // view-source halaman ini bisa upload langsung ke akun Cloudinary tanpa
+  // login sama sekali. Sekarang upload lewat Edge Function
+  // `cloudinary-sign-upload`, yang generate signature di server SETELAH cek
+  // is_admin() -- lihat getCloudinaryUploadSignature() di bawah.
+  //
+  // TODO (sekali saja): preset lama "admin_unsigned" di Cloudinary sudah
+  // tidak dipakai kode ini lagi -- sebaiknya dihapus/di-nonaktifkan dari
+  // Cloudinary Console (Settings -> Upload -> Upload Presets) supaya tidak
+  // ada jalur unsigned yang masih hidup.
   const CLOUDINARY_CLOUD_NAME = 'phgdb2st';
-  const CLOUDINARY_UPLOAD_PRESET = 'admin_unsigned';
 
   let CATEGORIES = [];
   let IMAGES = [];
@@ -1439,16 +1439,37 @@
     }
   }
 
-  // Upload File/Blob langsung ke Cloudinary (unsigned upload), kembalikan
+  // Minta "izin upload" (signature) dari Edge Function cloudinary-sign-upload.
+  // Signature ini digenerate SERVER-SIDE pakai Cloudinary API Secret (tidak
+  // pernah ada di kode client), dan Edge Function-nya sendiri cek dulu bahwa
+  // yang minta memang admin yang sudah login (lewat is_admin() RPC) sebelum
+  // mau kasih signature. Jadi upload ke Cloudinary sekarang TIDAK BISA lagi
+  // dilakukan orang luar walau mereka tahu CLOUDINARY_CLOUD_NAME dari kode --
+  // beda dengan unsigned preset sebelumnya yang bisa dipakai siapa saja.
+  async function getCloudinaryUploadSignature() {
+    const { data, error } = await supabaseClient.functions.invoke('cloudinary-sign-upload', {
+      method: 'POST',
+    });
+    if (error) throw new Error(await edgeFunctionErrorMessage(error, 'Gagal mendapat izin upload'));
+    if (data?.error) throw new Error(data.error);
+    return data; // { signature, timestamp, folder, api_key, cloud_name }
+  }
+
+  // Upload File/Blob ke Cloudinary lewat SIGNED upload, kembalikan
   // { url, width, height }. width/height diambil dari respons Cloudinary
   // sendiri (lebih akurat, tidak perlu probe manual lewat <img> lagi).
   async function uploadFileToCloudinary(fileOrBlob, hintName) {
+    const sig = await getCloudinaryUploadSignature();
+
     const form = new FormData();
     form.append('file', fileOrBlob, hintName || 'upload');
-    form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    form.append('folder', 'images'); // opsional, biar rapi di Media Library
+    form.append('api_key', sig.api_key);
+    form.append('timestamp', sig.timestamp);
+    form.append('signature', sig.signature);
+    form.append('folder', sig.folder);
+    form.append('transformation', sig.transformation);
 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`, {
       method: 'POST',
       body: form
     });
@@ -1464,12 +1485,17 @@
   // itu di sisi server mereka. Ini otomatis menghilangkan masalah CORS yang
   // dulu sering gagal kalau host sumber gambar memblokir fetch dari browser.
   async function fetchUrlAndUploadToStorage(sourceUrl) {
+    const sig = await getCloudinaryUploadSignature();
+
     const form = new FormData();
     form.append('file', sourceUrl);
-    form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    form.append('folder', 'images');
+    form.append('api_key', sig.api_key);
+    form.append('timestamp', sig.timestamp);
+    form.append('signature', sig.signature);
+    form.append('folder', sig.folder);
+    form.append('transformation', sig.transformation);
 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`, {
       method: 'POST',
       body: form
     });
