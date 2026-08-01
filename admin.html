@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin · Status Gallery</title>
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
 <style>
   :root {
     --bg: #0a0a0a;
@@ -353,6 +354,7 @@
         <h2>Semua Gambar</h2>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn btn-ghost" style="width:auto;" id="cleanupBtn" onclick="cleanupOrphanFiles()">Bersihkan File Tak Terpakai</button>
+          <button class="btn btn-ghost" style="width:auto;" id="warmCacheBtn" onclick="warmImageCache()">Panaskan Cache Gambar Lama</button>
           <button class="btn btn-ghost" style="width:auto;" id="migrateAllBtn" onclick="migrateAllImages()">Pindahkan Semua ke Cloudinary</button>
           <button class="btn btn-ghost" style="width:auto;" id="reoptimizeAllBtn" onclick="reoptimizeAllImages()">Kompres Ulang Gambar Besar</button>
           <button class="btn btn-primary" style="width:auto;" onclick="openImageModal()">+ Tambah Gambar</button>
@@ -839,6 +841,22 @@
     showToast(newVal ? 'Gambar ditampilkan' : 'Gambar disembunyikan', 'success');
   }
 
+  // supabase-js cuma kasih pesan generik ("Edge Function returned a non-2xx
+  // status code") kalau function-nya gagal -- pesan asli (dari kode kita
+  // sendiri atau dari Cloudinary) ada di body respons-nya, bukan di
+  // error.message. Helper ini menggali body itu supaya pesannya kelihatan
+  // jelas di toast, tidak perlu bolak-balik cek Logs di dashboard.
+  async function edgeFunctionErrorMessage(error, fallback) {
+    try {
+      const res = error?.context;
+      if (res && typeof res.json === 'function') {
+        const body = await res.clone().json();
+        if (body?.error) return body.error;
+      }
+    } catch (_) { /* body bukan JSON atau sudah kebaca, abaikan */ }
+    return error?.message || fallback;
+  }
+
   // Hapus file fisik di Cloudinary lewat Edge Function 'delete-cloudinary-image'.
   // Edge Function itu yang menyimpan CLOUDINARY_API_SECRET & membuat signature
   // di sisi server (secret TIDAK BOLEH ada di kode frontend ini). Edge Function
@@ -855,7 +873,7 @@
         body: { publicId },
       });
       if (error) {
-        console.warn('Gagal menghapus file di Cloudinary:', error.message || error);
+        console.warn('Gagal menghapus file di Cloudinary:', await edgeFunctionErrorMessage(error, error.message));
         return;
       }
       if (!data?.success) {
@@ -1170,7 +1188,7 @@
       const { data: listData, error: listErr } = await supabaseClient.functions.invoke('cleanup-orphan-files', {
         body: { action: 'list' },
       });
-      if (listErr) throw new Error(listErr.message || 'Gagal mengecek file Cloudinary');
+      if (listErr) throw new Error(await edgeFunctionErrorMessage(listErr, 'Gagal mengecek file Cloudinary'));
       if (listData?.error) throw new Error(listData.error);
 
       const orphans = listData?.orphans ?? [];
@@ -1191,7 +1209,7 @@
       const { data: delData, error: delErr } = await supabaseClient.functions.invoke('cleanup-orphan-files', {
         body: { action: 'delete', publicIds },
       });
-      if (delErr) throw new Error(delErr.message || 'Gagal menghapus file');
+      if (delErr) throw new Error(await edgeFunctionErrorMessage(delErr, 'Gagal menghapus file'));
       if (delData?.error) throw new Error(delData.error);
 
       const failedCount = delData?.failed?.length || 0;
@@ -1206,6 +1224,76 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Bersihkan File Tak Terpakai';
+    }
+  }
+
+  // ===== PANASKAN CACHE GAMBAR LAMA =====
+  // Eager Transformation di Upload Preset Cloudinary cuma berlaku untuk
+  // upload BARU -- gambar lama yang sudah lebih dulu ada di Cloudinary tidak
+  // otomatis ikut ke-generate. Fungsi ini "memanaskan" gambar lama dengan
+  // cara memanggil langsung ke-3 ukuran thumbnail yang dipakai app.js
+  // (480/720/960px, harus SAMA PERSIS dengan thumbUrl() di app.js supaya
+  // URL-nya cocok dan benar-benar kepakai nanti). Begitu Cloudinary selesai
+  // generate sekali, hasilnya disimpan permanen di sisi mereka -- jadi
+  // cukup dipanaskan sekali dari sini, semua pengunjung berikutnya (dari
+  // device manapun) langsung dapat versi cepatnya.
+  const WARM_CACHE_VARIANTS = ['w_480,q_70,f_auto,c_limit', 'w_720,q_75,f_auto,c_limit', 'w_960,q_65,f_auto,c_limit'];
+  const WARM_CACHE_CONCURRENCY = 6;
+
+  function cloudinaryVariantUrl(url, transform) {
+    return url.replace('/upload/', `/upload/${transform}/`);
+  }
+
+  function loadImageUrl(url) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  }
+
+  async function warmImageCache() {
+    const btn = document.getElementById('warmCacheBtn');
+    const targets = IMAGES.filter(img => isStorageUrl(img.url));
+    if (targets.length === 0) {
+      showToast('Belum ada gambar di Cloudinary untuk dipanaskan.', 'error');
+      return;
+    }
+
+    const jobs = [];
+    targets.forEach(img => WARM_CACHE_VARIANTS.forEach(v => jobs.push(cloudinaryVariantUrl(img.url, v))));
+
+    if (!confirm(`Memanaskan cache untuk ${targets.length} gambar (${jobs.length} request ke Cloudinary). Proses berjalan di background, boleh tetap dipakai selama menunggu. Lanjutkan?`)) {
+      return;
+    }
+
+    btn.disabled = true;
+    let done = 0, failed = 0;
+    const updateProgress = () => { btn.textContent = `Memanaskan... ${done}/${jobs.length}`; };
+    updateProgress();
+
+    // Dibatasi WARM_CACHE_CONCURRENCY request berbarengan, supaya tidak
+    // membanjiri browser & Cloudinary sekaligus (bisa ratusan request kalau
+    // gambar-nya banyak).
+    let cursor = 0;
+    async function worker() {
+      while (cursor < jobs.length) {
+        const url = jobs[cursor++];
+        const ok = await loadImageUrl(url);
+        if (!ok) failed++;
+        done++;
+        updateProgress();
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(WARM_CACHE_CONCURRENCY, jobs.length) }, worker));
+
+    btn.disabled = false;
+    btn.textContent = 'Panaskan Cache Gambar Lama';
+    if (failed > 0) {
+      showToast(`Selesai. ${done - failed} berhasil, ${failed} gagal (cek koneksi/URL).`, 'error');
+    } else {
+      showToast(`Selesai! ${targets.length} gambar sudah dipanaskan, sekarang cepat dibuka semua pengunjung.`, 'success');
     }
   }
 
