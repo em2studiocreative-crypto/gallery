@@ -362,20 +362,20 @@
     const wasFavorite = favorites.has(imgId);
     // Update angka "disukai X orang" secara optimis (langsung di layar),
     // tanpa nunggu roundtrip ke server. Angka yang SEBENARNYA/final tetap
-    // dijaga oleh trigger database (lihat favorites_count_migration.sql) --
-    // ini cuma supaya terasa instan buat user yang lagi nge-klik.
-    // Sengaja HANYA disentuh untuk user yang login: favorit guest cuma
-    // lokal (localStorage), jadi memang tidak pernah ikut dihitung.
+    // dijaga oleh trigger database (lihat favorites_count_migration.sql)
+    // untuk user login, dan oleh RPC adjust_favorites_count() untuk tamu.
+    // Berlaku untuk SEMUA orang sekarang (bukan cuma yang login) supaya
+    // like dari tamu juga ikut kehitung di angka publik.
     const img = IMAGES.find(i => i.id === imgId);
     if (wasFavorite) {
       favorites.delete(imgId);
       showToast('Dihapus dari favorit');
-      if (currentUser && img) img.favorites_count = Math.max((img.favorites_count || 0) - 1, 0);
+      if (img) img.favorites_count = Math.max((img.favorites_count || 0) - 1, 0);
     } else {
       favorites.add(imgId);
       showToast('Ditambahkan ke favorit', 'success');
       if (img) trackInteraction(img.category, 'favorite');
-      if (currentUser && img) img.favorites_count = (img.favorites_count || 0) + 1;
+      if (img) img.favorites_count = (img.favorites_count || 0) + 1;
     }
 
     if (currentUser) {
@@ -389,8 +389,14 @@
           .then(({ error }) => { if (error) console.error('Gagal simpan favorit di server:', error); });
       }
     } else {
-      // Belum login (guest): simpan ke localStorage seperti biasa
+      // Belum login (guest): daftar favorit pribadinya tetap cuma di
+      // localStorage (supaya tab "Favorit" dia jalan tanpa akun), TAPI
+      // sekarang tambahan/pengurangannya juga dikirim ke server lewat RPC
+      // (tanpa user_id, karena tamu tidak punya akun) supaya ikut kehitung
+      // di angka "disukai X orang" yang publik.
       saveFavorites();
+      supabaseClient.rpc('adjust_favorites_count', { p_image_id: imgId, p_delta: wasFavorite ? -1 : 1 })
+        .then(({ error }) => { if (error) console.error('Gagal update jumlah favorit tamu di server:', error); });
     }
 
     // Grid TIDAK perlu dirender ulang penuh kecuali sedang di mode
