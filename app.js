@@ -922,25 +922,51 @@
   function updateAuthShortcutUI() {
     const btn = document.getElementById('authShortcutBtn');
     const text = document.getElementById('authShortcutText');
+    const avatarIcon = document.getElementById('authShortcutAvatarIcon');
+    const avatarLetter = document.getElementById('authShortcutAvatarLetter');
     if (!btn) return;
     if (currentUser) {
       const email = currentUser.email || '';
       btn.classList.add('logged-in');
       btn.setAttribute('title', 'Keluar (' + email + ')');
       text.textContent = email;
+      avatarIcon.classList.add('hidden');
+      avatarLetter.classList.remove('hidden');
+      avatarLetter.textContent = email.charAt(0).toUpperCase();
     } else {
       btn.classList.remove('logged-in');
       btn.setAttribute('title', 'Masuk');
       text.textContent = 'Login';
+      avatarIcon.classList.remove('hidden');
+      avatarLetter.classList.add('hidden');
     }
   }
 
+  // Tamu -> langsung mulai login Google (nggak perlu konfirmasi, aman).
+  // Sudah login -> JANGAN langsung logout, buka dialog konfirmasi dulu biar
+  // nggak ke-tap nggak sengaja pas lagi buka/tutup kategori di sebelahnya.
   function handleAuthShortcut() {
     if (currentUser) {
-      logoutUser();
+      openLogoutConfirmModal();
     } else {
       loginWithProvider('google');
     }
+  }
+
+  function openLogoutConfirmModal() {
+    if (!currentUser) return;
+    document.getElementById('logoutConfirmEmail').textContent = currentUser.email || '';
+    document.getElementById('logoutConfirmModal').classList.add('open');
+  }
+
+  function closeLogoutConfirmModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('logoutConfirmModal').classList.remove('open');
+  }
+
+  function confirmLogout() {
+    closeLogoutConfirmModal();
+    logoutUser();
   }
 
   // Ambil favorit dari Supabase lalu gabung dengan favorit lokal (kalau ada
