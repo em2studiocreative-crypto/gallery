@@ -201,11 +201,13 @@
   }
 
   /* ===== CATEGORIES ===== */
-  /* Redesain: dulu 1 baris scroll horizontal + tombol bulat kecil yang buka
-     modal terpisah buat lihat "semua kategori". Sekarang semua kategori
-     langsung tersusun rapi jadi grid yang wrap ke bawah, dibatasi tingginya
-     (~2 baris) di awal biar gak makan tempat, dengan tombol "Lihat Semua
-     Kategori" buat expand kalau user mau lihat semuanya sekaligus. */
+  /* Redesain: 2 kondisi simpel.
+     - Collapsed (default): satu bar full-width (.categories-active-bar)
+       nunjukin kategori yang lagi aktif aja, dengan chevron nunjuk ke bawah.
+       Tap buat buka grid semua kategori.
+     - Expanded: grid semua kategori ketampil (.categories-scroll), dengan
+       tombol "Sembunyikan" di bawahnya buat nutup lagi. Begitu user milih
+       kategori (selectCategory), tampilan otomatis balik ke collapsed. */
   .categories-wrap {
     position: sticky;
     top: var(--header-h);
@@ -218,44 +220,51 @@
     gap: 8px;
   }
 
-  .categories-scroll {
-    position: relative;
+  .categories-active-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    color: #000;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: filter 0.2s;
   }
+
+  .categories-active-bar:hover {
+    filter: brightness(1.05);
+  }
+
+  .categories-active-bar span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .categories-active-bar svg {
+    flex-shrink: 0;
+  }
+
+  .categories-active-bar.hidden { display: none; }
+
+  .categories-scroll.hidden { display: none; }
 
   .categories {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    overflow: hidden;
-    max-height: var(--cat-collapsed-h, 84px);
-    transition: max-height 0.3s ease;
   }
 
-  .categories.expanded {
-    max-height: 1000px;
-  }
-
-  /* Gradien tipis di bawah daftar chip supaya kelihatan jelas ada lebih
-     banyak kategori yang belum ketampil saat masih collapsed. Otomatis
-     hilang begitu di-expand (lihat aturan .expanded di bawah). */
-  .categories-fade {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 28px;
-    background: linear-gradient(to top, var(--bg), transparent);
-    pointer-events: none;
-    transition: opacity 0.2s;
-  }
-
-  .categories.expanded ~ .categories-fade {
-    opacity: 0;
-  }
-
-  /* Tombol "Lihat Semua Kategori" / "Sembunyikan" -- ketampil cuma kalau
-     kontennya memang lebih tinggi dari 2 baris (lihat updateCategoriesToggleVisibility
-     di app.js), supaya gak ganggu kalau kategori dikit. */
+  /* Tombol "Sembunyikan" -- ketampil pas grid lagi dibuka (expanded), buat
+     nutup lagi balik ke bar aktif full-width. */
   .categories-toggle-btn {
     align-self: center;
     display: flex;
@@ -279,7 +288,6 @@
   }
 
   .categories-toggle-btn svg {
-    transition: transform 0.25s ease;
     flex-shrink: 0;
   }
 
