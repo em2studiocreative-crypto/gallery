@@ -1651,6 +1651,7 @@
           return;
         }
         const mapped = mapImageRow(row);
+        const prev = idx !== -1 ? IMAGES[idx] : null;
         if (idx !== -1) IMAGES[idx] = mapped; else IMAGES.unshift(mapped);
         // Kalau gambar yang lagi kebuka di modal ini yang keupdate (mis. ada
         // orang LAIN like/unlike-nya barusan), ikut refresh angka "disukai
@@ -1659,7 +1660,20 @@
           currentModalImage = mapped;
           updateModalFavoriteBtn();
         }
-        scheduleRealtimeRender();
+        // Grid sama sekali TIDAK menampilkan favorites_count/downloads, jadi
+        // kalau yang berubah cuma dua angka itu (mis. abis kita SENDIRI like
+        // gambar -> trigger DB update favorites_count -> event realtime balik
+        // lagi ke kita), TIDAK PERLU render ulang seluruh grid. Ini yang
+        // sebelumnya bikin grid keliatan "reload/reset" tiap habis nge-like.
+        const onlyCountsChanged = prev
+          && prev.title === mapped.title
+          && prev.category === mapped.category
+          && prev.url === mapped.url
+          && prev.size === mapped.size
+          && prev.created_at === mapped.created_at;
+        if (!onlyCountsChanged) {
+          scheduleRealtimeRender();
+        }
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'images' }, (payload) => {
         const oldId = payload.old.id;
