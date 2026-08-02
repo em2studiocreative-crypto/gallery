@@ -2546,8 +2546,9 @@
     const ratio = (w && h) ? `${w}/${h}` : '1/1';
     const isFav = favorites.has(s.id);
     return `
-      <div class="modal-similar-item" data-img-id="${s.id}" role="button" tabindex="0" aria-label="Buka ${escapeHtml(s.title)}" onclick="openModal(${s.id}, { sourceEl: this })" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${s.id}, { sourceEl: this });}">
+      <div class="modal-similar-item" data-img-id="${s.id}" role="button" tabindex="0" aria-label="Buka ${escapeHtml(s.title)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${s.id}, { sourceEl: this });}">
         <img src="${gridThumb(s.url)}" srcset="${gridThumbSrcset(s.url)}" alt="Status ${escapeHtml(catLabel(s.category))} - ${escapeHtml(s.title)}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
+        <div class="img-touch-catcher" data-img-id="${s.id}" aria-hidden="true"></div>
         <button class="card-fav-btn ${isFav ? 'active' : ''}" aria-label="${isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}" onclick="event.stopPropagation(); toggleFavorite(${s.id})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-heart"></use></svg>
         </button>
@@ -3155,6 +3156,56 @@ viewBox="0 0 7.14519 2.77802"
   let lpMoved = false; // true kalau jari sempat geser melewati toleransi (berarti user scroll, bukan tap)
   let lpActiveEl = null;
 
+  // ===== DOUBLE-TAP TO LOVE (gaya Instagram) =====
+  // Tap kedua yang mendarat di gambar yang SAMA dalam waktu singkat dianggap
+  // "double tap" -> favoritkan gambar itu (kalau belum) + tampilkan animasi
+  // hati. Supaya bisa dibedakan dari tap tunggal (yang biasanya buka modal),
+  // aksi tap tunggal DITUNDA sebentar (DOUBLE_TAP_MS) -- kalau tap kedua
+  // keburu datang, aksi tunggal dibatalkan dan diganti aksi double-tap.
+  // Konsekuensinya: buka gambar dari grid/["Gambar Serupa"] jadi delay
+  // sekitar 300ms. Di gambar besar modal, tap tunggal memang tidak
+  // ngapa-ngapain, jadi di situ tidak ada delay tambahan sama sekali.
+  const DOUBLE_TAP_MS = 300;
+  let lastTapImgId = null;
+  let lastTapTime = 0;
+  let pendingTapTimer = null;
+
+  function handleTapAction(imgId, onShortTap, burstTargetEl) {
+    const now = Date.now();
+    const isDoubleTap = lastTapImgId === imgId && (now - lastTapTime) < DOUBLE_TAP_MS;
+    if (isDoubleTap) {
+      clearTimeout(pendingTapTimer);
+      lastTapImgId = null;
+      lastTapTime = 0;
+      if (!favorites.has(imgId)) toggleFavorite(imgId);
+      showHeartBurst(burstTargetEl);
+      if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
+      return;
+    }
+    lastTapImgId = imgId;
+    lastTapTime = now;
+    if (onShortTap) {
+      clearTimeout(pendingTapTimer);
+      pendingTapTimer = setTimeout(() => {
+        // Batal kalau di antara waktu tunggu ini ternyata ada tap lain yang
+        // sudah "menggeser" state (mis. tap cepat ke gambar lain).
+        if (lastTapImgId === imgId) onShortTap();
+      }, DOUBLE_TAP_MS);
+    }
+  }
+
+  function showHeartBurst(targetEl) {
+    if (!targetEl) return;
+    const rect = targetEl.getBoundingClientRect();
+    const burst = document.createElement('div');
+    burst.className = 'heart-burst';
+    burst.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><use href="#icon-heart"></use></svg>';
+    burst.style.left = (rect.left + rect.width / 2) + 'px';
+    burst.style.top = (rect.top + rect.height / 2) + 'px';
+    document.body.appendChild(burst);
+    setTimeout(() => burst.remove(), 700);
+  }
+
   function buildLongPressActions(imgId) {
     const img = IMAGES.find(i => i.id === imgId);
     const isFav = img && favorites.has(imgId);
@@ -3256,13 +3307,13 @@ viewBox="0 0 7.14519 2.77802"
     }
   }
 
-  function handleCatcherEnd(e, imgId, onShortTap) {
+  function handleCatcherEnd(e, imgId, onShortTap, burstTargetEl) {
     clearTimeout(lpTimer);
     // Hanya anggap ini tap kalau long-press tidak sempat terpicu DAN jari
     // tidak pernah geser melewati toleransi. Kalau jari sempat geser
     // (berarti user scroll galeri), jangan buka modal walau geraknya
     // berakhir tepat di atas kartu yang sama.
-    if (!lpTriggered && !lpMoved && onShortTap) onShortTap();
+    if (!lpTriggered && !lpMoved) handleTapAction(imgId, onShortTap, burstTargetEl || e.currentTarget);
     lpActiveEl = null;
   }
 
@@ -3287,15 +3338,16 @@ viewBox="0 0 7.14519 2.77802"
         // kepanggil lagi buat tap yang sama, bikin openModal() jalan 2x.
         e.preventDefault();
         const imgId = Number(catcher.dataset.imgId);
-        handleCatcherEnd(e, imgId, () => openModal(imgId, { sourceEl: catcher }));
+        handleCatcherEnd(e, imgId, () => openModal(imgId, { sourceEl: catcher }), catcher);
       });
 
       // Desktop: klik biasa tetap buka modal, klik-kanan tetap dimatikan
-      // (kita punya menu sendiri).
+      // (kita punya menu sendiri). Double-click juga difavoritkan supaya
+      // konsisten dengan double-tap di HP.
       gallery.addEventListener('click', (e) => {
         const catcher = e.target.closest('.img-touch-catcher');
         if (!catcher) return;
-        openModal(Number(catcher.dataset.imgId), { sourceEl: catcher });
+        handleTapAction(Number(catcher.dataset.imgId), () => openModal(Number(catcher.dataset.imgId), { sourceEl: catcher }), catcher);
       });
       gallery.addEventListener('contextmenu', (e) => {
         if (e.target.closest('.img-touch-catcher')) e.preventDefault();
@@ -3312,9 +3364,46 @@ viewBox="0 0 7.14519 2.77802"
       modalCatcher.addEventListener('touchmove', handleCatcherMove, { passive: true });
       modalCatcher.addEventListener('touchend', (e) => {
         if (!currentModalImage) return;
-        handleCatcherEnd(e, currentModalImage.id, null);
+        handleCatcherEnd(e, currentModalImage.id, null, modalCatcher);
       });
       modalCatcher.addEventListener('contextmenu', (e) => e.preventDefault());
+      // Desktop: tap tunggal di gambar modal memang tidak ngapa-ngapain,
+      // jadi double-click langsung difavoritkan tanpa perlu skema tunda.
+      modalCatcher.addEventListener('dblclick', (e) => {
+        if (!currentModalImage) return;
+        if (!favorites.has(currentModalImage.id)) toggleFavorite(currentModalImage.id);
+        showHeartBurst(modalCatcher);
+      });
+    }
+
+    // Kartu-kartu "Gambar Serupa" di bawah modal (di-render ulang tiap kali
+    // modal dibuka & nambah lewat infinite scroll, jadi delegasi juga).
+    const modalSimilarGrid = document.getElementById('modalSimilarGrid');
+    if (modalSimilarGrid) {
+      modalSimilarGrid.addEventListener('touchstart', (e) => {
+        const catcher = e.target.closest('.img-touch-catcher');
+        if (!catcher) return;
+        handleCatcherStart(e, Number(catcher.dataset.imgId));
+      }, { passive: true });
+      modalSimilarGrid.addEventListener('touchmove', handleCatcherMove, { passive: true });
+      modalSimilarGrid.addEventListener('touchend', (e) => {
+        const catcher = e.target.closest('.img-touch-catcher');
+        if (!catcher) return;
+        e.preventDefault();
+        const imgId = Number(catcher.dataset.imgId);
+        const item = catcher.closest('.modal-similar-item');
+        handleCatcherEnd(e, imgId, () => openModal(imgId, { sourceEl: item }), catcher);
+      });
+      modalSimilarGrid.addEventListener('click', (e) => {
+        const catcher = e.target.closest('.img-touch-catcher');
+        if (!catcher) return;
+        const imgId = Number(catcher.dataset.imgId);
+        const item = catcher.closest('.modal-similar-item');
+        handleTapAction(imgId, () => openModal(imgId, { sourceEl: item }), catcher);
+      });
+      modalSimilarGrid.addEventListener('contextmenu', (e) => {
+        if (e.target.closest('.img-touch-catcher')) e.preventDefault();
+      });
     }
 
     document.getElementById('longPressMenuBackdrop')?.addEventListener('click', closeLongPressMenu);
