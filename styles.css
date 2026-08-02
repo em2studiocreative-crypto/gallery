@@ -1555,6 +1555,11 @@
     padding: 0;
   }
 
+  /* modal-similar-item sekarang div+tabindex (bukan <button>) supaya bisa
+     nampung tombol love di dalamnya tanpa nested-button. Outline fallback
+     sama seperti .gallery-card di atas. */
+  .modal-similar-item:focus { outline: none; }
+
   .modal-similar-item img {
     width: 100%;
     height: auto;
@@ -2217,6 +2222,7 @@
   .modal-download-btn:focus-visible,
   .modal-report-icon-btn:focus-visible,
   .modal-close:focus-visible,
+  .modal-similar-item:focus-visible,
   .gallery-card:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
