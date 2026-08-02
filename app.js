@@ -3199,9 +3199,10 @@ viewBox="0 0 7.14519 2.77802"
     const rect = targetEl.getBoundingClientRect();
     const burst = document.createElement('div');
     burst.className = 'heart-burst';
-    burst.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><use href="#icon-heart"></use></svg>';
+    burst.innerHTML = '<svg viewBox="0 0 24 24" fill="#ef4444"><use href="#icon-heart"></use></svg>';
     burst.style.left = (rect.left + rect.width / 2) + 'px';
     burst.style.top = (rect.top + rect.height / 2) + 'px';
+    burst.style.color = '#ef4444';
     document.body.appendChild(burst);
     setTimeout(() => burst.remove(), 1300);
   }
