@@ -988,12 +988,58 @@
     setupRealtimeCategories();
   });
 
+  // Redesain kategori: dulu 1 baris scroll horizontal + tombol bulat yang
+  // buka modal terpisah buat lihat semua kategori. Sekarang semua kategori
+  // langsung tersusun sebagai grid yang wrap ke bawah, dibatasi ~2 baris
+  // (lihat --cat-collapsed-h / .categories di CSS) dengan tombol "Lihat
+  // Semua Kategori" buat expand kalau daftarnya emang lebih panjang dari
+  // 2 baris. Kalau kategorinya dikit dan udah muat semua di 2 baris,
+  // tombolnya otomatis disembunyikan (lihat updateCategoriesToggleVisibility).
+  let categoriesExpanded = false;
+
   function renderCategories() {
     const bar = document.getElementById('categoriesBar');
     bar.innerHTML = CATEGORIES.map(c =>
       `<button class="chip ${c.id === activeCategory ? 'active' : ''}" data-cat="${c.id}" aria-pressed="${c.id === activeCategory}" onclick="selectCategory('${c.id}')">${escapeHtml(c.label)}</button>`
     ).join('');
+    updateCategoriesToggleVisibility();
   }
+
+  function updateCategoriesToggleVisibility() {
+    const bar = document.getElementById('categoriesBar');
+    const btn = document.getElementById('categoriesToggleBtn');
+    if (!bar || !btn) return;
+    // scrollHeight konten tetap keukur penuh walau lagi collapsed (overflow:
+    // hidden cuma nyembunyiin visual, tingginya tetap keitung). Kalau lebih
+    // tinggi dari batas 2-baris, berarti ada kategori yang "kepotong" -->
+    // baru tombolnya ditampilkan.
+    const collapsedLimit = 84; // sinkron dengan --cat-collapsed-h di styles.css
+    const needsToggle = bar.scrollHeight > collapsedLimit + 4;
+    btn.classList.toggle('hidden', !needsToggle);
+    if (!needsToggle && categoriesExpanded) {
+      categoriesExpanded = false;
+      bar.classList.remove('expanded');
+    }
+  }
+
+  function toggleCategoriesExpanded() {
+    categoriesExpanded = !categoriesExpanded;
+    const bar = document.getElementById('categoriesBar');
+    const label = document.getElementById('categoriesToggleLabel');
+    const icon = document.getElementById('categoriesToggleIcon');
+    bar.classList.toggle('expanded', categoriesExpanded);
+    label.textContent = categoriesExpanded ? 'Sembunyikan' : 'Lihat Semua Kategori';
+    icon.style.transform = categoriesExpanded ? 'rotate(180deg)' : '';
+  }
+
+  // Lebar layar berubah (rotate HP, resize window) -> jumlah chip yang muat
+  // per baris ikut berubah, jadi perlu dicek ulang apakah tombol "Lihat
+  // Semua Kategori" masih perlu ditampilkan atau tidak.
+  let categoriesResizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(categoriesResizeTimer);
+    categoriesResizeTimer = setTimeout(updateCategoriesToggleVisibility, 200);
+  });
 
   function selectCategory(catId, options = {}) {
     const { syncUrl = true } = options;
@@ -1002,10 +1048,6 @@
     highlightNav('Beranda');
     renderCategories();
     filterAndRender();
-    const activeChip = document.querySelector(`#categoriesBar .chip[data-cat="${catId}"]`);
-    if (activeChip) {
-      activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
     // syncUrl=false dipakai oleh popstate handler (URL sudah berubah lewat
     // Back/Forward browser, tinggal ikuti -- jangan pushState lagi).
     if (syncUrl) syncCategoryUrl(catId);
