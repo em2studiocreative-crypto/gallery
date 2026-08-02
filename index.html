@@ -197,13 +197,19 @@ viewBox="0 0 1.49117 0.57976"
 
 <!-- CATEGORIES -->
 <div class="categories-wrap">
-  <div class="categories-scroll">
+  <!-- Bar aktif: ketampil pas collapsed, full-width, nunjukin kategori yang
+       lagi dipilih. Tap buat buka grid semua kategori. -->
+  <button type="button" class="categories-active-bar" id="categoriesActiveBar" onclick="toggleCategoriesExpanded()">
+    <span id="categoriesActiveLabel">Semua</span>
+    <svg id="categoriesActiveIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <!-- Grid semua kategori: ketampil pas expanded aja. -->
+  <div class="categories-scroll hidden" id="categoriesScroll">
     <div class="categories" id="categoriesBar"></div>
-    <div class="categories-fade" id="categoriesFade"></div>
   </div>
   <button type="button" class="categories-toggle-btn hidden" id="categoriesToggleBtn" onclick="toggleCategoriesExpanded()">
-    <span id="categoriesToggleLabel">Lihat Semua Kategori</span>
-    <svg id="categoriesToggleIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <span>Sembunyikan</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)"><polyline points="6 9 12 15 18 9"/></svg>
   </button>
 </div>
 
