@@ -1,909 +1,1937 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.em2studio.online/</loc>
-    <lastmod>2026-07-31</lastmod>
+    <lastmod>2026-08-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=motivasi</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=islami</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=aesthetic</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=quotes</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=anime</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=cinta</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=foods</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=sketsa</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=grunge</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=abstrak</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=typography</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=otomotif</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=retro</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=kritis</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=ilustration</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=streetwear</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?kategori=vector</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=233-menikah-dengan-nya</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785603157/images/sxwkd7mtx1dawxrtevx6.jpg</image:loc>
+      <image:title>Menikah dengan nya — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Menikah dengan nya&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=232-sakit-hati-di-tolak</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785602970/images/kuptbwwknwc4vmy1dbsi.jpg</image:loc>
+      <image:title>Sakit hati di tolak — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Sakit hati di tolak&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=231-bertepuk-sebelah-tangan</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785602516/images/ao8a0immxtdcjwtuhws1.jpg</image:loc>
+      <image:title>Bertepuk sebelah tangan — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Bertepuk sebelah tangan&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=230-pemerasan-rakyat</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785602340/images/mm2q4g2kgxgdvlqb2gpa.jpg</image:loc>
+      <image:title>Pemerasan Rakyat — Kritis</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Pemerasan Rakyat&quot; kategori Kritis gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=229-dunia-badut</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785601809/images/hnlm3ufabtcsn1dpfoub.jpg</image:loc>
+      <image:title>Dunia Badut — Kritis</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Dunia Badut&quot; kategori Kritis gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=228-death-is-real</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785601665/images/m3ckese7ysitxhqaw1eh.jpg</image:loc>
+      <image:title>Death is real — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Death is real&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=227-selalu-berdoa-dan-percaya</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785601162/images/wjwvwezwjysww34hnueq.jpg</image:loc>
+      <image:title>Selalu berdoa dan percaya — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Selalu berdoa dan percaya&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=226-no-matter-difficult</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785600850/images/t5em31nojksuvbnfwdbx.jpg</image:loc>
+      <image:title>No Matter Difficult — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;No Matter Difficult&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=225-god-is-always-side</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785600604/images/lkrm6wkkagzo1hi10nbx.jpg</image:loc>
+      <image:title>God is always side — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;God is always side&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=224-not-alone</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785600432/images/fc4hytbzuhiufuarhf9h.jpg</image:loc>
+      <image:title>Not alone — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Not alone&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=223-discipline-motivation</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785600211/images/rsvsyt650dkrggcr9ufc.jpg</image:loc>
+      <image:title>Discipline Motivation — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Discipline Motivation&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=222-hijab</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785600175/images/x07r5l7vuqpwvgufk8kn.jpg</image:loc>
+      <image:title>Hijab — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Hijab&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=221-focus-progress-perfection</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785600063/images/wudzpr8hhcq3wee4bzoh.jpg</image:loc>
+      <image:title>Focus Progress Perfection — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Focus Progress Perfection&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=220-forward-everyday</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785600023/images/qlvocctpevhylbmzp4sw.jpg</image:loc>
+      <image:title>Forward Everyday — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Forward Everyday&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=219-chase-dream</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785599994/images/s0al2nkl2t2f5gspf7nu.jpg</image:loc>
+      <image:title>Chase Dream — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Chase Dream&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=218-good-vibes</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785599962/images/wk8hj2adicu39tvknkzi.jpg</image:loc>
+      <image:title>Good Vibes — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Good Vibes&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.em2studio.online/?img=217-explore-the-wild</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785596423/images/hqjxtb83y44wkxfyblxk.jpg</image:loc>
+      <image:title>Explore the wild — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Explore the wild&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=214-nmax-modification</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586959/images/1785512083357-c6mfpo_fczwwv.jpg</image:loc>
+      <image:title>Nmax Modification — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Nmax Modification&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=213-modif-style-car</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586968/images/1785511882860-jldknz_acabne.jpg</image:loc>
+      <image:title>Modif Style Car — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Modif Style Car&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=212-style-new-mitsubishi</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586974/images/1785511821459-npb2l7_fy2cpl.jpg</image:loc>
+      <image:title>Style New Mitsubishi — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Style New Mitsubishi&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=211-japan-style-simple</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586977/images/1785511473884-4o1uj0_zlghfs.jpg</image:loc>
+      <image:title>Japan Style Simple — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Japan Style Simple&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=210-japan-style</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586982/images/1785511446828-9kon9x_ctlbuf.jpg</image:loc>
+      <image:title>Japan Style — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Japan Style&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=209-vector-focus</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586985/images/1785511138819-bvumub_qtftkm.jpg</image:loc>
+      <image:title>Vector Focus — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Vector Focus&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=208-vector-direction</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586988/images/1785511113128-1qbszu_y09j45.jpg</image:loc>
+      <image:title>Vector Direction — Vector Design</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Vector Direction&quot; kategori Vector Design gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=207-abstract-vector</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586993/images/1785511043889-xqwzs6_ydw2lo.jpg</image:loc>
+      <image:title>Abstract Vector — Abstrak</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Abstract Vector&quot; kategori Abstrak gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=206-bermain-bersama-kucing</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785586997/images/1785510416633-rv4mmm_vhldgu.jpg</image:loc>
+      <image:title>Bermain bersama kucing — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Bermain bersama kucing&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=205-mengaji</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587002/images/1785510393261-gt8stl_xm0ynj.jpg</image:loc>
+      <image:title>Mengaji — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Mengaji&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=204-al-baqarah</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587005/images/1785490177562-3um7b1_eakhpf.jpg</image:loc>
+      <image:title>Al-Baqarah — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Al-Baqarah&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=203-bersedekahlah</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587009/images/1785490102834-ly77cv_alypjw.jpg</image:loc>
+      <image:title>Bersedekahlah — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Bersedekahlah&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=202-harus-bisa-bersabar</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587013/images/1785490082125-1082n4_fciqex.jpg</image:loc>
+      <image:title>Harus Bisa Bersabar — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Harus Bisa Bersabar&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=201-allah-yang-terbaik</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587017/images/1785490051835-o30ylv_snxmhn.jpg</image:loc>
+      <image:title>Allah Yang terbaik — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Allah Yang terbaik&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=200-focus-on-goal</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587020/images/1785489262504-f6d4df_ketf28.jpg</image:loc>
+      <image:title>Focus On Goal — StreetWear</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Focus On Goal&quot; kategori StreetWear gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=199-korupsi</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587024/images/1785489226098-8lz879_kh7yjs.jpg</image:loc>
+      <image:title>Korupsi — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Korupsi&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=198-cat-sketsa-color</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587027/images/1785489207445-riqwb1_fvxsuk.jpg</image:loc>
+      <image:title>Cat Sketsa Color — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Cat Sketsa Color&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=197-animal-sketsa</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587031/images/1785489186024-ijfnlz_ocd7wz.jpg</image:loc>
+      <image:title>Animal Sketsa — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Animal Sketsa&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=196-work-silence</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587035/images/1785489161241-lbcm8d_oemptm.jpg</image:loc>
+      <image:title>Work Silence — StreetWear</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Work Silence&quot; kategori StreetWear gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=195-never-give-up</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587039/images/1785489138636-omuvdf_ghryu2.jpg</image:loc>
+      <image:title>Never Give Up — StreetWear</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Never Give Up&quot; kategori StreetWear gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=194-focus-on-progress</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587041/images/1785489104865-v0dil9_qo44li.jpg</image:loc>
+      <image:title>Focus On Progress — StreetWear</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Focus On Progress&quot; kategori StreetWear gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=193-live-outside</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587044/images/1785489037317-qlzh87_euks08.jpg</image:loc>
+      <image:title>Live Outside — Ilustration</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Live Outside&quot; kategori Ilustration gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=192-abstrak-color</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587048/images/1785488988927-b1i2it_t1faxx.jpg</image:loc>
+      <image:title>Abstrak Color — Abstrak</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Abstrak Color&quot; kategori Abstrak gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=191-abstrak-for-white</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587051/images/1785488962202-5mffls_c4elob.jpg</image:loc>
+      <image:title>Abstrak for White — Abstrak</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Abstrak for White&quot; kategori Abstrak gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=190-abstrak-tshirt</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.em2studio.online/?img=189-focus-on-goal</loc>
-    <lastmod>2026-07-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587054/images/1785488913065-hukomm_z9exle.jpg</image:loc>
+      <image:title>abstrak Tshirt — Abstrak</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;abstrak Tshirt&quot; kategori Abstrak gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=188-focus-on-me</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587062/images/1785430783294-tlgmd0_fm4i5f.jpg</image:loc>
+      <image:title>Focus On Me — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Focus On Me&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=187-don-t-look-back</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587066/images/1785430756837-kfm7tb_uoum37.png</image:loc>
+      <image:title>Don&apos;t Look Back — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Don&apos;t Look Back&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=186-limitless</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587069/images/1785430332246-9yau1m_pshsk3.jpg</image:loc>
+      <image:title>Limitless — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Limitless&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=185-stay-focused</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587072/images/1785430248674-iw2jc9_q7whoq.jpg</image:loc>
+      <image:title>Stay Focused — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Stay Focused&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=184-level-up</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587075/images/1785430129166-tsw6sw_cyrc22.jpg</image:loc>
+      <image:title>Level UP — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Level UP&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=183-pasti-ada-kebahagian</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587079/images/1785430024017-b3ob12_unjdvc.jpg</image:loc>
+      <image:title>Pasti Ada kebahagian — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Pasti Ada kebahagian&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=182-jalan-mudah-hidup</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587083/images/1785429994925-lssqg7_uvmurr.jpg</image:loc>
+      <image:title>Jalan Mudah Hidup — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Jalan Mudah Hidup&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=181-perintah-bos</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587087/images/1785418529279-ev99p2_ydcwu8.png</image:loc>
+      <image:title>Perintah Bos — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Perintah Bos&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=180-jangan-menyerah</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587091/images/1785418282979-62s5jz_wvfhlc.png</image:loc>
+      <image:title>Jangan menyerah — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Jangan menyerah&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=179-mencari-tujuan</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587096/images/1785418129903-syt7p3_yl9hpd.png</image:loc>
+      <image:title>Mencari Tujuan — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Mencari Tujuan&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=178-yasin</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587101/images/1785418022294-jshr17_lqyis0.png</image:loc>
+      <image:title>Yasin — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Yasin&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=177-kaligraphy-grunge</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587104/images/1785417913589-hf2240_mduv25.png</image:loc>
+      <image:title>Kaligraphy Grunge — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kaligraphy Grunge&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=176-kaligraphy</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587108/images/1785417890631-2oi1ho_zojxpk.png</image:loc>
+      <image:title>Kaligraphy — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kaligraphy&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=175-unseen-unbroken</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587112/images/1785417737586-z30xxk_d6stb4.png</image:loc>
+      <image:title>Unseen Unbroken — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Unseen Unbroken&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=174-build</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587116/images/1785417679925-o04xvo_ehukgh.png</image:loc>
+      <image:title>Build — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Build&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=173-born-after-midnight</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587120/images/1785417555569-kwg7as_newgra.png</image:loc>
+      <image:title>Born After Midnight — StreetWear</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Born After Midnight&quot; kategori StreetWear gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=172-silence-make-legends</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587125/images/1785417485356-i5m93f_hpm75r.png</image:loc>
+      <image:title>Silence Make Legends — StreetWear</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Silence Make Legends&quot; kategori StreetWear gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=171-chaos-grunge-skull</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587130/images/1785417275315-j5goht_qbclct.png</image:loc>
+      <image:title>Chaos Grunge Skull — StreetWear</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Chaos Grunge Skull&quot; kategori StreetWear gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=170-rebel-streetwear</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587134/images/1785417244802-pky38y_ljn9hz.png</image:loc>
+      <image:title>Rebel Streetwear — StreetWear</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Rebel Streetwear&quot; kategori StreetWear gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=169-virus</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587138/images/1785416880404-cnakg3_qm2mfi.png</image:loc>
+      <image:title>Virus — Ilustration</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Virus&quot; kategori Ilustration gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=168-smile-cat</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587143/images/1785416814729-ydw4z7_n1quol.png</image:loc>
+      <image:title>Smile Cat — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Smile Cat&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=167-danger-area</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587148/images/1785416748400-losy4g_np7k8c.png</image:loc>
+      <image:title>Danger Area — Ilustration</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Danger Area&quot; kategori Ilustration gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=166-alone-grunge</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587152/images/1785416632971-fep3q2_snkczg.png</image:loc>
+      <image:title>Alone Grunge — Ilustration</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Alone Grunge&quot; kategori Ilustration gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=165-langit-ke-tujuh</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587156/images/1785416555900-89da1z_j1f6lq.png</image:loc>
+      <image:title>Langit ke Tujuh — Ilustration</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Langit ke Tujuh&quot; kategori Ilustration gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=164-jangan-berisik</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587160/images/1785375114290-hlfra0_cj3oon.jpg</image:loc>
+      <image:title>Jangan Berisik — Kritis</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Jangan Berisik&quot; kategori Kritis gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=163-pembungkaman</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587164/images/1785375083651-c3eju2_rxe5sf.jpg</image:loc>
+      <image:title>Pembungkaman — Kritis</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Pembungkaman&quot; kategori Kritis gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=162-negara-korup</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587168/images/1785375060562-01327c_dhntc4.jpg</image:loc>
+      <image:title>Negara Korup — Kritis</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Negara Korup&quot; kategori Kritis gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=161-pemimpin-tikus</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587173/images/1785375037289-08el7z_nu1u5m.jpg</image:loc>
+      <image:title>Pemimpin Tikus — Kritis</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Pemimpin Tikus&quot; kategori Kritis gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=160-anarkis</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587178/images/1785374999860-50bfnl_kc6sdj.jpg</image:loc>
+      <image:title>Anarkis — Kritis</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Anarkis&quot; kategori Kritis gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=159-yellow-sun</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587182/images/1785374945135-6wnopp_xq5mla.jpg</image:loc>
+      <image:title>Yellow Sun — Aesthetic</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Yellow Sun&quot; kategori Aesthetic gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=158-logo-z</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587184/images/1785373545443-pyqu70_lpyyrv.jpg</image:loc>
+      <image:title>Logo Z — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Logo Z&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=157-unique</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587188/images/1785373524802-7k32r3_nu1u0a.jpg</image:loc>
+      <image:title>Unique — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Unique&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=156-focus-on-your</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587192/images/1785373475978-x76nx7_oneydp.jpg</image:loc>
+      <image:title>Focus On Your — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Focus On Your&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=155-break-your</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587194/images/1785373450666-k3e1w0_rsmixr.jpg</image:loc>
+      <image:title>Break Your — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Break Your&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=154-retro-car-classic</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587199/images/1785373412780-jfjpa2_voyykc.jpg</image:loc>
+      <image:title>Retro Car Classic — Retro</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Retro Car Classic&quot; kategori Retro gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=153-moto-retro</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587202/images/1785373378338-7dfnv3_esdidv.jpg</image:loc>
+      <image:title>Moto Retro — Retro</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Moto Retro&quot; kategori Retro gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=152-f1-race</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587207/images/1785363650255-h7h5nc_seqyeu.png</image:loc>
+      <image:title>F1 Race — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;F1 Race&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=151-race-f1</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587212/images/1785363607320-cej17v_saprcb.png</image:loc>
+      <image:title>Race F1 — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Race F1&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=150-dog-sketsa</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587216/images/1785318331021-fy74i8_izhayt.png</image:loc>
+      <image:title>Dog sketsa — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Dog sketsa&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=149-cat-sketsa</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587223/images/1785318297501-jyklwx_gzx4du.png</image:loc>
+      <image:title>Cat sketsa — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Cat sketsa&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=148-juara</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587227/images/1785299866388-j4dl02_cugjlv.png</image:loc>
+      <image:title>Juara — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Juara&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=147-merdeka</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587231/images/1785299837288-ghdpvn_ckmzpr.png</image:loc>
+      <image:title>Merdeka — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Merdeka&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=146-harley</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587235/images/1785299814692-07z62p_zpijwv.png</image:loc>
+      <image:title>Harley — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Harley&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=145-harley</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587238/images/1785299793333-cpv1q1_y73vb6.png</image:loc>
+      <image:title>Harley — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Harley&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=144-ktm</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587242/images/1785299760477-668fx8_hziwwa.png</image:loc>
+      <image:title>KTM — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;KTM&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=143-kawasaki</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587245/images/1785299729348-5ghy6o_tibuty.png</image:loc>
+      <image:title>Kawasaki — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kawasaki&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=142-honda</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587250/images/1785299696227-95fptx_pcryak.png</image:loc>
+      <image:title>Honda — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Honda&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=141-ducati</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587260/images/1785299672238-bq7q7y_yycyte.png</image:loc>
+      <image:title>Ducati — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Ducati&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=140-yamaha</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587263/images/1785299643926-4qe5za_b4cois.png</image:loc>
+      <image:title>Yamaha — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Yamaha&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=139-typography</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587267/images/1785255897658-tk80gf_al4tqa.png</image:loc>
+      <image:title>Typography — Typography</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Typography&quot; kategori Typography gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=138-nasi-goreng</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587271/images/1785255536559-r5ab1f_hkkzuj.png</image:loc>
+      <image:title>Nasi Goreng — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Nasi Goreng&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=137-indomie-spesial</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587276/images/1785255464464-2ljcpb_erwu48.png</image:loc>
+      <image:title>Indomie Spesial — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Indomie Spesial&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=136-spagetti</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587281/images/1785255494164-ni85b4_ltsa2b.png</image:loc>
+      <image:title>Spagetti — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Spagetti&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=135-menemukan-jalan-nya</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587289/images/1785254741597-eoyjig_rm3sem.png</image:loc>
+      <image:title>Menemukan Jalan nya — Quotes</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Menemukan Jalan nya&quot; kategori Quotes gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=134-biru</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587293/images/1785254681841-0viryn_u9egjr.png</image:loc>
+      <image:title>Biru — Abstrak</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Biru&quot; kategori Abstrak gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=133-romantis</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587298/images/1785254655648-auui41_alwuki.png</image:loc>
+      <image:title>Romantis — Quotes</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Romantis&quot; kategori Quotes gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=132-terindah-dalam-hidupku</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587308/images/1785254629992-3ar45a_j9bimr.png</image:loc>
+      <image:title>Terindah Dalam Hidupku — Quotes</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Terindah Dalam Hidupku&quot; kategori Quotes gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=131-un-break</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587312/images/1785254914715-y5pv2e_a6gxv2.png</image:loc>
+      <image:title>Un Break — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Un Break&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=130-typo-error</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587317/images/1785253878132-48xw1d_lkjtve.png</image:loc>
+      <image:title>Typo Error — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Typo Error&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=129-stay-hungry</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587322/images/1785253800631-j8bx77_ayo7m8.png</image:loc>
+      <image:title>Stay Hungry — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Stay Hungry&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=128-rebel</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587327/images/1785253659366-nnhfxp_iq7eq4.png</image:loc>
+      <image:title>Rebel — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Rebel&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=127-broken-street-girl</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587332/images/1785253421636-81pt0l_zfkk1a.png</image:loc>
+      <image:title>Broken Street Girl — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Broken Street Girl&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=126-hujan-hari-ini</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587336/images/1785253394267-7hxy47_n7aghn.png</image:loc>
+      <image:title>Hujan Hari ini — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Hujan Hari ini&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=125-broken-heart-girl</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587340/images/1785253004384-3tum4i_mb01h2.png</image:loc>
+      <image:title>Broken Heart Girl — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Broken Heart Girl&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=124-jangan-menyerah-hari-ini</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587345/images/1785252969389-q3zqry_fjc0vk.png</image:loc>
+      <image:title>Jangan Menyerah Hari ini — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Jangan Menyerah Hari ini&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=123-heart-broken-grunge</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587348/images/1785252943959-op72jo_vrxa4c.png</image:loc>
+      <image:title>Heart Broken Grunge — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Heart Broken Grunge&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=122-cinta-tak-sempurna</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587352/images/1785252873616-nlj751_vaicae.png</image:loc>
+      <image:title>Cinta Tak Sempurna — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Cinta Tak Sempurna&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=121-heart-broken</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587357/images/1785252815958-64a0m5_ituyvf.png</image:loc>
+      <image:title>Heart Broken — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Heart Broken&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=120-selalu-ada-untuk-mu</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587361/images/1785252766644-xlae29_rcvwum.png</image:loc>
+      <image:title>Selalu ada untuk mu — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Selalu ada untuk mu&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=119-badai-pasti-berlalu</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587365/images/1785252674766-j6jyum_jvqd9d.png</image:loc>
+      <image:title>Badai Pasti Berlalu — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Badai Pasti Berlalu&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=118-broken-wings</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587369/images/1785252652955-951531_cqwk8p.png</image:loc>
+      <image:title>Broken Wings — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Broken Wings&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=117-future</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587374/images/1785251880595-oxz73p_javaph.png</image:loc>
+      <image:title>Future — Abstrak</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Future&quot; kategori Abstrak gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=116-trail</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587377/images/1785251767189-x87e8a_lzdtbj.png</image:loc>
+      <image:title>Trail — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Trail&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=115-mobil-balap</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587381/images/1785251705641-r8202h_tsqzgj.png</image:loc>
+      <image:title>Mobil Balap — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Mobil Balap&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=114-selalu-bertaqwa</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587386/images/1785251675548-ooqbyf_jubn6t.png</image:loc>
+      <image:title>Selalu Bertaqwa — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Selalu Bertaqwa&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=113-motor-sport</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587390/images/1785250884270-mz33os_zsmxvx.png</image:loc>
+      <image:title>Motor Sport — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Motor Sport&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=112-kamu-adalah-alasan</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587396/images/1785250301320-8armz2_mcxg9t.png</image:loc>
+      <image:title>Kamu adalah Alasan — Semua</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kamu adalah Alasan&quot; kategori Semua gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=111-kuat-menghadapi-ujian</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587400/images/1785250258141-42akqk_duhimd.png</image:loc>
+      <image:title>Kuat Menghadapi Ujian — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kuat Menghadapi Ujian&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=110-semangat-hari-ini</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587404/images/1785250170106-q6hona_tfue5d.png</image:loc>
+      <image:title>Semangat Hari Ini — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Semangat Hari Ini&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=109-kebahagian-ku</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587408/images/1785250131170-hc5rob_kxtekp.png</image:loc>
+      <image:title>Kebahagian Ku — Cinta</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kebahagian Ku&quot; kategori Cinta gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=107-berkebun</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587411/images/1785250030501-6v3kwz_lo5trv.png</image:loc>
+      <image:title>Berkebun — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Berkebun&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=106-romantic-moment</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587415/images/1785201647726-egq4jw_q9ce5d.png</image:loc>
+      <image:title>Romantic Moment — Cinta</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Romantic Moment&quot; kategori Cinta gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=105-racing-moto</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587420/images/1785200448296-fgdl8m_b3gpdq.png</image:loc>
+      <image:title>Racing Moto — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Racing Moto&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=104-racing-race</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587425/images/1785200425864-f158y0_ro4xbv.png</image:loc>
+      <image:title>Racing Race — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Racing Race&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=103-perjalanan-hidup</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587429/images/1785199830740-duvvg4_epe8za.png</image:loc>
+      <image:title>Perjalanan Hidup — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Perjalanan Hidup&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=102-yakin-pada-nya</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587435/images/1785199804809-hp35sr_oifl7p.png</image:loc>
+      <image:title>Yakin pada Nya — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Yakin pada Nya&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=101-aurora</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587438/images/1785198819705-qcv4nm_g7yhvn.jpg</image:loc>
+      <image:title>Aurora — Aesthetic</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Aurora&quot; kategori Aesthetic gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=100-masjid</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587442/images/1785198495574-f907c7_p1f6zl.png</image:loc>
+      <image:title>Masjid — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Masjid&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=99-vountains</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587446/images/1785198455422-wcbtgv_pks9da.png</image:loc>
+      <image:title>Vountains — Aesthetic</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Vountains&quot; kategori Aesthetic gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=98-abstrak</loc>
     <lastmod>2026-07-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587452/images/1785195282943-piswth_lqmzoz.png</image:loc>
+      <image:title>Abstrak — Abstrak</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Abstrak&quot; kategori Abstrak gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=97-fight</loc>
     <lastmod>2026-07-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587456/images/1785194322011-4t0xbs_nkbzhy.png</image:loc>
+      <image:title>Fight — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Fight&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=96-grunge-skull</loc>
     <lastmod>2026-07-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587460/images/1785191581427-o3rjad_ylvi7y.png</image:loc>
+      <image:title>Grunge Skull — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Grunge Skull&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=95-strive-better</loc>
     <lastmod>2026-07-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587465/images/1785191590685-2lx1f8_bi2eog.png</image:loc>
+      <image:title>Strive Better — Grunge</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Strive Better&quot; kategori Grunge gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=94-racing</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587469/images/1785254975324-bva9bo_y944rw.png</image:loc>
+      <image:title>Racing — Otomotif</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Racing&quot; kategori Otomotif gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=91-bucin</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587474/images/1785075539168-y26zzz_fflnjr.png</image:loc>
+      <image:title>Bucin — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Bucin&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=90-kerja-cerdas</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587478/images/1785075505161-cilhmt_tsjcri.png</image:loc>
+      <image:title>Kerja Cerdas — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kerja Cerdas&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=89-diantara-kita</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587482/images/1785075460357-ol5sir_dof1nd.png</image:loc>
+      <image:title>Diantara Kita — Cinta</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Diantara Kita&quot; kategori Cinta gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=88-alasan-dengan-mu</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587487/images/1785075361873-jnabfa_oytwyo.png</image:loc>
+      <image:title>Alasan dengan mu — Cinta</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Alasan dengan mu&quot; kategori Cinta gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=87-hidup-simple</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587491/images/1785073643777-0y9th1_ikcmsg.png</image:loc>
+      <image:title>Hidup Simple — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Hidup Simple&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=86-ketawa-saja</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587495/images/1785046900826-aflbny_kdupml.jpg</image:loc>
+      <image:title>Ketawa saja — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Ketawa saja&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=85-pertolongan-tuhan</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587498/images/1785046785686-blddlc_z8f8rm.png</image:loc>
+      <image:title>Pertolongan Tuhan — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Pertolongan Tuhan&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=84-kesempurnaan</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587502/images/1785041618718-v1i0de_xysfw8.jpg</image:loc>
+      <image:title>Kesempurnaan — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kesempurnaan&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=83-tidak-harus-sempurna</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587506/images/1785041576398-l8atmh_kl0nsg.jpg</image:loc>
+      <image:title>Tidak harus sempurna — Anime</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Tidak harus sempurna&quot; kategori Anime gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=82-cinta-tak-harus-memiliki</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587509/images/1785040002411-i6wolk_xsofou.png</image:loc>
+      <image:title>Cinta tak harus memiliki — Cinta</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Cinta tak harus memiliki&quot; kategori Cinta gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=81-harapan</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587514/images/1785029351080-eluy9r_uykhk7.png</image:loc>
+      <image:title>Harapan — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Harapan&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=80-sabar</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587517/images/1785024671492-ewoi66_d3xzbv.png</image:loc>
+      <image:title>Sabar — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Sabar&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=79-perjuangan</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587521/images/1785024587650-c6olgk_lvdhs1.png</image:loc>
+      <image:title>Perjuangan — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Perjuangan&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=78-kesabaran</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587525/images/1785024493854-8goibm_nkehlf.png</image:loc>
+      <image:title>Kesabaran — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Kesabaran&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=77-perjalanan-hidup</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587529/images/1785024432573-r82k7w_f9n0rs.png</image:loc>
+      <image:title>Perjalanan Hidup — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Perjalanan Hidup&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=76-aku-masih-cinta</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587533/images/1785024389842-1evfv6_buhgsa.png</image:loc>
+      <image:title>Aku masih cinta — Cinta</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Aku masih cinta&quot; kategori Cinta gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=75-bertepuk-sebelah-tangan</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587537/images/1785024340760-z0jx0u_pxr98m.png</image:loc>
+      <image:title>Bertepuk sebelah tangan — Cinta</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Bertepuk sebelah tangan&quot; kategori Cinta gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=74-naik-terus</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587541/images/1784997805734-e80u16_adiyjb.png</image:loc>
+      <image:title>Naik Terus — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Naik Terus&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=73-roti-kadet</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587544/images/1784994837980-ho64ru_q1qtew.jpg</image:loc>
+      <image:title>Roti Kadet — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Roti Kadet&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=72-rori-tawar</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587547/images/1784994801268-gp3ume_szxxlk.png</image:loc>
+      <image:title>Rori Tawar — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Rori Tawar&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=71-dunia-sementara</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587550/images/1784994736874-en64lk_bx1njb.png</image:loc>
+      <image:title>Dunia Sementara — Islami</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Dunia Sementara&quot; kategori Islami gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=70-bejuang</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587554/images/1784994641542-apj3aq_soumhl.png</image:loc>
+      <image:title>Bejuang — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Bejuang&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=69-strategi-hidup</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587559/images/1784994615434-lxspst_mmg4su.png</image:loc>
+      <image:title>Strategi Hidup — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Strategi Hidup&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=68-berkhayal</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587562/images/1784994607454-0mx9v9_bbqova.png</image:loc>
+      <image:title>Berkhayal — Sketsa</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Berkhayal&quot; kategori Sketsa gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=67-hotdog</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587567/images/1784994464637-xu2idi_ubpkub.png</image:loc>
+      <image:title>Hotdog — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Hotdog&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=66-burger</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587571/images/1784994425521-c4citd_ntmm83.png</image:loc>
+      <image:title>Burger — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Burger&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=65-roti</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587576/images/1784991414452-ifgtxr_tsg9p8.png</image:loc>
+      <image:title>Roti — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Roti&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=64-bersyukur</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587581/images/1784991416284-wxkvgr_b3e5xb.png</image:loc>
+      <image:title>Bersyukur — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Bersyukur&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=63-syukuri</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587585/images/1784991420046-qem7d0_ngznvu.png</image:loc>
+      <image:title>Syukuri — Motivasi</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Syukuri&quot; kategori Motivasi gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.em2studio.online/?img=62-coba</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/phgdb2st/image/upload/v1785587589/images/1785041674150-e9ieio_gqinog.png</image:loc>
+      <image:title>Coba — Foods</image:title>
+      <image:caption>Download gambar status WhatsApp &quot;Coba&quot; kategori Foods gratis dalam kualitas HD di Status Gallery.</image:caption>
+    </image:image>
   </url>
 </urlset>
