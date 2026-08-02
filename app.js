@@ -3203,7 +3203,7 @@ viewBox="0 0 7.14519 2.77802"
     burst.style.left = (rect.left + rect.width / 2) + 'px';
     burst.style.top = (rect.top + rect.height / 2) + 'px';
     document.body.appendChild(burst);
-    setTimeout(() => burst.remove(), 700);
+    setTimeout(() => burst.remove(), 1300);
   }
 
   function buildLongPressActions(imgId) {
