@@ -3163,9 +3163,9 @@ viewBox="0 0 7.14519 2.77802"
   // aksi tap tunggal DITUNDA sebentar (DOUBLE_TAP_MS) -- kalau tap kedua
   // keburu datang, aksi tunggal dibatalkan dan diganti aksi double-tap.
   // Konsekuensinya: buka gambar dari grid/["Gambar Serupa"] jadi delay
-  // sekitar 300ms. Di gambar besar modal, tap tunggal memang tidak
+  // sekitar 450ms. Di gambar besar modal, tap tunggal memang tidak
   // ngapa-ngapain, jadi di situ tidak ada delay tambahan sama sekali.
-  const DOUBLE_TAP_MS = 300;
+  const DOUBLE_TAP_MS = 450;
   let lastTapImgId = null;
   let lastTapTime = 0;
   let pendingTapTimer = null;
