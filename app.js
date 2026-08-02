@@ -350,7 +350,7 @@
   // muncul di lebih dari satu kartu sekaligus di grid.
   function updateCardFavoriteButton(imgId) {
     const isFav = favorites.has(imgId);
-    document.querySelectorAll(`.gallery-card[data-img-id="${imgId}"] .card-fav-btn`).forEach(btn => {
+    document.querySelectorAll(`.gallery-card[data-img-id="${imgId}"] .card-fav-btn, .modal-similar-item[data-img-id="${imgId}"] .card-fav-btn`).forEach(btn => {
       btn.classList.toggle('active', isFav);
       btn.setAttribute('aria-label', isFav ? 'Hapus dari favorit' : 'Tambah ke favorit');
       const svg = btn.querySelector('svg');
@@ -2544,11 +2544,15 @@
   function modalSimilarItemHtml(s) {
     const [w, h] = s.size.split('×').map(Number);
     const ratio = (w && h) ? `${w}/${h}` : '1/1';
+    const isFav = favorites.has(s.id);
     return `
-      <button class="modal-similar-item" onclick="openModal(${s.id}, { sourceEl: this })" aria-label="Buka ${escapeHtml(s.title)}">
+      <div class="modal-similar-item" data-img-id="${s.id}" role="button" tabindex="0" aria-label="Buka ${escapeHtml(s.title)}" onclick="openModal(${s.id}, { sourceEl: this })" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal(${s.id}, { sourceEl: this });}">
         <img src="${gridThumb(s.url)}" srcset="${gridThumbSrcset(s.url)}" alt="Status ${escapeHtml(catLabel(s.category))} - ${escapeHtml(s.title)}" style="aspect-ratio:${ratio}" loading="lazy" decoding="async">
+        <button class="card-fav-btn ${isFav ? 'active' : ''}" aria-label="${isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}" onclick="event.stopPropagation(); toggleFavorite(${s.id})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-heart"></use></svg>
+        </button>
         <span class="modal-similar-item-label">${escapeHtml(s.title)}</span>
-      </button>
+      </div>
     `;
   }
 
