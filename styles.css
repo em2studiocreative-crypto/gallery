@@ -970,7 +970,7 @@
     transition: background 0.2s;
   }
   .relogin-close:hover { background: #e6e4de; }
-  .relogin-form h1 { font-size: 25px; font-weight: 800; color: #141414; margin-bottom: 8px; }
+  .relogin-form h2 { font-size: 25px; font-weight: 800; color: #141414; margin-bottom: 8px; }
   .relogin-form .relogin-sub { font-size: 13px; color: #8a867e; margin-bottom: 26px; line-height: 1.6; }
   .relogin-form .auth-provider-list { margin-bottom: 0; }
   .relogin-form .auth-btn.google { border-color: #e2e0da; }
@@ -995,7 +995,7 @@
     .relogin-card { flex-direction: column; max-width: 400px; min-height: 0; border-radius: 20px; }
     .relogin-visual { flex: none; padding: 30px 24px 26px; }
     .relogin-form { padding: 32px 26px 30px; }
-    .relogin-form h1 { font-size: 22px; }
+    .relogin-form h2 { font-size: 22px; }
   }
 
   .profile-guest-link {
