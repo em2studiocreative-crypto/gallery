@@ -197,12 +197,21 @@ viewBox="0 0 1.49117 0.57976"
 
 <!-- CATEGORIES -->
 <div class="categories-wrap">
-  <!-- Bar aktif: ketampil pas collapsed, full-width, nunjukin kategori yang
-       lagi dipilih. Tap buat buka grid semua kategori. -->
-  <button type="button" class="categories-active-bar" id="categoriesActiveBar" onclick="toggleCategoriesExpanded()">
-    <span id="categoriesActiveLabel">Semua</span>
-    <svg id="categoriesActiveIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-  </button>
+  <div class="categories-top-row">
+    <!-- Bar aktif: ketampil pas collapsed, full-width, nunjukin kategori yang
+         lagi dipilih. Tap buat buka grid semua kategori. -->
+    <button type="button" class="categories-active-bar" id="categoriesActiveBar" onclick="toggleCategoriesExpanded()">
+      <span id="categoriesActiveLabel">Semua</span>
+      <svg id="categoriesActiveIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <!-- Jalan pintas login/logout: tamu -> mulai login Google langsung,
+         sudah login -> tap buat keluar. Ikon & warna berubah sesuai status
+         (lihat updateAuthShortcutUI di app.js). -->
+    <button type="button" class="auth-shortcut-btn" id="authShortcutBtn" onclick="handleAuthShortcut()" aria-label="Masuk" title="Masuk">
+      <svg id="authShortcutIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="authShortcutAvatar" class="hidden"></span>
+    </button>
+  </div>
   <!-- Grid semua kategori: ketampil pas expanded aja. -->
   <div class="categories-scroll hidden" id="categoriesScroll">
     <div class="categories" id="categoriesBar"></div>
