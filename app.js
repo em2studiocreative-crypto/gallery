@@ -914,6 +914,39 @@
       loggedInBox.style.display = 'none';
       updateProfileQuotaText();
     }
+    updateAuthShortcutUI();
+  }
+
+  // Jalan pintas login/logout di samping bar kategori -- ikutin status
+  // currentUser yang sama dipakai modal profil, jadi selalu sinkron.
+  function updateAuthShortcutUI() {
+    const btn = document.getElementById('authShortcutBtn');
+    const icon = document.getElementById('authShortcutIcon');
+    const avatar = document.getElementById('authShortcutAvatar');
+    if (!btn) return;
+    if (currentUser) {
+      const email = currentUser.email || '';
+      btn.classList.add('logged-in');
+      btn.setAttribute('aria-label', 'Keluar');
+      btn.setAttribute('title', 'Keluar (' + email + ')');
+      icon.classList.add('hidden');
+      avatar.classList.remove('hidden');
+      avatar.textContent = email.charAt(0).toUpperCase();
+    } else {
+      btn.classList.remove('logged-in');
+      btn.setAttribute('aria-label', 'Masuk');
+      btn.setAttribute('title', 'Masuk');
+      icon.classList.remove('hidden');
+      avatar.classList.add('hidden');
+    }
+  }
+
+  function handleAuthShortcut() {
+    if (currentUser) {
+      logoutUser();
+    } else {
+      loginWithProvider('google');
+    }
   }
 
   // Ambil favorit dari Supabase lalu gabung dengan favorit lokal (kalau ada
