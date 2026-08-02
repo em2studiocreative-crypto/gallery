@@ -201,83 +201,89 @@
   }
 
   /* ===== CATEGORIES ===== */
+  /* Redesain: dulu 1 baris scroll horizontal + tombol bulat kecil yang buka
+     modal terpisah buat lihat "semua kategori". Sekarang semua kategori
+     langsung tersusun rapi jadi grid yang wrap ke bawah, dibatasi tingginya
+     (~2 baris) di awal biar gak makan tempat, dengan tombol "Lihat Semua
+     Kategori" buat expand kalau user mau lihat semuanya sekaligus. */
   .categories-wrap {
     position: sticky;
     top: var(--header-h);
     z-index: 90;
     background: var(--bg);
     border-bottom: 1px solid var(--border);
-    padding: var(--gap-2) var(--gap-2) var(--gap-2) 0;
+    padding: var(--gap-2);
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .categories-scroll {
+    position: relative;
   }
 
   .categories {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
-    padding: 0 0 0 var(--gap-2);
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    position: relative;
-    flex: 1;
-    min-width: 0;
+    overflow: hidden;
+    max-height: var(--cat-collapsed-h, 84px);
+    transition: max-height 0.3s ease;
   }
 
-  /* Tombol "semua kategori" — solusi kalau daftar kategori makin banyak dan
-     gak muat lagi discroll horizontal satu-satu. Selalu nempel di ujung
-     kanan (di luar area scroll .categories), buka modal berisi SEMUA
-     kategori yang bisa dicari & dikelompokkan per abjad. */
-  .categories-more-btn {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--card);
-    color: var(--text-dim);
-    border: none;
-    cursor: pointer;
+  .categories.expanded {
+    max-height: 1000px;
+  }
+
+  /* Gradien tipis di bawah daftar chip supaya kelihatan jelas ada lebih
+     banyak kategori yang belum ketampil saat masih collapsed. Otomatis
+     hilang begitu di-expand (lihat aturan .expanded di bawah). */
+  .categories-fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 28px;
+    background: linear-gradient(to top, var(--bg), transparent);
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .categories.expanded ~ .categories-fade {
+    opacity: 0;
+  }
+
+  /* Tombol "Lihat Semua Kategori" / "Sembunyikan" -- ketampil cuma kalau
+     kontennya memang lebih tinggi dari 2 baris (lihat updateCategoriesToggleVisibility
+     di app.js), supaya gak ganggu kalau kategori dikit. */
+  .categories-toggle-btn {
+    align-self: center;
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    transition: background 0.2s, color 0.2s;
   }
 
-  .categories-more-btn:hover {
-    background: var(--card-hover);
+  .categories-toggle-btn:hover {
+    background: var(--card);
     color: var(--accent);
   }
 
-  .categories::-webkit-scrollbar { display: none; }
-
-  .categories::before,
-  .categories::after {
-    content: '';
-    position: sticky;
-    top: 0;
-    bottom: 0;
-    width: 20px;
+  .categories-toggle-btn svg {
+    transition: transform 0.25s ease;
     flex-shrink: 0;
-    align-self: stretch;
-    pointer-events: none;
-    z-index: 2;
   }
 
-  .categories::before {
-    left: 0;
-    order: -1;
-    margin-left: -8px;
-    background: linear-gradient(to left, transparent, var(--bg));
-  }
-
-  .categories::after {
-    right: 0;
-    order: 9999;
-    margin-right: -8px;
-    background: linear-gradient(to right, transparent, var(--bg));
-  }
+  .categories-toggle-btn.hidden { display: none; }
 
   .chip {
     flex-shrink: 0;
@@ -2152,7 +2158,7 @@
   @media (min-width: 640px) {
     .gallery, .gallery-col { gap: 14px; }
     .header { padding: 0 var(--gap-3); }
-    .categories { padding: 0 var(--gap-3); }
+    .categories-wrap { padding: var(--gap-2) var(--gap-3); }
     .main { padding: var(--gap-3); }
   }
 
