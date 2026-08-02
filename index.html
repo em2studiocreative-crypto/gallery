@@ -204,10 +204,15 @@ viewBox="0 0 1.49117 0.57976"
       <span id="categoriesActiveLabel">Semua</span>
       <svg id="categoriesActiveIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <!-- Jalan pintas login/logout: tamu -> tulisan "Login" (tap mulai login
-         Google langsung), sudah login -> tampil email-nya (tap buat keluar).
-         Nggak pakai ikon, cuma teks -- lihat updateAuthShortcutUI di app.js. -->
+    <!-- Jalan pintas login/logout: tamu -> avatar generik + tulisan "Login"
+         (tap mulai login Google langsung). Sudah login -> avatar berisi
+         huruf awal + email-nya (tap buka konfirmasi keluar dulu, bukan
+         langsung logout -- lihat handleAuthShortcut di app.js). -->
     <button type="button" class="auth-shortcut-btn" id="authShortcutBtn" onclick="handleAuthShortcut()" title="Masuk">
+      <span class="auth-shortcut-avatar" id="authShortcutAvatar">
+        <svg id="authShortcutAvatarIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-user"></use></svg>
+        <span id="authShortcutAvatarLetter" class="hidden"></span>
+      </span>
       <span id="authShortcutText">Login</span>
     </button>
   </div>
@@ -449,6 +454,26 @@ viewBox="0 0 0.16593 0.10268"
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Keluar
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- KONFIRMASI KELUAR: dipicu dari jalan pintas login/logout di sebelah bar
+     kategori. Sengaja bukan logout langsung -- user harus tap "Keluar" lagi
+     di sini buat konfirmasi, supaya nggak kepencet nggak sengaja. -->
+<div class="modal-backdrop" id="logoutConfirmModal" onclick="closeLogoutConfirmModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:340px; padding:28px 24px; text-align:center; display:block;">
+    <button class="modal-close" onclick="closeLogoutConfirmModal()" aria-label="Tutup">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-close"></use></svg>
+    </button>
+    <div style="width:48px;height:48px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </div>
+    <h2 class="modal-title" style="font-size:16px;margin-bottom:6px;">Keluar dari akun?</h2>
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;" id="logoutConfirmEmail"></p>
+    <div style="display:flex;gap:10px;">
+      <button class="state-btn secondary" style="width:100%;" onclick="closeLogoutConfirmModal()">Batal</button>
+      <button class="state-btn danger" style="width:100%;" onclick="confirmLogout()">Keluar</button>
     </div>
   </div>
 </div>
