@@ -239,6 +239,54 @@
     transition: filter 0.2s;
   }
 
+  .categories-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .categories-top-row .categories-active-bar {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Jalan pintas login/logout di samping bar kategori. Tamu: outline abu-abu
+     dengan ikon orang -> tap langsung mulai login Google. Sudah login:
+     lingkaran solid warna aksen berisi huruf awal email -> tap buat keluar. */
+  .auth-shortcut-btn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .auth-shortcut-btn:hover {
+    background: var(--card-hover);
+    color: var(--text);
+  }
+
+  .auth-shortcut-btn.logged-in {
+    background: var(--accent);
+    color: #000;
+    border-color: transparent;
+  }
+
+  .auth-shortcut-btn.logged-in:hover {
+    filter: brightness(1.05);
+  }
+
   .categories-active-bar:hover {
     filter: brightness(1.05);
   }
