@@ -245,31 +245,40 @@
     gap: 8px;
   }
 
+  /* Kolom kategori dibikin lebih kecil (basis ~38%, boleh nyusut lagi) biar
+     kolom login/email di sebelahnya punya ruang lebih longgar -- jadi kalau
+     email-nya panjang, kolom kategori nggak ikut kegencet. */
   .categories-top-row .categories-active-bar {
-    flex: 1;
-    min-width: 0;
+    flex: 0 1 38%;
+    min-width: 90px;
   }
 
-  /* Jalan pintas login/logout di samping bar kategori. Tamu: outline abu-abu
-     dengan ikon orang -> tap langsung mulai login Google. Sudah login:
-     lingkaran solid warna aksen berisi huruf awal email -> tap buat keluar. */
+  /* Jalan pintas login/logout di samping bar kategori -- teks aja, nggak
+     pakai ikon. Tamu: "Login" (tap langsung mulai login Google). Sudah
+     login: nama email (tap buat keluar). Ellipsis buat jaga-jaga kalau
+     email-nya kepanjangan. */
   .auth-shortcut-btn {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 10px 14px;
+    border-radius: var(--radius-pill);
     background: var(--card);
     color: var(--text-dim);
     border: 1px solid var(--border);
     cursor: pointer;
-    padding: 0;
     font-family: inherit;
-    font-weight: 700;
-    font-size: 15px;
+    font-weight: 600;
+    font-size: 13px;
     transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .auth-shortcut-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .auth-shortcut-btn:hover {
@@ -281,6 +290,7 @@
     background: var(--accent);
     color: #000;
     border-color: transparent;
+    font-weight: 700;
   }
 
   .auth-shortcut-btn.logged-in:hover {
