@@ -505,11 +505,43 @@ viewBox="0 0 0.16593 0.10268"
 
 <!-- HALAMAN LOGIN ULANG SETELAH LOGOUT -->
 <!-- Muncul otomatis hanya saat user menekan "Keluar", bukan gerbang wajib
-     untuk tamu biasa. Bisa dilewati lewat tombol X atau "Lanjutkan sebagai Tamu". -->
+     untuk tamu biasa. Bisa dilewati lewat tombol X atau "Lanjutkan sebagai Tamu".
+     Style: full-bleed collage foto yang auto-scroll + scrim gelap, mirip
+     halaman login gaya app store. Kolom foto diisi otomatis lewat JS
+     (populateReloginCollage di app.js) dari thumbnail yang sudah dimuat di grid. -->
 <div class="relogin-screen" id="reloginScreen">
-  <div class="relogin-card" onclick="event.stopPropagation()">
-    <div class="relogin-visual">
-      <div class="relogin-logo">
+  <button class="relogin-x" onclick="closeReloginScreen()" aria-label="Tutup">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><use href="#icon-close"></use></svg>
+  </button>
+
+  <div class="relogin-collage" id="reloginCollage" aria-hidden="true">
+    <div class="relogin-col"></div>
+    <div class="relogin-col"></div>
+    <div class="relogin-col"></div>
+  </div>
+  <div class="relogin-scrim"></div>
+
+  <div class="relogin-content" onclick="event.stopPropagation()">
+    <span class="relogin-badge">Status Gallery</span>
+    <h2>Masuk dan lihat status favoritmu!</h2>
+    <p class="relogin-sub">Simpan koleksi & favoritmu supaya tetap tersinkron di semua perangkat.</p>
+
+    <div class="relogin-actions">
+      <button class="auth-btn google" onclick="loginWithProvider('google')">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 16.1 3 9.3 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.9 27 37 24 37c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.2 40.5 16 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.6C39.9 37 45 30.9 45 24c0-1.4-.1-2.7-.4-4z"/></svg>
+        Masuk dengan Google
+      </button>
+      <button class="relogin-guest-btn" onclick="closeReloginScreen()">Lanjutkan sebagai Tamu</button>
+    </div>
+
+    <p class="relogin-terms">Dengan masuk, kamu menyetujui <a onclick="showToast('Fitur segera hadir!')">Syarat & Ketentuan</a> dan <a onclick="showToast('Fitur segera hadir!')">Kebijakan Privasi</a> kami.</p>
+  </div>
+</div>
+
+<!-- Logo SVG EM2STUDIO lama disimpan di <template> supaya asetnya tidak
+     hilang, walau sudah tidak dipakai di tampilan login ulang yang baru. -->
+<template id="reloginOldLogoTemplate">
+  <div class="relogin-logo">
 <svg class="relogin-logo-svg" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
 viewBox="0 0 1.49117 0.57976"
  xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -531,26 +563,7 @@ viewBox="0 0 1.49117 0.57976"
  </g>
 </svg>
       </div>
-      <h2>Sampai Jumpa Lagi!</h2>
-      <p>Masuk kembali supaya favorit dan koleksi kamu tetap tersimpan dan sinkron.</p>
-      <span class="relogin-badge">Status Gallery</span>
-    </div>
-    <div class="relogin-form">
-      <button class="relogin-close" onclick="closeReloginScreen()" aria-label="Tutup">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-close"></use></svg>
-      </button>
-      <h2>Masuk Lagi</h2>
-      <p class="relogin-sub">Kamu baru saja keluar. Masuk lagi kapan saja untuk melanjutkan dari akun kamu.</p>
-      <div class="auth-provider-list">
-        <button class="auth-btn google" onclick="loginWithProvider('google')">
-          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 16.1 3 9.3 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 35.9 27 37 24 37c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.2 40.5 16 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.6C39.9 37 45 30.9 45 24c0-1.4-.1-2.7-.4-4z"/></svg>
-          Masuk dengan Google
-        </button>
-      </div>
-      <p class="relogin-guest">Tidak sekarang? <button onclick="closeReloginScreen()">Lanjutkan sebagai Tamu</button></p>
-    </div>
-  </div>
-</div>
+</template>
 
 <!-- SETTINGS MODAL -->
 <div class="settings-page" id="settingsModal">
