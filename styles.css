@@ -290,9 +290,10 @@
     font-size: 12px;
   }
 
+  /* Card kuning (pill) sengaja dihapus untuk state sudah-login -- avatar
+     bulat ikut disembunyikan, tersisa cuma teks email-nya. */
   .auth-shortcut-btn.logged-in .auth-shortcut-avatar {
-    background: rgba(0, 0, 0, 0.18);
-    color: #000;
+    display: none;
   }
 
   .auth-shortcut-btn span {
@@ -307,14 +308,15 @@
   }
 
   .auth-shortcut-btn.logged-in {
-    background: var(--accent);
-    color: #000;
+    background: none;
+    color: var(--text-dim);
     border-color: transparent;
     font-weight: 700;
+    padding: 8px 4px;
   }
 
   .auth-shortcut-btn.logged-in:hover {
-    filter: brightness(1.05);
+    color: var(--text);
   }
 
   .categories-active-bar:hover {
