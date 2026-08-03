@@ -1533,14 +1533,14 @@
   // gambar yang sudah kita punya), bukan dari DOM -- jadi tidak ada
   // pembacaan layout sama sekali saat nge-append kartu.
   // ===== Google AdSense: kartu iklan native disisipkan ke grid galeri =====
-  // GANTI ca-pub-XXXXXXXXXXXXXXXX & ADSENSE_INFEED_SLOT dengan Publisher ID
-  // & Ad unit slot AdSense kamu sendiri (lihat juga index.html: script
-  // loader di <head> dan banner sebelum galeri, keduanya perlu diganti juga).
+  // Publisher ID sudah diisi. GANTI ADSENSE_INFEED_SLOT dengan Ad unit
+  // slot AdSense (In-feed) setelah dibuat di dashboard, sama seperti
+  // data-ad-slot di index.html (banner sebelum galeri).
   //
   // Pola ini mengikuti dokumentasi resmi Google untuk "ads on infinite
   // scroll pages": tiap instance <ins> punya id unik, dan adsbygoogle.push({})
   // dipanggil satu kali per instance SETELAH elemennya benar-benar masuk DOM.
-  const ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXX';
+  const ADSENSE_CLIENT = 'ca-pub-5044655116409533';
   const ADSENSE_INFEED_SLOT = '0000000000';
   const AD_EVERY_N_CARDS = 8; // 1 kartu iklan tiap 8 kartu gambar asli
   let cardsSinceLastAd = 0;
