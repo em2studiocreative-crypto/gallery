@@ -342,6 +342,8 @@
         <div class="stat-card"><div class="stat-value" id="statTotalDownloads">—</div><div class="stat-label">Total Download</div></div>
         <div class="stat-card"><div class="stat-value" id="statTotalUsers">—</div><div class="stat-label">User Terdaftar</div></div>
         <div class="stat-card"><div class="stat-value" id="statGuestVisits">—</div><div class="stat-label">Total Kunjungan Tamu</div></div>
+        <div class="stat-card"><div class="stat-value" id="statMobileVisits">—</div><div class="stat-label">Kunjungan dari HP</div></div>
+        <div class="stat-card"><div class="stat-value" id="statDesktopVisits">—</div><div class="stat-label">Kunjungan dari PC</div></div>
       </div>
       <div class="dash-section-title">🔥 Gambar Terpopuler</div>
       <div class="top-list" id="dashTopList">
@@ -738,24 +740,36 @@
     el.textContent = Number(data).toLocaleString('id-ID');
   }
 
-  // Total kunjungan tamu (orang yang buka galeri tanpa login) dicatat lewat
-  // tabel guest_visits di database, diisi otomatis dari halaman galeri
-  // publik. Dibaca lewat RPC get_guest_visit_stats() (admin-only), lihat
-  // SQL yang menyertai ini. Kalau function belum dibuat, tampilkan "—".
+  // Total kunjungan halaman (termasuk yang cuma lihat tanpa klik apa pun)
+  // dicatat lewat tabel guest_visits di database, diisi otomatis dari
+  // halaman galeri publik (lihat logGuestVisit() di app.js). Dibaca lewat
+  // RPC get_guest_visit_stats() (admin-only), termasuk breakdown HP/PC.
+  // Setup lengkap tabel + kedua RPC ada di guest_visits_setup.sql.
+  // Kalau function belum dibuat, tampilkan "—".
   async function loadGuestVisits() {
     const el = document.getElementById('statGuestVisits');
+    const elMobile = document.getElementById('statMobileVisits');
+    const elDesktop = document.getElementById('statDesktopVisits');
     const { data, error } = await supabaseClient.rpc('get_guest_visit_stats');
     if (error || !data || !data.length) {
       console.error('Gagal ambil statistik kunjungan tamu (pastikan function get_guest_visit_stats sudah dibuat):', error);
       el.textContent = '—';
       el.classList.add('muted');
       el.title = 'Function get_guest_visit_stats belum tersedia di database';
+      elMobile.textContent = '—';
+      elMobile.classList.add('muted');
+      elDesktop.textContent = '—';
+      elDesktop.classList.add('muted');
       return;
     }
     const stats = data[0];
     el.classList.remove('muted');
     el.textContent = Number(stats.total_visits || 0).toLocaleString('id-ID');
     el.title = `${Number(stats.unique_visitors || 0).toLocaleString('id-ID')} pengunjung unik · ${Number(stats.today_visits || 0).toLocaleString('id-ID')} hari ini`;
+    elMobile.classList.remove('muted');
+    elMobile.textContent = Number(stats.mobile_visits || 0).toLocaleString('id-ID');
+    elDesktop.classList.remove('muted');
+    elDesktop.textContent = Number(stats.desktop_visits || 0).toLocaleString('id-ID');
   }
 
   async function loadCategories() {
