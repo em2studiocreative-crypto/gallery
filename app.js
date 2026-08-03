@@ -1508,6 +1508,7 @@
   // disentuh ulang.
   function setupGalleryColumns(gallery) {
     gallery.innerHTML = '';
+    cardsSinceLastAd = 0; // mulai hitungan iklan dari 0 lagi tiap render dari awal
     const colCount = galleryColumnCount();
     for (let i = 0; i < colCount; i++) {
       const col = document.createElement('div');
@@ -1531,6 +1532,62 @@
   // Solusinya: estimasi tinggi tiap kolom dari DATA (rasio lebar/tinggi
   // gambar yang sudah kita punya), bukan dari DOM -- jadi tidak ada
   // pembacaan layout sama sekali saat nge-append kartu.
+  // ===== Google AdSense: kartu iklan native disisipkan ke grid galeri =====
+  // GANTI ca-pub-XXXXXXXXXXXXXXXX & ADSENSE_INFEED_SLOT dengan Publisher ID
+  // & Ad unit slot AdSense kamu sendiri (lihat juga index.html: script
+  // loader di <head> dan banner sebelum galeri, keduanya perlu diganti juga).
+  //
+  // Pola ini mengikuti dokumentasi resmi Google untuk "ads on infinite
+  // scroll pages": tiap instance <ins> punya id unik, dan adsbygoogle.push({})
+  // dipanggil satu kali per instance SETELAH elemennya benar-benar masuk DOM.
+  const ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXX';
+  const ADSENSE_INFEED_SLOT = '0000000000';
+  const AD_EVERY_N_CARDS = 8; // 1 kartu iklan tiap 8 kartu gambar asli
+  let cardsSinceLastAd = 0;
+  let adInstanceCounter = 0;
+
+  function adCardHtml(instanceId) {
+    return `
+      <div class="gallery-card ad-card" data-ad-instance="${instanceId}">
+        <span class="ad-card-label">Iklan</span>
+        <ins class="adsbygoogle"
+             style="display:block; width:100%; min-height:250px;"
+             data-ad-client="${ADSENSE_CLIENT}"
+             data-ad-slot="${ADSENSE_INFEED_SLOT}"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      </div>
+    `;
+  }
+
+  // Taruh satu kartu iklan di kolom yang lagi paling pendek (pakai
+  // estimasi tinggi yang sama gayanya kayak appendItemsToColumns), lalu
+  // trigger AdSense buat ngisi <ins>-nya.
+  function appendAdCard(gallery) {
+    const cols = Array.from(gallery.querySelectorAll('.gallery-col'));
+    if (!cols.length) return;
+    if (!gallery._colHeights || gallery._colHeights.length !== cols.length) {
+      gallery._colHeights = cols.map(() => 0);
+    }
+    const heights = gallery._colHeights;
+    let shortestIdx = 0;
+    for (let c = 1; c < heights.length; c++) {
+      if (heights[c] < heights[shortestIdx]) shortestIdx = c;
+    }
+    heights[shortestIdx] += 300; // perkiraan kasar tinggi kartu iklan
+
+    adInstanceCounter += 1;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = adCardHtml(adInstanceCounter).trim();
+    cols[shortestIdx].appendChild(wrapper.firstElementChild);
+
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (e) {
+      console.warn('AdSense push gagal:', e);
+    }
+  }
+
   function appendItemsToColumns(gallery, items, baseIdx) {
     const cols = Array.from(gallery.querySelectorAll('.gallery-col'));
     if (cols.length === 0) return;
@@ -1598,6 +1655,14 @@
     if (nextItems.length === 0) return; // hasil filter kosong/terlalu sedikit -> berhenti wajar
     appendItemsToColumns(gallery, nextItems, renderedCount);
     renderedCount += nextItems.length;
+
+    // Selipkan kartu iklan tiap AD_EVERY_N_CARDS kartu gambar yang sudah
+    // tampil (bisa lebih dari 1 kartu iklan sekaligus kalau batch-nya besar).
+    cardsSinceLastAd += nextItems.length;
+    while (cardsSinceLastAd >= AD_EVERY_N_CARDS) {
+      appendAdCard(gallery);
+      cardsSinceLastAd -= AD_EVERY_N_CARDS;
+    }
   }
 
   // Cek jarak ke bawah halaman; kalau sudah dekat, render batch berikutnya
