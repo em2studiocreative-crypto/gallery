@@ -404,6 +404,11 @@
     font-weight: 600;
   }
 
+  .chip-hot-icon {
+    margin-right: 4px;
+    font-size: 12px;
+  }
+
   /* ===== CATEGORIES MODAL (semua kategori, dikelompokkan per abjad) ===== */
   .cat-modal-content {
     max-width: 480px;
