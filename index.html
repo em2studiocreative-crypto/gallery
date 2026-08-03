@@ -130,12 +130,11 @@
 }
 </script>
 <!-- ===== Google AdSense =====
-     GANTI ca-pub-XXXXXXXXXXXXXXXX di bawah (dan di dua tempat lain: kartu
-     iklan banner sebelum galeri, dan appendAdCard() di app.js) dengan
-     Publisher ID akun AdSense kamu sendiri setelah disetujui Google.
-     Selama masih placeholder ini, iklan tidak akan tampil (cuma error di
-     console, aman -- bukan error yang bikin app rusak). -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+     Publisher ID: ca-pub-5044655116409533 (sudah terisi di sini, di kartu
+     iklan banner sebelum galeri, dan di appendAdCard() app.js).
+     data-ad-slot masih placeholder "0000000000" sampai Ad unit dibuat
+     di dashboard AdSense setelah situs disetujui. -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5044655116409533" crossorigin="anonymous"></script>
 </head>
 <body>
 <noscript>
@@ -291,14 +290,15 @@ viewBox="0 0 1.49117 0.57976"
   </div>
 
   <!-- Banner Iklan (AdSense) -- selalu tampil di atas galeri, di bawah bar
-       kategori. GANTI ca-pub-XXXXXXXXXXXXXXXX & data-ad-slot dengan punya
-       kamu sendiri. Selama masih placeholder, blok ini otomatis tidak makan
-       tempat (lihat aturan .ad-banner-slot:empty di styles.css). -->
+       kategori. Publisher ID sudah diisi; GANTI data-ad-slot="0000000000"
+       dengan slot ID Display ad unit setelah dibuat di dashboard AdSense.
+       Selama masih placeholder, blok ini otomatis tidak makan tempat
+       (lihat aturan .ad-banner-slot:empty di styles.css). -->
   <div class="ad-banner-slot">
     <span class="ad-card-label">Iklan</span>
     <ins class="adsbygoogle"
          style="display:block"
-         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+         data-ad-client="ca-pub-5044655116409533"
          data-ad-slot="0000000000"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
