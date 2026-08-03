@@ -396,11 +396,12 @@
               <th>ID</th>
               <th>Label</th>
               <th>Urutan</th>
+              <th>🔥</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="categoriesTbody">
-            <tr class="empty-row"><td colspan="5">Memuat...</td></tr>
+            <tr class="empty-row"><td colspan="6">Memuat...</td></tr>
           </tbody>
         </table>
       </div>
@@ -524,6 +525,10 @@
     <div class="field">
       <label for="catSort">Urutan tampil</label>
       <input type="number" id="catSort" placeholder="0">
+    </div>
+    <div class="checkbox-field">
+      <input type="checkbox" id="catHot">
+      <label for="catHot" style="margin:0;">🔥 Tandai sebagai kategori panas (muncul ikon api di chip kategori)</label>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeCategoryModal()">Batal</button>
@@ -756,7 +761,7 @@
   async function loadCategories() {
     const { data, error } = await supabaseClient
       .from('categories')
-      .select('id, label, sort_order')
+      .select('id, label, sort_order, is_hot')
       .order('sort_order', { ascending: true });
 
     if (error) { showToast('Gagal memuat kategori', 'error'); return; }
@@ -1601,7 +1606,7 @@
     const pagination = document.getElementById('categoriesPagination');
     const list = CATEGORIES.filter(c => c.id !== 'all');
     if (list.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada kategori.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Belum ada kategori.</td></tr>';
       pagination.innerHTML = buildPaginationHTML(0, 1, categoriesPageSize, 'goToCategoriesPage', 'setCategoriesPageSize');
       return;
     }
@@ -1615,6 +1620,7 @@
         <td>${escapeHtml(c.id)}</td>
         <td>${escapeHtml(c.label)}</td>
         <td>${c.sort_order}</td>
+        <td>${c.is_hot ? '🔥' : '—'}</td>
         <td class="actions">
           <button class="btn btn-ghost btn-sm" onclick="openCategoryModal('${escapeAttr(c.id)}')">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteCategory('${escapeAttr(c.id)}')">Hapus</button>
@@ -1633,6 +1639,7 @@
       document.getElementById('catId').disabled = true;
       document.getElementById('catLabel').value = c.label;
       document.getElementById('catSort').value = c.sort_order;
+      document.getElementById('catHot').checked = !!c.is_hot;
     } else {
       editingCategoryId = null;
       document.getElementById('categoryModalTitle').textContent = 'Tambah Kategori';
@@ -1640,6 +1647,7 @@
       document.getElementById('catId').disabled = false;
       document.getElementById('catLabel').value = '';
       document.getElementById('catSort').value = CATEGORIES.length;
+      document.getElementById('catHot').checked = false;
     }
     document.getElementById('categoryModalOverlay').classList.add('show');
   }
@@ -1652,6 +1660,7 @@
     const id = document.getElementById('catId').value.trim().toLowerCase().replace(/\s+/g, '-');
     const label = document.getElementById('catLabel').value.trim();
     const sort_order = parseInt(document.getElementById('catSort').value) || 0;
+    const is_hot = document.getElementById('catHot').checked;
 
     if (!id || !label) {
       showToast('ID dan label wajib diisi', 'error');
@@ -1668,9 +1677,9 @@
 
     let error;
     if (editingCategoryId) {
-      ({ error } = await supabaseClient.from('categories').update({ label, sort_order }).eq('id', editingCategoryId));
+      ({ error } = await supabaseClient.from('categories').update({ label, sort_order, is_hot }).eq('id', editingCategoryId));
     } else {
-      ({ error } = await supabaseClient.from('categories').insert({ id, label, sort_order }));
+      ({ error } = await supabaseClient.from('categories').insert({ id, label, sort_order, is_hot }));
     }
 
     btn.disabled = false;
