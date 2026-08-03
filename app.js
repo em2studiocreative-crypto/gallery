@@ -855,9 +855,45 @@
   }
 
 
+  // Isi 3 kolom kolase foto di halaman login ulang, diambil dari thumbnail
+  // yang sudah dimuat di galeri (jadi otomatis relevan, tanpa aset statis).
+  // Tiap kolom digandakan 2x supaya animasi scroll (translateY -50%) di CSS
+  // bisa loop mulus tanpa "patah" di ujung. Hanya diisi sekali per sesi
+  // (dataset.filled) supaya foto tidak berganti tiap kali modal dibuka.
+  function populateReloginCollage() {
+    const collage = document.getElementById('reloginCollage');
+    if (!collage) return;
+    const cols = collage.querySelectorAll('.relogin-col');
+    if (!cols.length || cols[0].dataset.filled === '1') return;
+
+    let srcs = Array.from(document.querySelectorAll('#gallery .gallery-card img'))
+      .map(img => img.currentSrc || img.src)
+      .filter(Boolean);
+
+    // Fallback kalau galeri belum sempat render sama sekali
+    if (srcs.length < 6) {
+      srcs = Array.from(document.querySelectorAll('img[src]'))
+        .map(img => img.src)
+        .filter(src => src && !src.startsWith('data:'));
+    }
+    if (!srcs.length) return;
+
+    const shuffled = [...srcs].sort(() => Math.random() - 0.5);
+    cols.forEach((col, i) => {
+      const picks = [];
+      for (let n = 0; n < 6; n++) {
+        picks.push(shuffled[(i * 6 + n) % shuffled.length]);
+      }
+      const doubled = [...picks, ...picks]; // gandakan utk loop mulus
+      col.innerHTML = doubled.map(src => `<img src="${src}" alt="" loading="lazy">`).join('');
+      col.dataset.filled = '1';
+    });
+  }
+
   // Tampilkan halaman login ulang bergaya branded (hanya dipanggil setelah
   // user menekan "Keluar" — bukan gerbang untuk tamu yang belum pernah login)
   function openReloginScreen() {
+    populateReloginCollage();
     document.getElementById('reloginScreen').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
