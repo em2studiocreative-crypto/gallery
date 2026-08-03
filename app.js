@@ -1070,6 +1070,38 @@
     filterAndRender();
   }
 
+  // ===== TRACKING KUNJUNGAN (untuk kartu "Total Kunjungan Tamu" + HP/PC
+  // di dashboard admin) =====
+  // Dicatat sekali tiap kali halaman ini dimuat, TANPA perlu klik apa pun --
+  // lihat log_guest_visit() di guest_visits_setup.sql. visitor_id disimpan
+  // di localStorage supaya admin bisa tahu "pengunjung unik", bukan cuma
+  // total kunjungan, tanpa perlu cookie/IP.
+  function getOrCreateVisitorId() {
+    try {
+      let id = localStorage.getItem('sg_visitor_id');
+      if (!id) {
+        id = (crypto.randomUUID ? crypto.randomUUID() : ('v-' + Date.now() + '-' + Math.random().toString(36).slice(2)));
+        localStorage.setItem('sg_visitor_id', id);
+      }
+      return id;
+    } catch (e) {
+      return 'v-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+    }
+  }
+
+  function detectDeviceType() {
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+  }
+
+  function logGuestVisit() {
+    supabaseClient.rpc('log_guest_visit', {
+      p_visitor_id: getOrCreateVisitorId(),
+      p_device_type: detectDeviceType()
+    }).then(({ error }) => {
+      if (error) console.error('Gagal mencatat kunjungan (pastikan guest_visits_setup.sql sudah dijalankan):', error);
+    });
+  }
+
   // ===== INIT =====
   document.addEventListener('DOMContentLoaded', () => {
     renderCategories();
@@ -1078,6 +1110,7 @@
     initAuth();
     setupRealtimeImages();
     setupRealtimeCategories();
+    logGuestVisit();
   });
 
   // Redesain kategori: 2 kondisi simpel.
