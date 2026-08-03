@@ -1085,10 +1085,17 @@
   //   otomatis balik ke collapsed (lihat selectCategory).
   let categoriesExpanded = false;
 
+  // Label chip kategori, dikasih ikon api kalau kategori ditandai "hot"
+  // (is_hot) dari admin panel.
+  function categoryChipLabel(c) {
+    const icon = c.is_hot ? '<span class="chip-hot-icon" aria-hidden="true">🔥</span>' : '';
+    return `${icon}${escapeHtml(c.label)}`;
+  }
+
   function renderCategories() {
     const bar = document.getElementById('categoriesBar');
     bar.innerHTML = CATEGORIES.map(c =>
-      `<button class="chip ${c.id === activeCategory ? 'active' : ''}" data-cat="${c.id}" aria-pressed="${c.id === activeCategory}" onclick="selectCategory('${c.id}')">${escapeHtml(c.label)}</button>`
+      `<button class="chip ${c.id === activeCategory ? 'active' : ''}" data-cat="${c.id}" aria-pressed="${c.id === activeCategory}" onclick="selectCategory('${c.id}')">${categoryChipLabel(c)}</button>`
     ).join('');
     const activeLabel = document.getElementById('categoriesActiveLabel');
     if (activeLabel) {
@@ -1173,7 +1180,7 @@
       <div class="cat-modal-group">
         <div class="cat-modal-group-title">${g.letter}</div>
         <div class="cat-modal-grid">
-          ${g.items.map(c => `<button type="button" class="cat-modal-chip ${c.id === activeCategory ? 'active' : ''}" onclick="selectCategoryFromModal('${c.id}')">${escapeHtml(c.label)}</button>`).join('')}
+          ${g.items.map(c => `<button type="button" class="cat-modal-chip ${c.id === activeCategory ? 'active' : ''}" onclick="selectCategoryFromModal('${c.id}')">${categoryChipLabel(c)}</button>`).join('')}
         </div>
       </div>
     `).join('');
@@ -1867,7 +1874,7 @@
 
   // Mengubah 1 baris tabel `categories` jadi bentuk objek yang dipakai UI.
   function mapCategoryRow(r) {
-    return { id: r.id, label: r.label, sort_order: r.sort_order };
+    return { id: r.id, label: r.label, sort_order: r.sort_order, is_hot: !!r.is_hot };
   }
 
   // Urutkan CATEGORIES berdasarkan abjad (label), dengan 'all' selalu di
@@ -2175,7 +2182,7 @@
 
     try {
       const [{ data: catRows, error: catErr }, { data: imgRows, error: imgErr }] = await Promise.all([
-        supabaseClient.from('categories').select('id, label, sort_order').order('sort_order', { ascending: true }),
+        supabaseClient.from('categories').select('id, label, sort_order, is_hot').order('sort_order', { ascending: true }),
         supabaseClient.from('images').select('id, title, category_id, url, width, height, downloads, favorites_count, created_at').eq('is_active', true).order('created_at', { ascending: false })
       ]);
 
@@ -2185,7 +2192,7 @@
       // 'all' selalu jadi opsi pertama, sisanya dari database (skip id 'all' kalau kebawa)
       CATEGORIES = [
         { id: 'all', label: 'Semua' },
-        ...catRows.filter(c => c.id !== 'all').map(c => ({ id: c.id, label: c.label, sort_order: c.sort_order }))
+        ...catRows.filter(c => c.id !== 'all').map(c => ({ id: c.id, label: c.label, sort_order: c.sort_order, is_hot: !!c.is_hot }))
       ];
       sortCategories();
 
